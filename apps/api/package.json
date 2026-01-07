@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "db:migrate": "kysely migrate",
-    "db:generate": "kysely-codegen ./src/lib/db.d.ts"
+    "db:generate": "kysely-codegen --out-file ./src/lib/db.d.ts"
   },
   "dependencies": {
     "better-auth": "^1.4.10",

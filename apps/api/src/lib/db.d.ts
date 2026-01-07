@@ -23,6 +23,21 @@ export interface Account {
   refreshToken: string | null;
   refreshTokenExpiresAt: Timestamp | null;
   scope: string | null;
+  updatedAt: Generated<Timestamp>;
+  userId: string;
+}
+
+export interface Book {
+  author: string | null;
+  createdAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+  description: string | null;
+  id: string;
+  isbn13: string | null;
+  language: string | null;
+  publishDate: Timestamp | null;
+  title: string;
+  totalPages: number;
   updatedAt: Timestamp;
   userId: string;
 }
@@ -33,7 +48,7 @@ export interface Session {
   id: string;
   ipAddress: string | null;
   token: string;
-  updatedAt: Timestamp;
+  updatedAt: Generated<Timestamp>;
   userAgent: string | null;
   userId: string;
 }
@@ -59,6 +74,7 @@ export interface Verification {
 
 export interface DB {
   account: Account;
+  book: Book;
   session: Session;
   user: User;
   verification: Verification;
