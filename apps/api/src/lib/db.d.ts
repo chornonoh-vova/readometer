@@ -42,6 +42,30 @@ export interface Book {
   userId: string;
 }
 
+export interface ReadingRun {
+  bookId: string;
+  completedPages: number;
+  deletedAt: Timestamp | null;
+  finishedAt: Timestamp | null;
+  id: string;
+  startedAt: Generated<Timestamp>;
+  updatedAt: Timestamp;
+  userId: string;
+}
+
+export interface ReadingSession {
+  deletedAt: Timestamp | null;
+  endPage: number | null;
+  endTime: Timestamp | null;
+  id: string;
+  readPages: number;
+  runId: string;
+  startPage: number | null;
+  startTime: Generated<Timestamp>;
+  updatedAt: Timestamp;
+  userId: string;
+}
+
 export interface Session {
   createdAt: Generated<Timestamp>;
   expiresAt: Timestamp;
@@ -75,6 +99,8 @@ export interface Verification {
 export interface DB {
   account: Account;
   book: Book;
+  readingRun: ReadingRun;
+  readingSession: ReadingSession;
   session: Session;
   user: User;
   verification: Verification;
