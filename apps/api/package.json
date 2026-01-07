@@ -1,0 +1,20 @@
+{
+  "name": "api",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "db:migrate": "kysely migrate",
+    "db:generate": "kysely-codegen ./src/lib/db.d.ts"
+  },
+  "dependencies": {
+    "better-auth": "^1.4.10",
+    "hono": "^4.11.3",
+    "kysely": "^0.28.9",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.16.0",
+    "kysely-codegen": "^0.19.0",
+    "kysely-ctl": "^0.19.0"
+  }
+}
