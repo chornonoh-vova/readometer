@@ -1,15 +1,18 @@
 {
   "name": "api",
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun --watch src/index.ts",
     "db:migrate": "kysely migrate",
     "db:generate": "kysely-codegen --out-file ./src/lib/db.d.ts"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
     "better-auth": "^1.4.10",
     "hono": "^4.11.3",
     "kysely": "^0.28.9",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bun": "latest",

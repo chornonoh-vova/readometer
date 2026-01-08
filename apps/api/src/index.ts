@@ -1,17 +1,30 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { showRoutes } from "hono/dev";
+
 import { migrateToLatest } from "./lib/database.ts";
+import type { AppEnv } from "./types.ts";
 import { auth } from "./lib/auth.ts";
+
+import session from "./middlewares/session.ts";
+import me from "./routes/me.ts";
+import books from "./routes/books.ts";
+import { compress } from "hono/compress";
 
 await migrateToLatest();
 
-const app = new Hono();
+const app = new Hono<AppEnv>().basePath("/api");
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
+app.use(cors());
+app.use(compress());
+app.use(logger());
+app.use("*", session);
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
+
+app.route("/me", me);
+app.route("/books", books);
 
 const isDev = process.env.NODE_ENV === "development";
 const port = process.env.PORT || 3000;
