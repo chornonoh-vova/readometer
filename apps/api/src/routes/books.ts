@@ -5,6 +5,7 @@ import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
 import { HTTPException } from "hono/http-exception";
 import z from "zod";
+import { isbnSchema, normalizeIsbnToIsbn13 } from "../lib/isbn.ts";
 
 const books = new Hono<AppEnv>();
 
@@ -55,6 +56,45 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   }
 
   return c.json(found);
+});
+
+const createBookSchema = z.object({
+  id: z.uuidv7(),
+  title: z.string().nonempty(),
+  description: z.string().optional(),
+  author: z.string().optional(),
+  totalPages: z.number().positive(),
+  publishDate: z.iso.date().optional(),
+  isbn: isbnSchema,
+  language: z.string().optional(),
+  updatedAt: z.iso.datetime(),
+});
+
+type CreateBookSchema = z.infer<typeof createBookSchema>;
+
+books.post("/", zValidator("json", createBookSchema), async (c) => {
+  const userId = c.get("user")!.id;
+  const request: CreateBookSchema = await c.req.json();
+  const createBookQuery = db
+    .insertInto("book")
+    .values({
+      id: request.id,
+      userId,
+      title: request.title,
+      description: request.description,
+      author: request.author,
+      totalPages: request.totalPages,
+      publishDate: request.publishDate
+        ? new Date(request.publishDate)
+        : undefined,
+      isbn13: normalizeIsbnToIsbn13(request.isbn),
+      language: request.language,
+      updatedAt: new Date(request.updatedAt),
+    })
+    .returningAll();
+
+  const result = await createBookQuery.executeTakeFirst();
+  return c.json(result);
 });
 
 export default books;
