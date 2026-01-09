@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { compress } from "hono/compress";
 import { logger } from "hono/logger";
 import { showRoutes } from "hono/dev";
 
@@ -8,9 +9,10 @@ import type { AppEnv } from "./types.ts";
 import { auth } from "./lib/auth.ts";
 
 import session from "./middlewares/session.ts";
+import requireAuth from "./middlewares/requireAuth.ts";
+
 import me from "./routes/me.ts";
 import books from "./routes/books.ts";
-import { compress } from "hono/compress";
 
 await migrateToLatest();
 
@@ -22,6 +24,8 @@ app.use(logger());
 app.use("*", session);
 
 app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
+
+app.use("*", requireAuth);
 
 app.route("/me", me);
 app.route("/books", books);

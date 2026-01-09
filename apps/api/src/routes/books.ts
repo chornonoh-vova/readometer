@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import requireAuth from "../middlewares/requireAuth.ts";
 import type { AppEnv } from "../types.ts";
 import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
@@ -8,8 +7,6 @@ import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "../lib/isbn.ts";
 
 const books = new Hono<AppEnv>();
-
-books.use(requireAuth);
 
 books.get("/", async (c) => {
   const userId = c.get("user")!.id;
