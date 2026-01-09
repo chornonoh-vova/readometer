@@ -41,7 +41,7 @@ const bookSchema = z.object({
 
 books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   const userId = c.get("user")!.id;
-  const bookId = c.req.param("bookId");
+  const bookId = c.req.valid("param").bookId;
 
   const bookQuery = db
     .selectFrom("book")
@@ -70,11 +70,10 @@ const createBookSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-type CreateBookSchema = z.infer<typeof createBookSchema>;
-
 books.post("/", zValidator("json", createBookSchema), async (c) => {
   const userId = c.get("user")!.id;
-  const request: CreateBookSchema = await c.req.json();
+  const request = c.req.valid("json");
+
   const createBookQuery = db
     .insertInto("book")
     .values({
@@ -94,6 +93,8 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
     .returningAll();
 
   const result = await createBookQuery.executeTakeFirst();
+
+  c.status(201);
   return c.json(result);
 });
 
