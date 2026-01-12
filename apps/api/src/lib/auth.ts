@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { pool } from "./database.ts";
 
-const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") ?? [
+export const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") ?? [
   process.env.BETTER_AUTH_URL!,
 ];
 

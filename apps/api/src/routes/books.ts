@@ -95,4 +95,75 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
   return c.json(result);
 });
 
+const updateBookSchema = z.object({
+  title: z.string().nonempty().optional(),
+  description: z.string().optional(),
+  author: z.string().optional(),
+  totalPages: z.number().positive().optional(),
+  publishDate: z.iso.date().optional(),
+  isbn: isbnSchema.optional(),
+  language: z.string().optional(),
+  updatedAt: z.iso.datetime(),
+});
+
+books.put(
+  "/:bookId",
+  zValidator("param", bookSchema),
+  zValidator("json", updateBookSchema),
+  async (c) => {
+    const userId = c.get("user")!.id;
+    const bookId = c.req.valid("param").bookId;
+
+    const request = c.req.valid("json");
+
+    const updateBookQuery = db
+      .updateTable("book")
+      .set({
+        title: request.title,
+        description: request.description,
+        author: request.author,
+        totalPages: request.totalPages,
+        publishDate: request.publishDate
+          ? new Date(request.publishDate)
+          : undefined,
+        isbn13: request.isbn ? normalizeIsbnToIsbn13(request.isbn) : undefined,
+        language: request.language,
+        updatedAt: new Date(request.updatedAt),
+      })
+      .where("id", "=", bookId)
+      .where("userId", "=", userId)
+      .returningAll();
+
+    const result = await updateBookQuery.executeTakeFirst();
+
+    if (!result) {
+      throw new HTTPException(404);
+    }
+
+    c.status(200);
+    return c.json(result);
+  },
+);
+
+books.delete("/:bookId", zValidator("param", bookSchema), async (c) => {
+  const userId = c.get("user")!.id;
+  const bookId = c.req.valid("param").bookId;
+
+  const markDeletedBookQuery = db
+    .updateTable("book")
+    .set("deletedAt", new Date())
+    .where("id", "=", bookId)
+    .where("userId", "=", userId)
+    .returningAll();
+
+  const result = await markDeletedBookQuery.executeTakeFirst();
+
+  if (!result) {
+    throw new HTTPException(404);
+  }
+
+  c.status(200);
+  return c.json(result);
+});
+
 export default books;

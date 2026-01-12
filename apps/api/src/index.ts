@@ -6,7 +6,7 @@ import { showRoutes } from "hono/dev";
 
 import { migrateToLatest } from "./lib/database.ts";
 import type { AppEnv } from "./types.ts";
-import { auth } from "./lib/auth.ts";
+import { auth, trustedOrigins } from "./lib/auth.ts";
 
 import session from "./middlewares/session.ts";
 import requireAuth from "./middlewares/requireAuth.ts";
@@ -18,7 +18,12 @@ await migrateToLatest();
 
 const app = new Hono<AppEnv>().basePath("/api");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: trustedOrigins,
+    credentials: true,
+  }),
+);
 app.use(compress());
 app.use(logger());
 app.use("*", session);
