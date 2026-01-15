@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
-import { Route as AuthIndexRouteImport } from './routes/_auth/index'
+import { Route as AuthAppRouteImport } from './routes/_auth/_app'
+import { Route as AuthAppIndexRouteImport } from './routes/_auth/_app.index'
+import { Route as AuthAppStatsRouteImport } from './routes/_auth/_app.stats'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -28,35 +30,55 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthIndexRoute = AuthIndexRouteImport.update({
+const AuthAppRoute = AuthAppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthAppIndexRoute = AuthAppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthRouteRoute,
+  getParentRoute: () => AuthAppRoute,
+} as any)
+const AuthAppStatsRoute = AuthAppStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AuthAppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/': typeof AuthIndexRoute
+  '/stats': typeof AuthAppStatsRoute
+  '/': typeof AuthAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/': typeof AuthIndexRoute
+  '/stats': typeof AuthAppStatsRoute
+  '/': typeof AuthAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_auth/': typeof AuthIndexRoute
+  '/_auth/_app': typeof AuthAppRouteWithChildren
+  '/_auth/_app/stats': typeof AuthAppStatsRoute
+  '/_auth/_app/': typeof AuthAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register' | '/'
+  fullPaths: '/login' | '/register' | '/stats' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/'
-  id: '__root__' | '/_auth' | '/login' | '/register' | '/_auth/'
+  to: '/login' | '/register' | '/stats' | '/'
+  id:
+    | '__root__'
+    | '/_auth'
+    | '/login'
+    | '/register'
+    | '/_auth/_app'
+    | '/_auth/_app/stats'
+    | '/_auth/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,22 +110,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/': {
-      id: '/_auth/'
+    '/_auth/_app': {
+      id: '/_auth/_app'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthAppRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/_app/': {
+      id: '/_auth/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
+      preLoaderRoute: typeof AuthAppIndexRouteImport
+      parentRoute: typeof AuthAppRoute
+    }
+    '/_auth/_app/stats': {
+      id: '/_auth/_app/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof AuthAppStatsRouteImport
+      parentRoute: typeof AuthAppRoute
     }
   }
 }
 
+interface AuthAppRouteChildren {
+  AuthAppStatsRoute: typeof AuthAppStatsRoute
+  AuthAppIndexRoute: typeof AuthAppIndexRoute
+}
+
+const AuthAppRouteChildren: AuthAppRouteChildren = {
+  AuthAppStatsRoute: AuthAppStatsRoute,
+  AuthAppIndexRoute: AuthAppIndexRoute,
+}
+
+const AuthAppRouteWithChildren =
+  AuthAppRoute._addFileChildren(AuthAppRouteChildren)
+
 interface AuthRouteRouteChildren {
-  AuthIndexRoute: typeof AuthIndexRoute
+  AuthAppRoute: typeof AuthAppRouteWithChildren
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthIndexRoute: AuthIndexRoute,
+  AuthAppRoute: AuthAppRouteWithChildren,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

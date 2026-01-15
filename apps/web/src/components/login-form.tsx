@@ -38,7 +38,7 @@ export type LoginFormProps = {
 export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   const router = useRouter();
 
-  const login = async (prevState: string | null, formData: FormData) => {
+  const login = async (_prevState: string | null, formData: FormData) => {
     const email = formData.get("email")!.toString();
     const password = formData.get("password")!.toString();
     const rememberMe = formData.get("remember-me") === "on";
@@ -52,9 +52,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
         rememberMe,
       },
       {
-        onSuccess: () => {
-          router.navigate({ to: redirect });
-        },
+        onSuccess: () => router.navigate({ to: redirect }),
         onError: (ctx) => {
           error = ctx.error.message;
         },
@@ -126,7 +124,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
               <Submit />
 
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <Link to="/register">Sign up</Link>
+                Don&apos;t have an account? <Link to="/register">Register</Link>
               </FieldDescription>
             </Field>
           </FieldGroup>

@@ -1,31 +1,34 @@
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import type { Expression } from "kysely";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 import type { AppEnv } from "../types.ts";
 import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
-import { HTTPException } from "hono/http-exception";
 import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "../lib/isbn.ts";
 
 const books = new Hono<AppEnv>();
 
+function readingRuns(bookId: Expression<string>) {
+  return jsonArrayFrom(
+    db
+      .selectFrom("readingRun")
+      .selectAll()
+      .whereRef("readingRun.bookId", "=", bookId)
+      .orderBy("updatedAt"),
+  ).as("readingRuns");
+}
+
 books.get("/", async (c) => {
   const userId = c.get("user")!.id;
-  const query = (c.req.query("q") ?? "").trim();
 
   let booksQuery = db
     .selectFrom("book")
     .selectAll()
+    .select(({ ref }) => [readingRuns(ref("book.id"))])
     .where("userId", "=", userId)
     .orderBy("updatedAt", "desc");
-
-  if (query) {
-    booksQuery = booksQuery.where((eb) =>
-      eb.or([
-        eb("title", "ilike", `%${query}%`),
-        eb("author", "ilike", `%${query}%`),
-      ]),
-    );
-  }
 
   const allBooks = await booksQuery.execute();
 
@@ -43,6 +46,7 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   const bookQuery = db
     .selectFrom("book")
     .selectAll()
+    .select(({ ref }) => [readingRuns(ref("book.id"))])
     .where("id", "=", bookId)
     .where("userId", "=", userId);
 
