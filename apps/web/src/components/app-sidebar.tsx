@@ -12,7 +12,7 @@ import { NavMain } from "./nav-main";
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar variant="floating">
       <SidebarHeader>
         <NavApp />
       </SidebarHeader>
