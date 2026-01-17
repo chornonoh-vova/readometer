@@ -1,10 +1,9 @@
-import { ComponentExample } from "@/components/component-example";
+import { AddBook } from "@/components/add-book";
+import { BooksList } from "@/components/books-list";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { booksQueryOptions } from "@/lib/books";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_auth/_app/")({
   component: Books,
@@ -14,17 +13,7 @@ export const Route = createFileRoute("/_auth/_app/")({
 });
 
 function BooksHeader() {
-  return (
-    <PageHeader
-      name={<h1>Books</h1>}
-      action={
-        <Button>
-          <PlusIcon />
-          Add book
-        </Button>
-      }
-    />
-  );
+  return <PageHeader name={<h1>Books</h1>} action={<AddBook />} />;
 }
 
 function Books() {
@@ -33,7 +22,7 @@ function Books() {
   return (
     <>
       <BooksHeader />
-      <ComponentExample />
+      <BooksList books={books} />
     </>
   );
 }

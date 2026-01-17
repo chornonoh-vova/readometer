@@ -18,6 +18,9 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .addColumn("startPage", "integer")
     .addColumn("endPage", "integer")
+    .addColumn("readTime", "integer", (col) =>
+      col.notNull().check(sql`"readTime" >= 0`),
+    )
     .addColumn("startTime", "timestamptz", (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )

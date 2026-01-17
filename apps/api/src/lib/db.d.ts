@@ -60,6 +60,7 @@ export interface ReadingSession {
   endTime: Timestamp | null;
   id: string;
   readPages: number;
+  readTime: number;
   runId: string;
   startPage: number | null;
   startTime: Generated<Timestamp>;

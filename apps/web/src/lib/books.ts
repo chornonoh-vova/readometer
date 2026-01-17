@@ -1,5 +1,16 @@
 import { queryOptions } from "@tanstack/react-query";
 
+export type ReadingRun = {
+  id: string;
+  userId: string;
+  bookId: string;
+  completedPages: number;
+  startedAt: string;
+  finishedAt: string | null;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
 export type Book = {
   id: string;
   userId: string;
@@ -13,6 +24,7 @@ export type Book = {
   deletedAt: string | null;
   updatedAt: string;
   createdAt: string;
+  readingRuns: ReadingRun[];
 };
 
 async function fetchBooks(): Promise<Book[]> {
