@@ -23,7 +23,7 @@ function readingRuns(bookId: Expression<string>) {
 books.get("/", async (c) => {
   const userId = c.get("user")!.id;
 
-  let booksQuery = db
+  const booksQuery = db
     .selectFrom("book")
     .selectAll()
     .select(({ ref }) => [readingRuns(ref("book.id"))])
