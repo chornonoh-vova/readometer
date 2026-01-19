@@ -25,10 +25,28 @@ books.get("/", async (c) => {
 
   const booksQuery = db
     .selectFrom("book")
-    .selectAll()
-    .select(({ ref }) => [readingRuns(ref("book.id"))])
+    .selectAll("book")
+    .leftJoinLateral(
+      (eb) =>
+        eb
+          .selectFrom("readingRun")
+          .select(["bookId", "completedPages", "updatedAt"])
+          .whereRef("bookId", "=", "book.id")
+          .orderBy("id", "desc")
+          .limit(1)
+          .as("readingRun"),
+      (join) => join.onRef("readingRun.bookId", "=", "book.id"),
+    )
+    .select((eb) => [
+      eb.fn
+        .coalesce("readingRun.completedPages", eb.lit(0))
+        .as("completedPages"),
+      eb.fn
+        .coalesce("readingRun.updatedAt", "book.updatedAt")
+        .as("lastUpdatedAt"),
+    ])
     .where("userId", "=", userId)
-    .orderBy("updatedAt", "desc");
+    .orderBy("lastUpdatedAt", "desc");
 
   const allBooks = await booksQuery.execute();
 

@@ -4,17 +4,6 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 
-export type ReadingRun = {
-  id: string;
-  userId: string;
-  bookId: string;
-  completedPages: number;
-  startedAt: string;
-  finishedAt: string | null;
-  updatedAt: string;
-  deletedAt: string | null;
-};
-
 export type Book = {
   id: string;
   userId: string;
@@ -28,7 +17,8 @@ export type Book = {
   deletedAt: string | null;
   updatedAt: string;
   createdAt: string;
-  readingRuns: ReadingRun[];
+  completedPages: number;
+  lastUpdatedAt: string;
 };
 
 async function fetchBooks(): Promise<Book[]> {
@@ -56,12 +46,12 @@ export type NewBook = {
   id: string;
   userId: string;
   title: string;
-  description?: string;
-  author?: string;
+  description: string | null;
+  author: string | null;
   totalPages: number;
-  publishDate?: string;
-  isbn13?: string;
-  language?: string;
+  publishDate: string | null;
+  isbn13: string | null;
+  language: string | null;
   updatedAt: string;
 };
 
@@ -88,13 +78,20 @@ export function useAddBookMutation() {
 
       const prevBooks = context.client.getQueryData(booksQueryKey);
 
-      context.client.setQueryData(booksQueryKey, (old: Book[] = []) => [
-        ...old,
-        {
-          ...newBook,
-          readingRuns: [],
-        },
-      ]);
+      context.client.setQueryData(
+        booksQueryKey,
+        (old: Book[] = []) =>
+          [
+            ...old,
+            {
+              ...newBook,
+              createdAt: newBook.updatedAt,
+              deletedAt: null,
+              completedPages: 0,
+              lastUpdatedAt: newBook.updatedAt,
+            },
+          ] satisfies Book[],
+      );
 
       return { prevBooks };
     },

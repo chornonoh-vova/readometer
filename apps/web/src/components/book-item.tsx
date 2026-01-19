@@ -1,11 +1,5 @@
 import type { Book } from "@/lib/books";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "./ui/item";
+import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
 import { Link } from "@tanstack/react-router";
 import {
   CircleCheckBigIcon,
@@ -25,12 +19,10 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 
 function BookStatus({ book }: { book: Book }) {
-  const lastReadingRun = book.readingRuns[0];
-
   let status: "to-read" | "completed" | "in-progress" = "to-read";
 
-  if (lastReadingRun) {
-    if (lastReadingRun.completedPages === book.totalPages) {
+  if (book.completedPages) {
+    if (book.completedPages === book.totalPages) {
       status = "completed";
     } else {
       status = "in-progress";
@@ -71,14 +63,12 @@ function BookStatus({ book }: { book: Book }) {
 }
 
 function BookProgress({ book }: { book: Book }) {
-  const lastReadingRun = book.readingRuns[0];
-  const completedPages = lastReadingRun?.completedPages ?? 0;
-  const percentage = Math.floor((completedPages / book.totalPages) * 100);
+  const percentage = Math.floor((book.completedPages / book.totalPages) * 100);
 
   return (
     <div className="grid grid-cols-2 text-muted-foreground text-xs">
       <span>
-        {completedPages} / {book.totalPages}
+        {book.completedPages} / {book.totalPages}
       </span>
       <span className="text-right">{percentage} %</span>
       <Progress className="col-span-2" value={percentage} />

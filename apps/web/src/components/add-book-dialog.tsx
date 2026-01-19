@@ -49,12 +49,12 @@ export function AddBookDialog({
 
   const addBook = async (_prevState: string | null, formData: FormData) => {
     const title = formData.get("title")!.toString();
-    const description = formData.get("description")?.toString();
-    const author = formData.get("author")?.toString();
+    const description = formData.get("description")?.toString() ?? null;
+    const author = formData.get("author")?.toString() ?? null;
     const totalPages = parseInt(formData.get("total-pages")!.toString());
-    const publishDate = formData.get("publish-date")?.toString();
-    const language = formData.get("language")?.toString();
-    const isbn13 = formData.get("isbn13")?.toString();
+    const publishDate = formData.get("publish-date")?.toString() ?? null;
+    const language = formData.get("language")?.toString() ?? null;
+    const isbn13 = formData.get("isbn13")?.toString() ?? null;
 
     mutation.mutate(
       {
