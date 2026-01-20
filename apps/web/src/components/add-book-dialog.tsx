@@ -88,7 +88,11 @@ export function AddBookDialog({
         <DialogDescription>
           Please enter the information to add a new book to your library
         </DialogDescription>
-        <form id="add-book-form" action={addBookAction}>
+        <form
+          id="add-book-form"
+          action={addBookAction}
+          className="max-h-[60vh] overflow-auto p-2"
+        >
           <FieldGroup>
             {message && (
               <Alert variant="destructive">

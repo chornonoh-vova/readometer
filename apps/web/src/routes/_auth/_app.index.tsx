@@ -1,6 +1,6 @@
 import { AddBook } from "@/components/add-book";
 import { BooksList } from "@/components/books-list";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader, PageHeaderName } from "@/components/page-header";
 import { booksQueryOptions } from "@/lib/books";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -13,12 +13,18 @@ export const Route = createFileRoute("/_auth/_app/")({
 });
 
 function BooksHeader() {
-  return <PageHeader name={<h1>Books</h1>} action={<AddBook />} />;
+  return (
+    <PageHeader>
+      <PageHeaderName>
+        <h1 className="text-sm">Books</h1>
+      </PageHeaderName>
+      <AddBook />
+    </PageHeader>
+  );
 }
 
 function Books() {
   const { data: books } = useSuspenseQuery(booksQueryOptions());
-  console.log(books);
   return (
     <>
       <BooksHeader />

@@ -21,8 +21,43 @@ export type Book = {
   lastUpdatedAt: string;
 };
 
+export type ReadingRun = {
+  id: string;
+  userId: string;
+  bookId: string;
+  completedPages: number;
+  startedAt: string;
+  updatedAt: string;
+  finishedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type BookDetails = {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  author: string | null;
+  totalPages: number;
+  publishDate: string | null;
+  isbn13: string | null;
+  language: string | null;
+  deletedAt: string | null;
+  updatedAt: string;
+  createdAt: string;
+  readingRuns: ReadingRun[];
+};
+
 async function fetchBooks(): Promise<Book[]> {
   const response = await fetch("/api/books");
+  if (!response.ok) {
+    throw new Error("Network error");
+  }
+  return await response.json();
+}
+
+async function fetchBookDetails(bookId: string): Promise<BookDetails> {
+  const response = await fetch(`/api/books/${bookId}`);
   if (!response.ok) {
     throw new Error("Network error");
   }
@@ -38,8 +73,19 @@ export function booksQueryOptions() {
   });
 }
 
+export function bookDetailsQueryOptions(bookId: string) {
+  return queryOptions({
+    queryKey: [...booksQueryKey, bookId],
+    queryFn: () => fetchBookDetails(bookId),
+  });
+}
+
 export function useBooksSuspenseQuery() {
   return useSuspenseQuery(booksQueryOptions());
+}
+
+export function useBookDetailsSuspenseQuery(bookId: string) {
+  return useSuspenseQuery(bookDetailsQueryOptions(bookId));
 }
 
 export type NewBook = {
