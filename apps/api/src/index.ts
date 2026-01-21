@@ -13,6 +13,7 @@ import requireAuth from "./middlewares/requireAuth.ts";
 
 import me from "./routes/me.ts";
 import books from "./routes/books.ts";
+import readingRuns from "./routes/readingRuns.ts";
 
 await migrateToLatest();
 
@@ -34,6 +35,7 @@ app.use("*", requireAuth);
 
 app.route("/me", me);
 app.route("/books", books);
+app.route("/reading-runs", readingRuns);
 
 const isDev = process.env.NODE_ENV === "development";
 const port = process.env.PORT || 3000;

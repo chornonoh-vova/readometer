@@ -3,6 +3,7 @@ import {
   useMutation,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import type { ReadingRun } from "./reading-runs";
 
 export type Book = {
   id: string;
@@ -19,17 +20,6 @@ export type Book = {
   createdAt: string;
   completedPages: number;
   lastUpdatedAt: string;
-};
-
-export type ReadingRun = {
-  id: string;
-  userId: string;
-  bookId: string;
-  completedPages: number;
-  startedAt: string;
-  updatedAt: string;
-  finishedAt: string | null;
-  deletedAt: string | null;
 };
 
 export type BookDetails = {
@@ -64,7 +54,7 @@ async function fetchBookDetails(bookId: string): Promise<BookDetails> {
   return await response.json();
 }
 
-const booksQueryKey = ["books"];
+export const booksQueryKey = ["books"];
 
 export function booksQueryOptions() {
   return queryOptions({

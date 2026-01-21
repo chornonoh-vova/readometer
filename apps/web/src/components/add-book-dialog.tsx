@@ -23,17 +23,14 @@ import { AlertCircleIcon } from "lucide-react";
 import { useAddBookMutation } from "@/lib/books";
 import * as uuid from "uuid";
 import { authClient } from "@/lib/auth-client";
+import { langToName, langToEmoji } from "@/lib/lang";
 
 const languages = [
   { label: "Select a language", value: null },
-  { label: "English", value: "en" },
-  { label: "Spanish", value: "es" },
-  { label: "French", value: "fr" },
-  { label: "German", value: "de" },
-  { label: "Italian", value: "it" },
-  { label: "Chinese", value: "zh" },
-  { label: "Japanese", value: "ja" },
-  { label: "Ukrainian", value: "uk" },
+  ...Object.entries(langToName).map(([code, name]) => ({
+    label: `${name} ${langToEmoji[code]}`,
+    value: code,
+  })),
 ];
 
 export function AddBookDialog({
@@ -140,10 +137,10 @@ export function AddBookDialog({
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  {languages.map(({ label, value }) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
+                <SelectContent alignItemWithTrigger={false}>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
