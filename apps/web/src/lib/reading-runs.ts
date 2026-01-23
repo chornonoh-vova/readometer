@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { booksQueryKey } from "./books";
+import { fetchApi } from "./api";
 
 export type ReadingRun = {
   id: string;
@@ -23,7 +24,7 @@ export type NewReadingRun = {
 async function addReadingRun(
   newReadingRun: NewReadingRun,
 ): Promise<ReadingRun> {
-  const response = await fetch("/api/reading-runs/", {
+  const response = await fetchApi("/reading-runs/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

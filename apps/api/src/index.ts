@@ -17,7 +17,7 @@ import readingRuns from "./routes/readingRuns.ts";
 
 await migrateToLatest();
 
-const app = new Hono<AppEnv>().basePath("/api");
+const app = new Hono<AppEnv>();
 
 app.use(
   cors({

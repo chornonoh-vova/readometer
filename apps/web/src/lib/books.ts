@@ -4,6 +4,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import type { ReadingRun } from "./reading-runs";
+import { fetchApi } from "./api";
 
 export type Book = {
   id: string;
@@ -39,7 +40,7 @@ export type BookDetails = {
 };
 
 async function fetchBooks(): Promise<Book[]> {
-  const response = await fetch("/api/books");
+  const response = await fetchApi("/books");
   if (!response.ok) {
     throw new Error("Network error");
   }
@@ -47,7 +48,7 @@ async function fetchBooks(): Promise<Book[]> {
 }
 
 async function fetchBookDetails(bookId: string): Promise<BookDetails> {
-  const response = await fetch(`/api/books/${bookId}`);
+  const response = await fetchApi(`/books/${bookId}`);
   if (!response.ok) {
     throw new Error("Network error");
   }
@@ -92,7 +93,7 @@ export type NewBook = {
 };
 
 async function addBook(newBook: NewBook): Promise<Book> {
-  const response = await fetch("/api/books", {
+  const response = await fetchApi("/books", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
