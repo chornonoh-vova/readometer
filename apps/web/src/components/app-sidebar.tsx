@@ -4,7 +4,6 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { NavUser } from "./nav-user";
 import { NavApp } from "./nav-app";
@@ -17,7 +16,6 @@ export function AppSidebar() {
         <NavApp />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarSeparator />
         <NavMain />
       </SidebarContent>
       <SidebarFooter>

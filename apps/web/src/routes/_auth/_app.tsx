@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { CurrentReadingSession } from "@/components/current-reading-session";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
@@ -10,8 +11,9 @@ function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="pb-24">
         <Outlet />
+        <CurrentReadingSession />
       </SidebarInset>
     </SidebarProvider>
   );

@@ -48,7 +48,7 @@ export function StartReadingDialog({ book }: { book: BookDetails }) {
       });
     }
 
-    startReadingSession(readingRun.id, startedAt, startPage);
+    startReadingSession(book, readingRun.id, startedAt, startPage);
 
     setOpen(false);
 
@@ -63,7 +63,9 @@ export function StartReadingDialog({ book }: { book: BookDetails }) {
         render={
           <Button>
             <PlayIcon />
-            Start reading
+            <span className="sr-only md:block md:not-sr-only">
+              Start reading
+            </span>
           </Button>
         }
       />
