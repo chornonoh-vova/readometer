@@ -1,5 +1,6 @@
-import { BookDetails } from "@/components/book-details";
+import { BookDetailsContent } from "@/components/book-details-content";
 import { PageHeader, PageHeaderName } from "@/components/page-header";
+import { StartReadingDialog } from "@/components/start-reading-dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,13 +9,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import {
   bookDetailsQueryOptions,
   useBookDetailsSuspenseQuery,
+  type BookDetails,
 } from "@/lib/books";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PlayIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_auth/_app/books/$bookId")({
   component: Book,
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_auth/_app/books/$bookId")({
     context.queryClient.ensureQueryData(bookDetailsQueryOptions(params.bookId)),
 });
 
-function BookDetailsHeader({ title }: { title: string }) {
+function BookDetailsHeader({ book }: { book: BookDetails }) {
   return (
     <PageHeader>
       <PageHeaderName>
@@ -33,15 +33,12 @@ function BookDetailsHeader({ title }: { title: string }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{title}</BreadcrumbPage>
+              <BreadcrumbPage>{book.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </PageHeaderName>
-      <Button>
-        <PlayIcon />
-        Start reading
-      </Button>
+      <StartReadingDialog book={book} />
     </PageHeader>
   );
 }
@@ -51,8 +48,8 @@ function Book() {
   const { data: book } = useBookDetailsSuspenseQuery(bookId);
   return (
     <>
-      <BookDetailsHeader title={book.title} />
-      <BookDetails book={book} />
+      <BookDetailsHeader book={book} />
+      <BookDetailsContent book={book} />
     </>
   );
 }

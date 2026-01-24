@@ -10,7 +10,7 @@ function BookInfo({ children }: { children: ReactNode }) {
   );
 }
 
-export function BookDetails({ book }: { book: BookDetails }) {
+export function BookDetailsContent({ book }: { book: BookDetails }) {
   return (
     <div className="px-4 flex flex-col gap-2">
       <h1 className="text-2xl font-semibold tracking-tight">
@@ -32,7 +32,7 @@ export function BookDetails({ book }: { book: BookDetails }) {
         {book.isbn13 && <BookInfo>ISBN-13: {book.isbn13}</BookInfo>}
       </div>
 
-      {book.readingRuns.length === 0 && <ReadingRunsEmpty />}
+      {book.readingRuns.length === 0 && <ReadingRunsEmpty book={book} />}
 
       <ReadingRunsList
         totalPages={book.totalPages}

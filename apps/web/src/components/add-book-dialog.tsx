@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "./ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
@@ -21,7 +22,7 @@ import {
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useAddBookMutation } from "@/lib/books";
-import * as uuid from "uuid";
+import { v7 as uuidv7 } from "uuid";
 import { authClient } from "@/lib/auth-client";
 import { langToName, langToEmoji } from "@/lib/lang";
 
@@ -55,7 +56,7 @@ export function AddBookDialog({
 
     mutation.mutate(
       {
-        id: uuid.v7(),
+        id: uuidv7(),
         userId: userId!,
         title,
         description,
@@ -80,16 +81,14 @@ export function AddBookDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-dvh overflow-auto">
-        <DialogHeader>Add a new book</DialogHeader>
-        <DialogDescription>
-          Please enter the information to add a new book to your library
-        </DialogDescription>
-        <form
-          id="add-book-form"
-          action={addBookAction}
-          className="max-h-[60vh] overflow-auto p-2"
-        >
+      <DialogContent className="overflow-y-scroll max-h-screen">
+        <DialogHeader>
+          <DialogTitle>Add a new book</DialogTitle>
+          <DialogDescription>
+            Please enter the information to add a new book to your library
+          </DialogDescription>
+        </DialogHeader>
+        <form id="add-book-form" action={addBookAction}>
           <FieldGroup>
             {message && (
               <Alert variant="destructive">
@@ -186,7 +185,11 @@ export function AddBookDialog({
               </Button>
             }
           />
-          <Button type="submit" form="add-book-form">
+          <Button
+            disabled={mutation.isPending}
+            type="submit"
+            form="add-book-form"
+          >
             Create
           </Button>
         </DialogFooter>

@@ -1,4 +1,4 @@
-import { BookOpenCheckIcon, PlayIcon } from "lucide-react";
+import { BookOpenCheckIcon } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -7,9 +7,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "./ui/empty";
-import { Button } from "./ui/button";
+import type { BookDetails } from "@/lib/books";
+import { StartReadingDialog } from "./start-reading-dialog";
 
-export function ReadingRunsEmpty() {
+export function ReadingRunsEmpty({ book }: { book: BookDetails }) {
   return (
     <Empty className="border border-dashed">
       <EmptyHeader>
@@ -22,10 +23,7 @@ export function ReadingRunsEmpty() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button>
-          <PlayIcon />
-          Start reading
-        </Button>
+        <StartReadingDialog book={book} />
       </EmptyContent>
     </Empty>
   );

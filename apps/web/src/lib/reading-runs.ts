@@ -24,7 +24,7 @@ export type NewReadingRun = {
 async function addReadingRun(
   newReadingRun: NewReadingRun,
 ): Promise<ReadingRun> {
-  const response = await fetchApi("/reading-runs/", {
+  const response = await fetchApi("/reading-runs", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
