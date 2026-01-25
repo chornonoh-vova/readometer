@@ -1,6 +1,6 @@
 import { BookDetailsContent } from "@/components/book-details-content";
 import { PageHeader, PageHeaderName } from "@/components/page-header";
-import { StartReadingDialog } from "@/components/start-reading-dialog";
+import { StartReadingSession } from "@/components/start-reading-session";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,7 +38,7 @@ function BookDetailsHeader({ book }: { book: BookDetails }) {
           </BreadcrumbList>
         </Breadcrumb>
       </PageHeaderName>
-      <StartReadingDialog book={book} />
+      <StartReadingSession book={book} />
     </PageHeader>
   );
 }

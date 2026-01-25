@@ -4,6 +4,7 @@ import { zValidator } from "../lib/validator";
 import z from "zod";
 import { db } from "../lib/database";
 import { HTTPException } from "hono/http-exception";
+import { sql } from "kysely";
 
 const readingRuns = new Hono<AppEnv>();
 
@@ -31,7 +32,7 @@ readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
       bookId: request.bookId,
       completedPages: request.completedPages,
       startedAt: new Date(request.startedAt),
-      updatedAt: new Date(request.updatedAt),
+      updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .returningAll();
 

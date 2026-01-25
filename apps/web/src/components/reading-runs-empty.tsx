@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from "./ui/empty";
 import type { BookDetails } from "@/lib/books";
-import { StartReadingDialog } from "./start-reading-dialog";
+import { StartReadingSession } from "./start-reading-session";
 
 export function ReadingRunsEmpty({ book }: { book: BookDetails }) {
   return (
@@ -23,7 +23,7 @@ export function ReadingRunsEmpty({ book }: { book: BookDetails }) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <StartReadingDialog book={book} />
+        <StartReadingSession book={book} />
       </EmptyContent>
     </Empty>
   );

@@ -2,7 +2,7 @@ import type { BookDetails } from "@/lib/books";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type ReadingSessionState = {
+export type ReadingSessionState = {
   session: {
     book: BookDetails;
     runId: string;
@@ -47,6 +47,10 @@ export const useReadingSessionStore = create<ReadingSessionState>()(
             return state;
           }
 
+          if (state.session.paused) {
+            return state;
+          }
+
           const lastContinuedAt = state.session.lastContinuedAt
             ? new Date(state.session.lastContinuedAt)
             : new Date(state.session.startedAt);
@@ -70,6 +74,10 @@ export const useReadingSessionStore = create<ReadingSessionState>()(
       play: () =>
         set((state) => {
           if (state.session === null) {
+            return state;
+          }
+
+          if (!state.session.paused) {
             return state;
           }
 

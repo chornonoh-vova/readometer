@@ -1,36 +1,41 @@
 import { FlagIcon, PauseIcon, PlayIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { useReadingSessionStore } from "@/store/reading-session";
+import {
+  useReadingSessionStore,
+  type ReadingSessionState,
+} from "@/store/reading-session";
 import { useEffect, useState } from "react";
 import { useSidebar } from "./ui/sidebar";
-import { cn } from "@/lib/utils";
+import { cn, formatReadingTime } from "@/lib/utils";
+import { FinishReadingSession } from "./finish-reading-session";
+
+function getReadingTime(session: ReadingSessionState["session"]) {
+  if (!session) return 0;
+
+  if (session.paused) return session.readTime;
+
+  const lastContinuedAt = session.lastContinuedAt
+    ? new Date(session.lastContinuedAt)
+    : new Date(session.startedAt);
+
+  const current = new Date();
+
+  return (
+    session.readTime +
+    (current.getTime() / 1000 - lastContinuedAt.getTime() / 1000)
+  );
+}
 
 export function CurrentReadingSession() {
   const { open, isMobile } = useSidebar();
-  const [readingTime, setReadingTime] = useState(0);
   const session = useReadingSessionStore((state) => state.session);
   const pause = useReadingSessionStore((state) => state.pause);
   const play = useReadingSessionStore((state) => state.play);
+  const [readingTime, setReadingTime] = useState(() => getReadingTime(session));
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (!session) return;
-
-      if (session.paused) {
-        setReadingTime(session.readTime);
-        return;
-      }
-
-      const lastContinuedAt = session.lastContinuedAt
-        ? new Date(session.lastContinuedAt)
-        : new Date(session.startedAt);
-
-      const current = new Date();
-
-      setReadingTime(
-        session.readTime +
-          (current.getTime() / 1000 - lastContinuedAt.getTime() / 1000),
-      );
+      setReadingTime(getReadingTime(session));
     }, 1000);
 
     return () => {
@@ -42,15 +47,7 @@ export function CurrentReadingSession() {
     return null;
   }
 
-  const hours = Math.floor(readingTime / (60 * 60));
-  const minutes = Math.floor(readingTime / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = Math.floor(readingTime % 60)
-    .toString()
-    .padStart(2, "0");
-
-  const formattedReadingTime = `${hours ? hours + ":" : ""}${minutes}:${seconds}`;
+  const formattedReadingTime = formatReadingTime(readingTime);
 
   return (
     <div
@@ -68,14 +65,12 @@ export function CurrentReadingSession() {
           <Button
             variant="ghost"
             size="icon"
-            title="Pause"
+            title={session.paused ? "Continue" : "Pause"}
             onClick={() => (session.paused ? play() : pause())}
           >
             {session.paused ? <PlayIcon /> : <PauseIcon />}
           </Button>
-          <Button variant="ghost" size="icon" title="Finish">
-            <FlagIcon />
-          </Button>
+          <FinishReadingSession />
         </div>
       </div>
     </div>

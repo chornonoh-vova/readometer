@@ -1,4 +1,4 @@
-import { PlayIcon } from "lucide-react";
+import { AlertCircleIcon, PlayIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -17,10 +17,11 @@ import { Field, FieldGroup, FieldLabel } from "./ui/field";
 import { useAddReadingRunMutation } from "@/lib/reading-runs";
 import { v7 as uuidv7 } from "uuid";
 import { useReadingSessionStore } from "@/store/reading-session";
+import { Alert, AlertTitle } from "./ui/alert";
 
-export function StartReadingDialog({ book }: { book: BookDetails }) {
+export function StartReadingSession({ book }: { book: BookDetails }) {
   const [open, setOpen] = useState(false);
-  const startReadingSession = useReadingSessionStore((state) => state.start);
+  const start = useReadingSessionStore((state) => state.start);
   const addReadingRun = useAddReadingRunMutation();
 
   let defaultStartPage = book.readingRuns[0]?.completedPages ?? 0;
@@ -48,9 +49,9 @@ export function StartReadingDialog({ book }: { book: BookDetails }) {
       });
     }
 
-    startReadingSession(book, readingRun.id, startedAt, startPage);
-
     setOpen(false);
+
+    start(book, readingRun.id, startedAt, startPage);
 
     return null;
   };
@@ -76,6 +77,13 @@ export function StartReadingDialog({ book }: { book: BookDetails }) {
         </DialogHeader>
         <form id="start-reading-form" action={startReadingAction}>
           <FieldGroup>
+            {message && (
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>{message}</AlertTitle>
+              </Alert>
+            )}
+
             <Field>
               <FieldLabel htmlFor="start-page">Start page</FieldLabel>
               <Input
