@@ -3,6 +3,7 @@ import { langToEmoji, langToName } from "@/lib/lang";
 import { ReadingRunsEmpty } from "./reading-runs-empty";
 import { ReadingRunsList } from "./reading-runs-list";
 import type { ReactNode } from "react";
+import { formatDate } from "@/lib/utils";
 
 function BookInfo({ children }: { children: ReactNode }) {
   return (
@@ -25,19 +26,14 @@ export function BookDetailsContent({ book }: { book: BookDetails }) {
           <BookInfo>Language: {langToName[book.language]}</BookInfo>
         )}
         {book.publishDate && (
-          <BookInfo>
-            Published: {new Date(book.publishDate).toLocaleDateString()}
-          </BookInfo>
+          <BookInfo>Published: {formatDate(book.publishDate)}</BookInfo>
         )}
         {book.isbn13 && <BookInfo>ISBN-13: {book.isbn13}</BookInfo>}
       </div>
 
       {book.readingRuns.length === 0 && <ReadingRunsEmpty book={book} />}
 
-      <ReadingRunsList
-        totalPages={book.totalPages}
-        readingRuns={book.readingRuns}
-      />
+      <ReadingRunsList book={book} />
     </div>
   );
 }

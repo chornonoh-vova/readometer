@@ -16,7 +16,7 @@ function readingRuns(bookId: Expression<string>) {
       .selectFrom("readingRun")
       .selectAll()
       .whereRef("readingRun.bookId", "=", bookId)
-      .orderBy("updatedAt"),
+      .orderBy("updatedAt", "desc"),
   ).as("readingRuns");
 }
 

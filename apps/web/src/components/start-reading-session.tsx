@@ -1,4 +1,4 @@
-import { AlertCircleIcon, PlayIcon } from "lucide-react";
+import { AlertCircleIcon, PlayIcon, RotateCcwIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -14,21 +14,23 @@ import { Input } from "./ui/input";
 import type { BookDetails } from "@/lib/books";
 import { useActionState, useState } from "react";
 import { Field, FieldGroup, FieldLabel } from "./ui/field";
-import { useAddReadingRunMutation } from "@/lib/reading-runs";
+import { useAddReadingRunMutation, type ReadingRun } from "@/lib/reading-runs";
 import { v7 as uuidv7 } from "uuid";
 import { useReadingSessionStore } from "@/store/reading-session";
 import { Alert, AlertTitle } from "./ui/alert";
 
-export function StartReadingSession({ book }: { book: BookDetails }) {
+export function StartReadingSession({
+  book,
+  readingRun,
+}: {
+  book: BookDetails;
+  readingRun?: ReadingRun;
+}) {
   const [open, setOpen] = useState(false);
   const start = useReadingSessionStore((state) => state.start);
   const addReadingRun = useAddReadingRunMutation();
 
-  let defaultStartPage = book.readingRuns[0]?.completedPages ?? 0;
-
-  if (defaultStartPage === book.totalPages) {
-    defaultStartPage = 0;
-  }
+  const defaultStartPage = readingRun?.completedPages ?? 0;
 
   const startReading = async (
     _prevState: string | null,
@@ -37,10 +39,13 @@ export function StartReadingSession({ book }: { book: BookDetails }) {
     const startedAt = new Date().toISOString();
     const startPage = parseInt(formData.get("start-page")!.toString());
 
-    let readingRun = book.readingRuns[0];
+    let startReadingRun = readingRun;
 
-    if (defaultStartPage === 0) {
-      readingRun = await addReadingRun.mutateAsync({
+    if (
+      !startReadingRun ||
+      startReadingRun.completedPages === book.totalPages
+    ) {
+      startReadingRun = await addReadingRun.mutateAsync({
         id: uuidv7(),
         bookId: book.id,
         completedPages: startPage,
@@ -51,21 +56,33 @@ export function StartReadingSession({ book }: { book: BookDetails }) {
 
     setOpen(false);
 
-    start(book, readingRun.id, startedAt, startPage);
+    start(book, startReadingRun.id, startedAt, startPage);
 
     return null;
   };
 
   const [message, startReadingAction] = useActionState(startReading, null);
 
+  let ButtonIcon = PlayIcon;
+  let buttonLabel = "Start reading";
+
+  if (readingRun) {
+    if (readingRun.completedPages === book.totalPages) {
+      ButtonIcon = RotateCcwIcon;
+      buttonLabel = "Read again";
+    } else {
+      buttonLabel = "Continue reading";
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           <Button>
-            <PlayIcon />
+            <ButtonIcon />
             <span className="sr-only md:block md:not-sr-only">
-              Start reading
+              {buttonLabel}
             </span>
           </Button>
         }

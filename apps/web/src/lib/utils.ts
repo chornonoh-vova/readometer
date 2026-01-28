@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatDate(date: string) {
+  return new Date(date).toLocaleDateString();
+}
+
 export function formatReadingTime(readingTime: number) {
   const hours = Math.floor(readingTime / (60 * 60));
   const minutes = Math.floor(readingTime / 60)

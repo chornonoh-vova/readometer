@@ -1,4 +1,4 @@
-import { FlagIcon, PauseIcon, PlayIcon } from "lucide-react";
+import { PauseIcon, PlayIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   useReadingSessionStore,

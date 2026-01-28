@@ -38,7 +38,6 @@ function BookDetailsHeader({ book }: { book: BookDetails }) {
           </BreadcrumbList>
         </Breadcrumb>
       </PageHeaderName>
-      <StartReadingSession book={book} />
     </PageHeader>
   );
 }

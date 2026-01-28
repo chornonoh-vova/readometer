@@ -8,6 +8,28 @@ import { HTTPException } from "hono/http-exception";
 
 const readingSessions = new Hono<AppEnv>();
 
+const readingSessionsSchema = z.object({
+  runId: z.uuidv7(),
+});
+
+readingSessions.get(
+  "/",
+  zValidator("query", readingSessionsSchema),
+  async (c) => {
+    const userId = c.get("user")!.id;
+    const runId = c.req.valid("query").runId;
+
+    const result = await db
+      .selectFrom("readingSession")
+      .selectAll()
+      .where("userId", "=", userId)
+      .where("runId", "=", runId)
+      .execute();
+
+    return c.json(result);
+  },
+);
+
 const createReadingSessionSchema = z.object({
   id: z.uuidv7(),
   runId: z.uuidv7(),

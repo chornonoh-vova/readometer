@@ -1,4 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { fetchApi } from "./api";
 import { booksQueryKey } from "./books";
 
@@ -25,6 +29,26 @@ export type NewReadingSession = {
   endTime: string;
   readTime: number;
 };
+
+async function fetchReadingSessions(runId: string): Promise<ReadingSession[]> {
+  const searchParams = new URLSearchParams([["runId", runId]]);
+  const response = await fetchApi(`/reading-sessions?${searchParams}`);
+  if (!response.ok) {
+    throw new Error("Network error");
+  }
+  return await response.json();
+}
+
+export function readingSessionsQueryOptions(runId: string) {
+  return queryOptions({
+    queryKey: ["reading-sessions", runId],
+    queryFn: () => fetchReadingSessions(runId),
+  });
+}
+
+export function useReadingSessionsSuspenseQuery(runId: string) {
+  return useSuspenseQuery(readingSessionsQueryOptions(runId));
+}
 
 async function addReadingSession(
   newReadingSession: NewReadingSession,
