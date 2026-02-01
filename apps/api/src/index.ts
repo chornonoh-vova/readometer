@@ -15,6 +15,8 @@ import me from "./routes/me.ts";
 import books from "./routes/books.ts";
 import readingRuns from "./routes/readingRuns.ts";
 import readingSessions from "./routes/readingSessions.ts";
+import healthz from "./routes/healthz.ts";
+import readyz from "./routes/readyz.ts";
 
 await migrateToLatest();
 
@@ -29,6 +31,9 @@ app.use(
 app.use(compress());
 app.use(logger());
 app.use("*", session);
+
+app.route("/healthz", healthz);
+app.route("/readyz", readyz);
 
 app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
 

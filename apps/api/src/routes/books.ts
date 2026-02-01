@@ -1,24 +1,13 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import type { Expression } from "kysely";
-import { jsonArrayFrom } from "kysely/helpers/postgres";
 import type { AppEnv } from "../types.ts";
 import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
 import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "../lib/isbn.ts";
+import { sql } from "kysely";
 
 const books = new Hono<AppEnv>();
-
-function readingRuns(bookId: Expression<string>) {
-  return jsonArrayFrom(
-    db
-      .selectFrom("readingRun")
-      .selectAll()
-      .whereRef("readingRun.bookId", "=", bookId)
-      .orderBy("updatedAt", "desc"),
-  ).as("readingRuns");
-}
 
 books.get("/", async (c) => {
   const userId = c.get("user")!.id;
@@ -64,7 +53,6 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   const bookQuery = db
     .selectFrom("book")
     .selectAll()
-    .select(({ ref }) => [readingRuns(ref("book.id"))])
     .where("id", "=", bookId)
     .where("userId", "=", userId);
 
@@ -79,14 +67,13 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
 
 const createBookSchema = z.object({
   id: z.uuidv7(),
-  title: z.string().nonempty(),
-  description: z.string().optional(),
-  author: z.string().optional(),
+  title: z.string().trim().nonempty(),
+  description: z.string().trim().optional(),
+  author: z.string().trim().optional(),
   totalPages: z.number().positive(),
   publishDate: z.iso.date().optional(),
   isbn: isbnSchema,
-  language: z.string().optional(),
-  updatedAt: z.iso.datetime(),
+  language: z.string().trim().optional(),
 });
 
 books.post("/", zValidator("json", createBookSchema), async (c) => {
@@ -107,7 +94,6 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
         : undefined,
       isbn13: normalizeIsbnToIsbn13(request.isbn),
       language: request.language,
-      updatedAt: new Date(request.updatedAt),
     })
     .returningAll();
 
@@ -118,14 +104,13 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
 });
 
 const updateBookSchema = z.object({
-  title: z.string().nonempty().optional(),
-  description: z.string().optional(),
-  author: z.string().optional(),
+  title: z.string().trim().nonempty().optional(),
+  description: z.string().trim().optional(),
+  author: z.string().trim().optional(),
   totalPages: z.number().positive().optional(),
   publishDate: z.iso.date().optional(),
   isbn: isbnSchema.optional(),
-  language: z.string().optional(),
-  updatedAt: z.iso.datetime(),
+  language: z.string().trim().optional(),
 });
 
 books.put(
@@ -150,7 +135,7 @@ books.put(
           : undefined,
         isbn13: request.isbn ? normalizeIsbnToIsbn13(request.isbn) : undefined,
         language: request.language,
-        updatedAt: new Date(request.updatedAt),
+        updatedAt: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", bookId)
       .where("userId", "=", userId)
@@ -171,21 +156,18 @@ books.delete("/:bookId", zValidator("param", bookSchema), async (c) => {
   const userId = c.get("user")!.id;
   const bookId = c.req.valid("param").bookId;
 
-  const markDeletedBookQuery = db
-    .updateTable("book")
-    .set("deletedAt", new Date())
+  const deleteBookQuery = db
+    .deleteFrom("book")
     .where("id", "=", bookId)
-    .where("userId", "=", userId)
-    .returningAll();
+    .where("userId", "=", userId);
 
-  const result = await markDeletedBookQuery.executeTakeFirst();
+  const result = await deleteBookQuery.executeTakeFirst();
 
-  if (!result) {
+  if (!result.numDeletedRows) {
     throw new HTTPException(404);
   }
 
-  c.status(200);
-  return c.json(result);
+  return c.status(204);
 });
 
 export default books;

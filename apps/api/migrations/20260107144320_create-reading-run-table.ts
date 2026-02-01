@@ -20,8 +20,9 @@ export async function up(db: Kysely<any>): Promise<void> {
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
     .addColumn("finishedAt", "timestamptz")
-    .addColumn("deletedAt", "timestamptz")
-    .addColumn("updatedAt", "timestamptz", (col) => col.notNull())
+    .addColumn("updatedAt", "timestamptz", (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
     .execute();
 
   await db.schema

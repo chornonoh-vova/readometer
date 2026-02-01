@@ -70,7 +70,6 @@ readingSessions.post(
             startTime: request.startTime,
             endTime: request.endTime,
             readTime: request.readTime,
-            updatedAt: sql`CURRENT_TIMESTAMP`,
           })
           .returningAll()
           .executeTakeFirst();
@@ -82,6 +81,78 @@ readingSessions.post(
       console.error(error);
       throw new HTTPException(404);
     }
+  },
+);
+
+const sessionIdSchema = z.object({
+  sessionId: z.uuidv7(),
+});
+
+const updateReadingSessionSchema = z.object({
+  startPage: z.number().positive().optional(),
+  endPage: z.number().positive().optional(),
+  startTime: z.iso.datetime().optional(),
+  endTime: z.iso.datetime().optional(),
+  readTime: z.number().positive().optional(),
+});
+
+readingSessions.put(
+  "/:sessionId",
+  zValidator("param", sessionIdSchema),
+  zValidator("json", updateReadingSessionSchema),
+  async (c) => {
+    const userId = c.get("user")!.id;
+    const sessionId = c.req.valid("param").sessionId;
+
+    const request = c.req.valid("json");
+
+    const updateReadingSessionQuery = db
+      .updateTable("readingSession")
+      .set({
+        startPage: request.startPage,
+        endPage: request.endPage,
+        readPages:
+          request.startPage && request.endPage
+            ? request.endPage - request.startPage
+            : undefined,
+        startTime: request.startTime ? new Date(request.startTime) : undefined,
+        endTime: request.endTime ? new Date(request.endTime) : undefined,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where("id", "=", sessionId)
+      .where("userId", "=", userId)
+      .returningAll();
+
+    const result = await updateReadingSessionQuery.executeTakeFirst();
+
+    if (!result) {
+      throw new HTTPException(404);
+    }
+
+    c.status(200);
+    return c.json(result);
+  },
+);
+
+readingSessions.delete(
+  "/:sessionId",
+  zValidator("param", sessionIdSchema),
+  async (c) => {
+    const userId = c.get("user")!.id;
+    const sessionId = c.req.valid("param").sessionId;
+
+    const deleteReadingSessionQuery = db
+      .deleteFrom("readingSession")
+      .where("id", "=", sessionId)
+      .where("userId", "=", userId);
+
+    const result = await deleteReadingSessionQuery.executeTakeFirst();
+
+    if (!result.numDeletedRows) {
+      throw new HTTPException(404);
+    }
+
+    return c.status(204);
   },
 );
 

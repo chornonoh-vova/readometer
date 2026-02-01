@@ -31,7 +31,6 @@ export interface Account {
 export interface Book {
   author: string | null;
   createdAt: Generated<Timestamp>;
-  deletedAt: Timestamp | null;
   description: string | null;
   id: string;
   isbn13: string | null;
@@ -39,23 +38,21 @@ export interface Book {
   publishDate: Timestamp | null;
   title: string;
   totalPages: number;
-  updatedAt: Timestamp;
+  updatedAt: Generated<Timestamp>;
   userId: string;
 }
 
 export interface ReadingRun {
   bookId: string;
   completedPages: number;
-  deletedAt: Timestamp | null;
   finishedAt: Timestamp | null;
   id: string;
   startedAt: Generated<Timestamp>;
-  updatedAt: Timestamp;
+  updatedAt: Generated<Timestamp>;
   userId: string;
 }
 
 export interface ReadingSession {
-  deletedAt: Timestamp | null;
   endPage: number | null;
   endTime: Timestamp | null;
   id: string;
@@ -64,7 +61,7 @@ export interface ReadingSession {
   runId: string;
   startPage: number | null;
   startTime: Generated<Timestamp>;
-  updatedAt: Timestamp;
+  updatedAt: Generated<Timestamp>;
   userId: string;
 }
 

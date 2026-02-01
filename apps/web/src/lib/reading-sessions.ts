@@ -4,7 +4,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { fetchApi } from "./api";
-import { booksQueryKey } from "./books";
+import { books, readingRuns, readingSessions } from "./query-keys";
 
 export type ReadingSession = {
   id: string;
@@ -16,8 +16,6 @@ export type ReadingSession = {
   startTime: string;
   endTime: string | null;
   readTime: number;
-  updatedAt: string;
-  deletedAt: string | null;
 };
 
 export type NewReadingSession = {
@@ -31,17 +29,13 @@ export type NewReadingSession = {
 };
 
 async function fetchReadingSessions(runId: string): Promise<ReadingSession[]> {
-  const searchParams = new URLSearchParams([["runId", runId]]);
-  const response = await fetchApi(`/reading-sessions?${searchParams}`);
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
+  const searchParams = new URLSearchParams({ runId });
+  return await fetchApi(`/reading-sessions?${searchParams}`);
 }
 
 export function readingSessionsQueryOptions(runId: string) {
   return queryOptions({
-    queryKey: ["reading-sessions", runId],
+    queryKey: readingSessions.byRun(runId),
     queryFn: () => fetchReadingSessions(runId),
   });
 }
@@ -53,26 +47,32 @@ export function useReadingSessionsSuspenseQuery(runId: string) {
 async function addReadingSession(
   newReadingSession: NewReadingSession,
 ): Promise<ReadingSession> {
-  const response = await fetchApi("/reading-sessions", {
+  return fetchApi("/reading-sessions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(newReadingSession),
   });
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
 }
 
 export function useAddReadingSessionMutation(bookId: string) {
   return useMutation({
     mutationFn: (newReadingSession: NewReadingSession) =>
       addReadingSession(newReadingSession),
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+    onSuccess: (_data, variables, _onMutateResult, context) => {
+      const { runId } = variables;
       context.client.invalidateQueries({
-        queryKey: [...booksQueryKey, bookId],
+        queryKey: books.list,
+      });
+      context.client.invalidateQueries({
+        queryKey: books.details(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingRuns.byBook(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingSessions.byRun(runId),
       });
     },
   });

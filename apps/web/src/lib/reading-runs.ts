@@ -1,6 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import { booksQueryKey } from "./books";
+import {
+  queryOptions,
+  useMutation,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { fetchApi } from "./api";
+import { books, readingRuns } from "./query-keys";
 
 export type ReadingRun = {
   id: string;
@@ -10,7 +14,6 @@ export type ReadingRun = {
   startedAt: string;
   updatedAt: string;
   finishedAt: string | null;
-  deletedAt: string | null;
 };
 
 export type NewReadingRun = {
@@ -18,32 +21,49 @@ export type NewReadingRun = {
   bookId: string;
   completedPages: number;
   startedAt: string;
-  updatedAt: string;
 };
+
+async function fetchReadingRuns(bookId: string): Promise<ReadingRun[]> {
+  const searchParams = new URLSearchParams({ bookId });
+  return fetchApi(`/reading-runs?${searchParams}`);
+}
+
+export function readingRunsQueryOptions(bookId: string) {
+  return queryOptions({
+    queryKey: readingRuns.byBook(bookId),
+    queryFn: () => fetchReadingRuns(bookId),
+  });
+}
+
+export function useReadingRunsSuspenseQuery(bookId: string) {
+  return useSuspenseQuery(readingRunsQueryOptions(bookId));
+}
 
 async function addReadingRun(
   newReadingRun: NewReadingRun,
 ): Promise<ReadingRun> {
-  const response = await fetchApi("/reading-runs", {
+  return await fetchApi("/reading-runs", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(newReadingRun),
   });
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
 }
 
 export function useAddReadingRunMutation() {
   return useMutation({
     mutationFn: (newReadingRun: NewReadingRun) => addReadingRun(newReadingRun),
-    onSettled: (_data, _error, variables, _onMutateResult, context) => {
-      const bookId = variables.bookId;
+    onSuccess: (_data, variables, _onMutateResult, context) => {
+      const { bookId } = variables;
       context.client.invalidateQueries({
-        queryKey: [...booksQueryKey, bookId],
+        queryKey: books.list,
+      });
+      context.client.invalidateQueries({
+        queryKey: books.details(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingRuns.byBook(bookId),
       });
     },
   });

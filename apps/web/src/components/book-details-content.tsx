@@ -4,6 +4,7 @@ import { ReadingRunsEmpty } from "./reading-runs-empty";
 import { ReadingRunsList } from "./reading-runs-list";
 import type { ReactNode } from "react";
 import { formatDate } from "@/lib/utils";
+import type { ReadingRun } from "@/lib/reading-runs";
 
 function BookInfo({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +12,13 @@ function BookInfo({ children }: { children: ReactNode }) {
   );
 }
 
-export function BookDetailsContent({ book }: { book: BookDetails }) {
+export function BookDetailsContent({
+  book,
+  readingRuns,
+}: {
+  book: BookDetails;
+  readingRuns: ReadingRun[];
+}) {
   return (
     <div className="px-4 flex flex-col gap-2">
       <h1 className="text-2xl font-semibold tracking-tight">
@@ -31,9 +38,9 @@ export function BookDetailsContent({ book }: { book: BookDetails }) {
         {book.isbn13 && <BookInfo>ISBN-13: {book.isbn13}</BookInfo>}
       </div>
 
-      {book.readingRuns.length === 0 && <ReadingRunsEmpty book={book} />}
+      {readingRuns.length === 0 && <ReadingRunsEmpty book={book} />}
 
-      <ReadingRunsList book={book} />
+      <ReadingRunsList book={book} readingRuns={readingRuns} />
     </div>
   );
 }

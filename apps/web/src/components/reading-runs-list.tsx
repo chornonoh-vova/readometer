@@ -15,17 +15,23 @@ import { Suspense } from "react";
 import { ReadingSessionsList } from "./reading-sessions-list";
 import { formatDate } from "@/lib/utils";
 
-export function ReadingRunsList({ book }: { book: BookDetails }) {
+export function ReadingRunsList({
+  book,
+  readingRuns,
+}: {
+  book: BookDetails;
+  readingRuns: ReadingRun[];
+}) {
   return (
     <>
-      {book.readingRuns.map((readingRun, index) => (
+      {readingRuns.map((readingRun, index) => (
         <section
           key={readingRun.id}
           className="flex flex-col gap-2 md:rounded-md border-y md:border md:px-4 py-2"
         >
           <div className="flex gap-1.5 items-center justify-between">
             <h2 className="text-lg font-semibold">
-              Reading {book.readingRuns.length - index}
+              Reading {readingRuns.length - index}
             </h2>
 
             <StartReadingSession book={book} readingRun={readingRun} />

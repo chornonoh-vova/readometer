@@ -3,70 +3,45 @@ import {
   useMutation,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import type { ReadingRun } from "./reading-runs";
 import { fetchApi } from "./api";
+import { books } from "./query-keys";
 
 export type Book = {
   id: string;
   userId: string;
   title: string;
-  description: string | null;
-  author: string | null;
+  description?: string;
+  author?: string;
   totalPages: number;
-  publishDate: string | null;
-  isbn13: string | null;
-  language: string | null;
-  deletedAt: string | null;
+  publishDate?: string;
+  isbn13?: string;
+  language?: string;
   updatedAt: string;
   createdAt: string;
   completedPages: number;
   lastUpdatedAt: string;
 };
 
-export type BookDetails = {
-  id: string;
-  userId: string;
-  title: string;
-  description: string | null;
-  author: string | null;
-  totalPages: number;
-  publishDate: string | null;
-  isbn13: string | null;
-  language: string | null;
-  deletedAt: string | null;
-  updatedAt: string;
-  createdAt: string;
-  readingRuns: ReadingRun[];
-};
+export type BookDetails = Omit<Book, "completedPages" | "lastUpdatedAt">;
 
 async function fetchBooks(): Promise<Book[]> {
-  const response = await fetchApi("/books");
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
+  return fetchApi("/books");
 }
 
 async function fetchBookDetails(bookId: string): Promise<BookDetails> {
-  const response = await fetchApi(`/books/${bookId}`);
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
+  return fetchApi(`/books/${bookId}`);
 }
-
-export const booksQueryKey = ["books"];
 
 export function booksQueryOptions() {
   return queryOptions({
-    queryKey: booksQueryKey,
+    queryKey: books.list,
     queryFn: fetchBooks,
   });
 }
 
 export function bookDetailsQueryOptions(bookId: string) {
   return queryOptions({
-    queryKey: [...booksQueryKey, bookId],
+    queryKey: books.details(bookId),
     queryFn: () => fetchBookDetails(bookId),
   });
 }
@@ -83,66 +58,31 @@ export type NewBook = {
   id: string;
   userId: string;
   title: string;
-  description: string | null;
-  author: string | null;
+  description?: string;
+  author?: string;
   totalPages: number;
-  publishDate: string | null;
-  isbn13: string | null;
-  language: string | null;
-  updatedAt: string;
+  publishDate?: string;
+  isbn13?: string;
+  language?: string;
 };
 
 async function addBook(newBook: NewBook): Promise<Book> {
-  const response = await fetchApi("/books", {
+  return fetchApi("/books", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(newBook),
   });
-  if (!response.ok) {
-    throw new Error("Network error");
-  }
-  return await response.json();
 }
 
 export function useAddBookMutation() {
   return useMutation({
     mutationFn: (newBook: NewBook) => addBook(newBook),
 
-    onMutate: async (newBook, context) => {
-      await context.client.cancelQueries({ queryKey: booksQueryKey });
-
-      const prevBooks = context.client.getQueryData(booksQueryKey);
-
-      context.client.setQueryData(
-        booksQueryKey,
-        (old: Book[] = []) =>
-          [
-            ...old,
-            {
-              ...newBook,
-              createdAt: newBook.updatedAt,
-              deletedAt: null,
-              completedPages: 0,
-              lastUpdatedAt: newBook.updatedAt,
-            },
-          ] satisfies Book[],
-      );
-
-      return { prevBooks };
-    },
-
-    onError: (error, _variables, onMutateResult, context) => {
-      console.error(error);
-      if (onMutateResult?.prevBooks) {
-        context.client.setQueryData(booksQueryKey, onMutateResult.prevBooks);
-      }
-    },
-
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
       context.client.invalidateQueries({
-        queryKey: booksQueryKey,
+        queryKey: books.list,
       });
     },
   });

@@ -18,10 +18,11 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .addColumn("publishDate", "date")
     .addColumn("isbn13", "char(13)")
-    .addColumn("language", "text")
-    .addColumn("deletedAt", "timestamptz")
-    .addColumn("updatedAt", "timestamptz", (col) => col.notNull())
+    .addColumn("language", "char(2)")
     .addColumn("createdAt", "timestamptz", (col) =>
+      col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
+    )
+    .addColumn("updatedAt", "timestamptz", (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
     )
     .execute();

@@ -1,6 +1,5 @@
 import { BookDetailsContent } from "@/components/book-details-content";
 import { PageHeader, PageHeaderName } from "@/components/page-header";
-import { StartReadingSession } from "@/components/start-reading-session";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,12 +13,18 @@ import {
   useBookDetailsSuspenseQuery,
   type BookDetails,
 } from "@/lib/books";
+import {
+  readingRunsQueryOptions,
+  useReadingRunsSuspenseQuery,
+} from "@/lib/reading-runs";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/_app/books/$bookId")({
   component: Book,
-  loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(bookDetailsQueryOptions(params.bookId)),
+  loader: ({ context, params }) => {
+    context.queryClient.ensureQueryData(bookDetailsQueryOptions(params.bookId));
+    context.queryClient.ensureQueryData(readingRunsQueryOptions(params.bookId));
+  },
 });
 
 function BookDetailsHeader({ book }: { book: BookDetails }) {
@@ -45,10 +50,11 @@ function BookDetailsHeader({ book }: { book: BookDetails }) {
 function Book() {
   const { bookId } = Route.useParams();
   const { data: book } = useBookDetailsSuspenseQuery(bookId);
+  const { data: readingRuns } = useReadingRunsSuspenseQuery(bookId);
   return (
     <>
       <BookDetailsHeader book={book} />
-      <BookDetailsContent book={book} />
+      <BookDetailsContent book={book} readingRuns={readingRuns} />
     </>
   );
 }
