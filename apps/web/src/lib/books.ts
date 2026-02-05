@@ -56,13 +56,12 @@ export function useBookDetailsSuspenseQuery(bookId: string) {
 
 export type NewBook = {
   id: string;
-  userId: string;
   title: string;
   description?: string;
   author?: string;
   totalPages: number;
   publishDate?: string;
-  isbn13?: string;
+  isbn?: string;
   language?: string;
 };
 

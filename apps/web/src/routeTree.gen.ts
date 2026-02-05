@@ -52,17 +52,17 @@ const AuthAppBooksBookIdRoute = AuthAppBooksBookIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthAppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/stats': typeof AuthAppStatsRoute
-  '/': typeof AuthAppIndexRoute
   '/books/$bookId': typeof AuthAppBooksBookIdRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthAppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/stats': typeof AuthAppStatsRoute
-  '/': typeof AuthAppIndexRoute
   '/books/$bookId': typeof AuthAppBooksBookIdRoute
 }
 export interface FileRoutesById {
@@ -77,9 +77,9 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register' | '/stats' | '/' | '/books/$bookId'
+  fullPaths: '/' | '/login' | '/register' | '/stats' | '/books/$bookId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/stats' | '/' | '/books/$bookId'
+  to: '/' | '/login' | '/register' | '/stats' | '/books/$bookId'
   id:
     | '__root__'
     | '/_auth'
@@ -116,14 +116,14 @@ declare module '@tanstack/react-router' {
     '/_auth': {
       id: '/_auth'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/_app': {
       id: '/_auth/_app'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthAppRouteImport
       parentRoute: typeof AuthRouteRoute
     }

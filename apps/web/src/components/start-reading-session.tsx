@@ -50,7 +50,6 @@ export function StartReadingSession({
         bookId: book.id,
         completedPages: startPage,
         startedAt,
-        updatedAt: startedAt,
       });
     }
 

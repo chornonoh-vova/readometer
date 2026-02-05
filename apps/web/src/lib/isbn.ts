@@ -43,21 +43,18 @@ export function isbn10ToIsbn13(isbn10: string): string {
   return core + checkDigit;
 }
 
-export const isbnSchema = z
-  .string()
-  .optional()
-  .refine((value) => {
-    if (!value) return true;
+export const isbnSchema = z.string().refine((value) => {
+  if (!value) return true;
 
-    const isbn = stripIsbn(value);
+  const isbn = stripIsbn(value);
 
-    if (isbn.length === 10) {
-      return isValidIsbn10(isbn);
-    }
+  if (isbn.length === 10) {
+    return isValidIsbn10(isbn);
+  }
 
-    if (isbn.length === 13) {
-      return isValidIsbn13(isbn);
-    }
+  if (isbn.length === 13) {
+    return isValidIsbn13(isbn);
+  }
 
-    return false;
-  }, "Invalid ISBN");
+  return false;
+}, "Invalid ISBN");

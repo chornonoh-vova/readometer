@@ -27,13 +27,11 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useAddBookMutation } from "@/lib/books";
+import { useForm } from "@tanstack/react-form";
 import { v7 as uuidv7 } from "uuid";
-import { authClient } from "@/lib/auth-client";
 import { langToName, langToEmoji } from "@/lib/lang";
-import z from "zod";
+import * as z from "zod";
 import { isbnSchema } from "@/lib/isbn";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 
@@ -45,17 +43,31 @@ const languages = [
   })),
 ];
 
+const optionalInput = <T extends z.core.SomeType>(schema: T) =>
+  z
+    .union([schema, z.literal("")])
+    .transform((val) => (val === "" ? undefined : val))
+    .optional();
+
 const addBookFormSchema = z.object({
   title: z.string().trim().nonempty(),
   totalPages: z.number().positive(),
-  author: z.string().trim().optional(),
-  language: z.string().trim().optional(),
-  publishDate: z.iso.date().optional().catch(undefined),
-  isbn13: isbnSchema,
-  description: z.string().trim().optional(),
+  author: optionalInput(z.string().trim()),
+  language: optionalInput(z.string().trim()),
+  publishDate: optionalInput(z.iso.date()),
+  isbn: optionalInput(isbnSchema),
+  description: optionalInput(z.string().trim()),
 });
 
-type AddBookForm = z.infer<typeof addBookFormSchema>;
+const defaultValues: z.input<typeof addBookFormSchema> = {
+  title: "",
+  totalPages: 0,
+  author: "",
+  language: "",
+  publishDate: "",
+  isbn: "",
+  description: "",
+};
 
 export function AddBookDialog({
   open,
@@ -64,43 +76,45 @@ export function AddBookDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: session } = authClient.useSession();
-  const userId = session?.user.id;
   const mutation = useAddBookMutation();
   const [errorMessage, setErrorMessage] = useState("");
 
-  const form = useForm<AddBookForm>({
-    resolver: zodResolver(addBookFormSchema),
-    defaultValues: {
-      title: "",
-      totalPages: 0,
-      author: "",
-      language: "",
-      publishDate: "",
-      isbn13: "",
-      description: "",
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onSubmit: addBookFormSchema,
+    },
+    onSubmit: ({ value }) => {
+      const data = addBookFormSchema.parse(value);
+
+      setErrorMessage("");
+
+      mutation.mutate(
+        {
+          id: uuidv7(),
+          ...data,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+          },
+          onError: (error) => {
+            if (
+              error.cause &&
+              typeof error.cause === "object" &&
+              "message" in error.cause &&
+              typeof error.cause.message === "string"
+            ) {
+              setErrorMessage(error.cause.message);
+            } else {
+              setErrorMessage(error.message);
+              console.error(error);
+            }
+          },
+        },
+      );
     },
   });
-
-  const onSubmit = (data: AddBookForm) => {
-    setErrorMessage("");
-
-    mutation.mutate(
-      {
-        id: uuidv7(),
-        userId: userId!,
-        ...data,
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-        onError: (error) => {
-          setErrorMessage(error.cause?.message ?? "");
-        },
-      },
-    );
-  };
 
   return (
     <Dialog
@@ -118,7 +132,13 @@ export function AddBookDialog({
             Please enter the information to add a new book to your library
           </DialogDescription>
         </DialogHeader>
-        <form id="add-book-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id="add-book-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
           <FieldGroup>
             {errorMessage && (
               <Alert variant="destructive">
@@ -129,174 +149,213 @@ export function AddBookDialog({
               </Alert>
             )}
 
-            <Controller
+            <form.Field
               name="title"
-              control={form.control}
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Book title</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    type="text"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Book title"
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
 
-            <Controller
-              name="totalPages"
-              control={form.control}
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Total pages</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    type="number"
-                    aria-invalid={fieldState.invalid}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
-                      field.onChange(isNaN(value) ? "" : value);
-                    }}
-                    placeholder="123"
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="author"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Book author</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    type="text"
-                    aria-invalid={fieldState.invalid}
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="language"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field
-                  orientation="responsive"
-                  data-invalid={fieldState.invalid}
-                >
-                  <FieldContent>
-                    <FieldLabel htmlFor={field.name}>Book language</FieldLabel>
-                    <FieldDescription>Language of the book</FieldDescription>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Book title</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="text"
+                      aria-invalid={isInvalid}
+                      required
+                      placeholder="Book title"
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
                     )}
-                  </FieldContent>
-                  <Select
-                    id={field.name}
-                    name={field.name}
-                    value={field.value}
-                    items={languages}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger aria-invalid={fieldState.invalid}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false}>
-                      {languages.map((lang) => (
-                        <SelectItem key={lang.value} value={lang.value}>
-                          {lang.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              )}
+                  </Field>
+                );
+              }}
             />
 
-            <Controller
+            <form.Field
+              name="totalPages"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Total pages</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="number"
+                      aria-invalid={isInvalid}
+                      onBlur={field.handleBlur}
+                      onChange={(e) =>
+                        field.handleChange(e.target.valueAsNumber)
+                      }
+                      placeholder="123"
+                      autoComplete="off"
+                      min={0}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="author"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Book author</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="text"
+                      aria-invalid={isInvalid}
+                      placeholder="Book author"
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="language"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field orientation="responsive" data-invalid={isInvalid}>
+                    <FieldContent>
+                      <FieldLabel htmlFor={field.name}>
+                        Book language
+                      </FieldLabel>
+                      <FieldDescription>Language of the book</FieldDescription>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </FieldContent>
+                    <Select
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      items={languages}
+                      onValueChange={(value) => field.handleChange(value!)}
+                    >
+                      <SelectTrigger aria-invalid={isInvalid}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent alignItemWithTrigger={false}>
+                        {languages.map((lang) => (
+                          <SelectItem key={lang.value} value={lang.value}>
+                            {lang.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
               name="publishDate"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Publish Date</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    type="date"
-                    placeholder="Publish Date"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : value);
-                    }}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Publish date</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="date"
+                      aria-invalid={isInvalid}
+                      placeholder="Publish date"
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
             />
 
-            <Controller
-              name="isbn13"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>ISBN-13</FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="ISBN"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+            <form.Field
+              name="isbn"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>ISBN</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="ISBN"
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
             />
 
-            <Controller
+            <form.Field
               name="description"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                  <Textarea
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Example Book Description"
-                  />
-                  <FieldDescription>
-                    Write here the more detailed book description
-                  </FieldDescription>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                    <Textarea
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Example book description"
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
             />
           </FieldGroup>
         </form>
