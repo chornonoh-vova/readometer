@@ -10,7 +10,7 @@ RUN turbo prune api --docker
 FROM base AS builder
 WORKDIR /app
 COPY --from=prepare /app/out/json/ .
-RUN bun install --production
+RUN bun install
 COPY --from=prepare /app/out/full/ .
 
 FROM base AS runner
