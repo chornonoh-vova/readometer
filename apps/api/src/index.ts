@@ -20,7 +20,7 @@ import readyz from "./routes/readyz.ts";
 
 await migrateToLatest();
 
-const app = new Hono<AppEnv>();
+const app = new Hono<AppEnv>().basePath("/api");
 
 app.use(
   cors({

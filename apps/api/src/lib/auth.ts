@@ -5,8 +5,6 @@ export const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") ?? [
   process.env.BETTER_AUTH_URL!,
 ];
 
-const appDomain = process.env.APP_DOMAIN;
-
 export const auth = betterAuth({
   basePath: "/auth",
 
@@ -20,12 +18,6 @@ export const auth = betterAuth({
 
   advanced: {
     cookiePrefix: "readometer",
-    ...(appDomain && {
-      crossSubDomainCookies: {
-        enabled: true,
-        domain: appDomain,
-      },
-    }),
   },
 });
 

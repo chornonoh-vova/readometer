@@ -13,9 +13,6 @@ COPY --from=prepare /app/out/json/ .
 RUN bun install
 COPY --from=prepare /app/out/full/ .
 
-ARG API_URL
-ENV VITE_API_URL=${API_URL}
-
 RUN bun turbo build
 
 FROM nginx:1.29 AS runner
