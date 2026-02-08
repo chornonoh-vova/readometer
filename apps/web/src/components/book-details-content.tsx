@@ -5,6 +5,7 @@ import { ReadingRunsList } from "./reading-runs-list";
 import type { ReactNode } from "react";
 import { formatDate } from "@/lib/utils";
 import type { ReadingRun } from "@/lib/reading-runs";
+import { BookDescriptionDialog } from "./book-description-dialog";
 
 function BookInfo({ children }: { children: ReactNode }) {
   return (
@@ -21,11 +22,23 @@ export function BookDetailsContent({
 }) {
   return (
     <div className="px-4 flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {book.title} {book.language && langToEmoji[book.language]}
-      </h1>
+      <div className="flex gap-4 justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {book.title} {book.language && langToEmoji[book.language]}
+          </h1>
+          {book.author && (
+            <p className="text-muted-foreground">{book.author}</p>
+          )}
+        </div>
 
-      {book.author && <p className="text-muted-foreground">{book.author}</p>}
+        {book.description && (
+          <BookDescriptionDialog
+            title={book.title}
+            description={book.description}
+          />
+        )}
+      </div>
 
       <div className="flex flex-wrap gap-2">
         <BookInfo>Pages: {book.totalPages}</BookInfo>

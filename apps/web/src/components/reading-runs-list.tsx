@@ -14,6 +14,7 @@ import type { BookDetails } from "@/lib/books";
 import { Suspense } from "react";
 import { ReadingSessionsList } from "./reading-sessions-list";
 import { formatDate } from "@/lib/utils";
+import { ReadingSessionsLoading } from "./reading-sessions-loading";
 
 export function ReadingRunsList({
   book,
@@ -24,14 +25,14 @@ export function ReadingRunsList({
 }) {
   return (
     <>
-      {readingRuns.map((readingRun, index) => (
+      {readingRuns.map((readingRun, idx) => (
         <section
           key={readingRun.id}
           className="flex flex-col gap-2 md:rounded-md border-y md:border md:px-4 py-2"
         >
           <div className="flex gap-1.5 items-center justify-between">
             <h2 className="text-lg font-semibold">
-              Reading {readingRuns.length - index}
+              Reading #{readingRuns.length - idx}
             </h2>
 
             <StartReadingSession book={book} readingRun={readingRun} />
@@ -64,24 +65,24 @@ export function ReadingRunsList({
 
           <Collapsible
             defaultOpen={
-              index === 0 || readingRun.completedPages < book.totalPages
+              idx === 0 || readingRun.completedPages < book.totalPages
             }
           >
             <div className="flex items-center justify-between gap-4 mb-2">
-              <p className="text-sm font-semibold">Sessions</p>
+              <h3 className="text-sm font-semibold">Sessions</h3>
               <CollapsibleTrigger
                 render={
                   <Button variant="ghost" size="icon">
                     <ChevronsUpDownIcon />
                     <span className="sr-only">
-                      Toggle sessions for run {index + 1}
+                      Toggle sessions for run {idx + 1}
                     </span>
                   </Button>
                 }
               />
             </div>
             <CollapsibleContent>
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<ReadingSessionsLoading />}>
                 <ReadingSessionsList
                   runId={readingRun.id}
                   bookId={readingRun.bookId}

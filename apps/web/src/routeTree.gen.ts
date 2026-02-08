@@ -14,7 +14,6 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as AuthAppRouteImport } from './routes/_auth/_app'
 import { Route as AuthAppIndexRouteImport } from './routes/_auth/_app.index'
-import { Route as AuthAppStatsRouteImport } from './routes/_auth/_app.stats'
 import { Route as AuthAppBooksBookIdRouteImport } from './routes/_auth/_app.books.$bookId'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -40,11 +39,6 @@ const AuthAppIndexRoute = AuthAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthAppRoute,
 } as any)
-const AuthAppStatsRoute = AuthAppStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
-  getParentRoute: () => AuthAppRoute,
-} as any)
 const AuthAppBooksBookIdRoute = AuthAppBooksBookIdRouteImport.update({
   id: '/books/$bookId',
   path: '/books/$bookId',
@@ -55,14 +49,12 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthAppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/stats': typeof AuthAppStatsRoute
   '/books/$bookId': typeof AuthAppBooksBookIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AuthAppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/stats': typeof AuthAppStatsRoute
   '/books/$bookId': typeof AuthAppBooksBookIdRoute
 }
 export interface FileRoutesById {
@@ -71,22 +63,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_auth/_app': typeof AuthAppRouteWithChildren
-  '/_auth/_app/stats': typeof AuthAppStatsRoute
   '/_auth/_app/': typeof AuthAppIndexRoute
   '/_auth/_app/books/$bookId': typeof AuthAppBooksBookIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/stats' | '/books/$bookId'
+  fullPaths: '/' | '/login' | '/register' | '/books/$bookId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/stats' | '/books/$bookId'
+  to: '/' | '/login' | '/register' | '/books/$bookId'
   id:
     | '__root__'
     | '/_auth'
     | '/login'
     | '/register'
     | '/_auth/_app'
-    | '/_auth/_app/stats'
     | '/_auth/_app/'
     | '/_auth/_app/books/$bookId'
   fileRoutesById: FileRoutesById
@@ -134,13 +124,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAppIndexRouteImport
       parentRoute: typeof AuthAppRoute
     }
-    '/_auth/_app/stats': {
-      id: '/_auth/_app/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof AuthAppStatsRouteImport
-      parentRoute: typeof AuthAppRoute
-    }
     '/_auth/_app/books/$bookId': {
       id: '/_auth/_app/books/$bookId'
       path: '/books/$bookId'
@@ -152,13 +135,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthAppRouteChildren {
-  AuthAppStatsRoute: typeof AuthAppStatsRoute
   AuthAppIndexRoute: typeof AuthAppIndexRoute
   AuthAppBooksBookIdRoute: typeof AuthAppBooksBookIdRoute
 }
 
 const AuthAppRouteChildren: AuthAppRouteChildren = {
-  AuthAppStatsRoute: AuthAppStatsRoute,
   AuthAppIndexRoute: AuthAppIndexRoute,
   AuthAppBooksBookIdRoute: AuthAppBooksBookIdRoute,
 }

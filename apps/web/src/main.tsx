@@ -7,6 +7,7 @@ import "./index.css";
 
 import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "./components/theme-provider";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,9 @@ const router = createRouter({
   Wrap: ({ children }) => {
     return (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     );
   },

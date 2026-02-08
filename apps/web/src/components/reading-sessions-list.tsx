@@ -1,20 +1,15 @@
 import { useReadingSessionsSuspenseQuery } from "@/lib/reading-sessions";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "./ui/item";
+import { Item, ItemActions, ItemContent, ItemTitle } from "./ui/item";
 import {
   BookOpenIcon,
+  CalendarCheckIcon,
   CalendarIcon,
   ClockIcon,
   MoreHorizontalIcon,
   Trash2Icon,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { formatDate, formatReadingTime } from "@/lib/utils";
+import { formatDateTime, formatReadingTime } from "@/lib/utils";
 import { DeleteReadingSessionAlert } from "./delete-reading-session-alert";
 import { useState } from "react";
 import {
@@ -24,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function ReadingSessionsList({
   runId,
@@ -37,22 +33,48 @@ export function ReadingSessionsList({
 
   return (
     <div className="flex flex-col gap-1">
-      {readingSessions.map((readingSession) => (
-        <Item key={readingSession.id} variant="outline">
+      {readingSessions.map((readingSession, idx) => (
+        <Item key={readingSession.id} className="min-h-24" variant="outline">
           <ItemContent>
-            <ItemTitle>
-              <CalendarIcon className="size-4" />
-              {formatDate(readingSession.startTime)}
-            </ItemTitle>
-            <ItemDescription className="inline-flex gap-1.5 items-center">
-              <BookOpenIcon className="size-3.5" />
-              <span>
-                Pages {readingSession.startPage}-{readingSession.endPage} (
-                {readingSession.readPages} pages)
-              </span>
-              <ClockIcon className="size-3.5" />
-              <span>{formatReadingTime(readingSession.readTime)}</span>
-            </ItemDescription>
+            <ItemTitle>Session #{readingSessions.length - idx}</ItemTitle>
+            <div className="flex flex-wrap flex-col md:flex-row gap-1 md:gap-3 md:items-center">
+              <div className="flex gap-2 items-center">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<CalendarIcon className="size-3.5" />}
+                  />
+                  <TooltipContent>Session start time</TooltipContent>
+                </Tooltip>
+                {formatDateTime(readingSession.startTime)}
+              </div>
+              {readingSession.endTime && (
+                <div className="flex gap-2 items-center">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<CalendarCheckIcon className="size-3.5" />}
+                    />
+                    <TooltipContent>Session end time</TooltipContent>
+                  </Tooltip>
+                  {formatDateTime(readingSession.endTime)}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex gap-2 items-center">
+                <BookOpenIcon className="size-3.5" />
+                <span>
+                  Pages {readingSession.startPage}-{readingSession.endPage} (
+                  {readingSession.readPages} pages)
+                </span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <Tooltip>
+                  <TooltipTrigger render={<ClockIcon className="size-3.5" />} />
+                  <TooltipContent>Session reading time</TooltipContent>
+                </Tooltip>
+                <span>{formatReadingTime(readingSession.readTime)}</span>
+              </div>
+            </div>
           </ItemContent>
           <ItemActions>
             <DropdownMenu modal={false}>

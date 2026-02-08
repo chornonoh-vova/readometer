@@ -129,7 +129,7 @@ export function EditBookDialog({
         setErrorMessage("");
       }}
     >
-      <DialogContent className="overflow-y-scroll max-h-screen">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit your book</DialogTitle>
           <DialogDescription>
@@ -138,6 +138,7 @@ export function EditBookDialog({
         </DialogHeader>
         <form
           id="edit-book-form"
+          className="-mx-4 max-h-[50vh] overflow-auto px-4 pb-1"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
