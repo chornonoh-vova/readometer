@@ -1,6 +1,5 @@
-import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
-import { useActionState, type ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import {
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -21,15 +21,14 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, Link } from "@tanstack/react-router";
 import { AlertCircleIcon } from "lucide-react";
+import * as z from "zod";
+import { useForm } from "@tanstack/react-form";
 
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Loading..." : "Login"}
-    </Button>
-  );
-}
+const loginFormSchema = z.object({
+  email: z.email(),
+  password: z.string().trim().nonempty().min(8).max(128),
+  rememberMe: z.boolean(),
+});
 
 export type LoginFormProps = {
   redirect: string;
@@ -37,35 +36,40 @@ export type LoginFormProps = {
 
 export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const login = async (_prevState: string | null, formData: FormData) => {
-    const email = formData.get("email")!.toString();
-    const password = formData.get("password")!.toString();
-    const rememberMe = formData.get("remember-me") === "on";
-
-    let error: string | null = null;
-
-    await authClient.signIn.email(
-      {
-        email,
-        password,
-        rememberMe,
-      },
-      {
-        onSuccess: () => router.navigate({ to: redirect }),
-        onError: (ctx) => {
-          error = ctx.error.message;
-        },
-      },
-    );
-
-    return error;
+  const defaultValues: z.input<typeof loginFormSchema> = {
+    email: "",
+    password: "",
+    rememberMe: false,
   };
 
-  const [message, loginAction] = useActionState(login, null);
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onSubmit: loginFormSchema,
+    },
+    onSubmit: ({ value }) => {
+      const data = loginFormSchema.parse(value);
+
+      setErrorMessage("");
+
+      authClient.signIn.email(data, {
+        onSuccess: () => router.navigate({ to: redirect }),
+        onError: (ctx) => {
+          setErrorMessage(ctx.error.message);
+        },
+      });
+    },
+  });
 
   return (
-    <form action={loginAction}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
       <Card className={cn("flex flex-col gap-6", className)} {...props}>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Login to your account</CardTitle>
@@ -75,53 +79,93 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
         </CardHeader>
         <CardContent>
           <FieldGroup>
-            {message && (
+            {errorMessage && (
               <Alert variant="destructive">
                 <AlertCircleIcon />
-                <AlertTitle>{message}</AlertTitle>
+                <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             )}
 
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="me@example.com"
-                autoComplete="email"
-                required
-              />
-            </Field>
+            <form.Field
+              name="email"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="email"
+                      aria-invalid={isInvalid}
+                      required
+                      placeholder="me@example.com"
+                      autoComplete="email"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="password"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="password"
+                      aria-invalid={isInvalid}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="rememberMe"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field orientation="horizontal" data-invalid={isInvalid}>
+                    <Checkbox
+                      id={field.name}
+                      name={field.name}
+                      checked={field.state.value}
+                      onCheckedChange={(checked) => field.handleChange(checked)}
+                    />
+                    <FieldLabel htmlFor={field.name} className="font-normal">
+                      Remember me
+                    </FieldLabel>
+                  </Field>
+                );
+              }}
+            />
 
             <Field>
-              <div className="flex justify-between items-center">
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <a
-                  href="#"
-                  className="inline-block text-sm underline-offset-4 hover:underline"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                autoComplete="current-password"
-                required
-              />
-            </Field>
-
-            <Field orientation="horizontal">
-              <Checkbox id="remember-me" name="remember-me" />
-              <FieldLabel htmlFor="remember-me" className="font-normal">
-                Remember me
-              </FieldLabel>
-            </Field>
-
-            <Field>
-              <Submit />
+              <Button type="submit">Sign in</Button>
 
               <FieldDescription className="text-center">
                 Don&apos;t have an account? <Link to="/register">Register</Link>

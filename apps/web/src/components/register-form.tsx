@@ -1,7 +1,6 @@
 import { authClient } from "@/lib/auth-client";
 import { Link, useRouter } from "@tanstack/react-router";
-import { useActionState, type ComponentProps } from "react";
-import { useFormStatus } from "react-dom";
+import { useState, type ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,52 +9,62 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Field, FieldLabel, FieldGroup, FieldDescription } from "./ui/field";
+import {
+  Field,
+  FieldLabel,
+  FieldGroup,
+  FieldDescription,
+  FieldError,
+} from "./ui/field";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
+import * as z from "zod";
+import { useForm } from "@tanstack/react-form";
 
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Loading..." : "Register"}
-    </Button>
-  );
-}
+const registerFormSchema = z.object({
+  name: z.string().nonempty(),
+  email: z.email(),
+  password: z.string().trim().nonempty().min(8).max(128),
+});
 
 export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const register = async (_prevState: string | null, formData: FormData) => {
-    const name = formData.get("name")!.toString();
-    const email = formData.get("email")!.toString();
-    const password = formData.get("password")!.toString();
-
-    let error: string | null = null;
-
-    await authClient.signUp.email(
-      {
-        name,
-        email,
-        password,
-      },
-      {
-        onSuccess: () => router.navigate({ to: "/" }),
-        onError: (ctx) => {
-          error = ctx.error.message;
-        },
-      },
-    );
-
-    return error;
+  const defaultValues: z.input<typeof registerFormSchema> = {
+    name: "",
+    email: "",
+    password: "",
   };
 
-  const [message, registerAction] = useActionState(register, null);
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onSubmit: registerFormSchema,
+    },
+    onSubmit: ({ value }) => {
+      const data = registerFormSchema.parse(value);
+
+      setErrorMessage("");
+
+      authClient.signUp.email(data, {
+        onSuccess: () => router.navigate({ to: "/" }),
+        onError: (ctx) => {
+          setErrorMessage(ctx.error.message);
+        },
+      });
+    },
+  });
 
   return (
-    <form action={registerAction}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
       <Card className={cn("flex flex-col gap-6", className)} {...props}>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Register a new account</CardTitle>
@@ -65,50 +74,100 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
         </CardHeader>
         <CardContent>
           <FieldGroup>
-            {message && (
+            {errorMessage && (
               <Alert variant="destructive">
                 <AlertCircleIcon />
-                <AlertTitle>{message}</AlertTitle>
+                <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             )}
 
-            <Field>
-              <FieldLabel htmlFor="name">Name</FieldLabel>
-              <Input
-                id="name"
-                type="text"
-                name="name"
-                placeholder="My name"
-                autoComplete="name"
-                required
-              />
-            </Field>
+            <form.Field
+              name="name"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="text"
+                      aria-invalid={isInvalid}
+                      required
+                      placeholder="My name"
+                      autoComplete="name"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="email"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="email"
+                      aria-invalid={isInvalid}
+                      required
+                      placeholder="me@example.com"
+                      autoComplete="email"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Field
+              name="password"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="password"
+                      aria-invalid={isInvalid}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      required
+                      autoComplete="new-password"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
 
             <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="me@example.com"
-                autoComplete="email"
-                required
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                autoComplete="new-password"
-                required
-              />
-            </Field>
-
-            <Field>
-              <Submit />
+              <Button type="submit">Sign up</Button>
 
               <FieldDescription className="text-center">
                 Already have an account? <Link to="/login">Login</Link>

@@ -1,4 +1,4 @@
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -11,46 +11,75 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { AlertCircleIcon, FlagIcon } from "lucide-react";
-import { Field, FieldGroup, FieldLabel } from "./ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { useReadingSessionStore } from "@/store/reading-session";
 import { useAddReadingSessionMutation } from "@/lib/reading-sessions";
 import { v7 as uuidv7 } from "uuid";
 import { Alert, AlertTitle } from "./ui/alert";
+import * as z from "zod";
+import { useForm } from "@tanstack/react-form";
+
+const finishReadingSessionSchema = z.object({
+  endPage: z.number().positive(),
+});
 
 export function FinishReadingSession() {
   const [open, setOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const session = useReadingSessionStore((state) => state.session);
   const pause = useReadingSessionStore((state) => state.pause);
   const finish = useReadingSessionStore((state) => state.finish);
   const addReadingSession = useAddReadingSessionMutation(session!.book.id);
 
-  const finishReading = async (
-    _prevState: string | null,
-    formData: FormData,
-  ) => {
-    if (!session) return null;
-
-    const endPage = parseInt(formData.get("end-page")!.toString());
-
-    await addReadingSession.mutateAsync({
-      id: uuidv7(),
-      runId: session.runId,
-      startPage: session.startPage,
-      endPage,
-      startTime: session.startedAt,
-      endTime: session.lastPausedAt!,
-      readTime: Math.floor(session.readTime),
-    });
-
-    setOpen(false);
-
-    finish();
-
-    return null;
+  const defaultValues: z.input<typeof finishReadingSessionSchema> = {
+    endPage: session?.startPage ?? 0,
   };
 
-  const [message, finishReadingAction] = useActionState(finishReading, null);
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onSubmit: finishReadingSessionSchema,
+    },
+    onSubmit: ({ value }) => {
+      if (!session) {
+        return;
+      }
+
+      setErrorMessage("");
+
+      addReadingSession.mutate(
+        {
+          id: uuidv7(),
+          runId: session.runId,
+          startPage: session.startPage,
+          endPage: value.endPage,
+          startTime: session.startedAt,
+          endTime: session.lastPausedAt!,
+          readTime: Math.floor(session.readTime),
+        },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            finish();
+          },
+          onError: (error) => {
+            if (
+              error.cause &&
+              typeof error.cause === "object" &&
+              "message" in error.cause &&
+              typeof error.cause.message === "string"
+            ) {
+              setErrorMessage(error.cause.message);
+            } else {
+              setErrorMessage(error.message);
+              console.error(error);
+            }
+          },
+        },
+      );
+    },
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -66,19 +95,50 @@ export function FinishReadingSession() {
           <DialogTitle>Finish reading session</DialogTitle>
           <DialogDescription>Complete a reading session</DialogDescription>
         </DialogHeader>
-        <form id="finish-reading-form" action={finishReadingAction}>
+        <form
+          id="finish-reading-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
           <FieldGroup>
-            {message && (
+            {errorMessage && (
               <Alert variant="destructive">
                 <AlertCircleIcon />
-                <AlertTitle>{message}</AlertTitle>
+                <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             )}
 
-            <Field>
-              <FieldLabel htmlFor="end-page">End page</FieldLabel>
-              <Input id="end-page" name="end-page" type="number" required />
-            </Field>
+            <form.Field
+              name="endPage"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>End page</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) =>
+                        field.handleChange(e.target.valueAsNumber)
+                      }
+                      type="number"
+                      aria-invalid={isInvalid}
+                      required
+                      autoComplete="off"
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
           </FieldGroup>
         </form>
         <DialogFooter>

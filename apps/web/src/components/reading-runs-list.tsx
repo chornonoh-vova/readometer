@@ -82,7 +82,10 @@ export function ReadingRunsList({
             </div>
             <CollapsibleContent>
               <Suspense fallback={<div>Loading...</div>}>
-                <ReadingSessionsList runId={readingRun.id} />
+                <ReadingSessionsList
+                  runId={readingRun.id}
+                  bookId={readingRun.bookId}
+                />
               </Suspense>
             </CollapsibleContent>
           </Collapsible>

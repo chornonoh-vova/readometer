@@ -77,3 +77,38 @@ export function useAddReadingSessionMutation(bookId: string) {
     },
   });
 }
+
+async function deleteReadingSession(sessionId: string): Promise<void> {
+  return fetchApi(`/reading-sessions/${sessionId}`, {
+    method: "DELEte",
+    noContent: true,
+  });
+}
+
+export function useDeleteReadingSessionMutation() {
+  return useMutation({
+    mutationFn: ({
+      sessionId,
+    }: {
+      sessionId: string;
+      runId: string;
+      bookId: string;
+    }) => deleteReadingSession(sessionId),
+
+    onSuccess: (_data, variables, _onMutateResult, context) => {
+      const { runId, bookId } = variables;
+      context.client.invalidateQueries({
+        queryKey: books.list,
+      });
+      context.client.invalidateQueries({
+        queryKey: books.details(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingRuns.byBook(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingSessions.byRun(runId),
+      });
+    },
+  });
+}

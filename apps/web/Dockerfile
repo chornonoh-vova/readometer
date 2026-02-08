@@ -18,7 +18,6 @@ RUN bun turbo build --filter=web
 FROM nginx:1.29 AS runner
 COPY --from=builder /app/apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
-USER nginx
 EXPOSE 80/tcp
 CMD ["nginx", "-g", "daemon off;"]
 

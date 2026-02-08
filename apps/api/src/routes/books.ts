@@ -167,7 +167,7 @@ books.delete("/:bookId", zValidator("param", bookSchema), async (c) => {
     throw new HTTPException(404);
   }
 
-  return c.status(204);
+  return c.body(null, 204);
 });
 
 export default books;

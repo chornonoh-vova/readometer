@@ -294,6 +294,5 @@ export {
   ComboboxChipsInput,
   ComboboxTrigger,
   ComboboxValue,
-   
   useComboboxAnchor,
 };

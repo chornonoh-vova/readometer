@@ -26,14 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { useAddBookMutation } from "@/lib/books";
+import { useEditBookMutation, type Book } from "@/lib/books";
 import { useForm } from "@tanstack/react-form";
-import { v7 as uuidv7 } from "uuid";
 import { langToName, langToEmoji } from "@/lib/lang";
 import * as z from "zod";
 import { isbnSchema } from "@/lib/isbn";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import { format } from "date-fns";
 
 const languages = [
   { label: "Select a language", value: null },
@@ -49,7 +49,7 @@ const optionalInput = <T extends z.core.SomeType>(schema: T) =>
     .transform((val) => (val === "" ? undefined : val))
     .optional();
 
-const addBookFormSchema = z.object({
+const editBookFormSchema = z.object({
   title: z.string().trim().nonempty(),
   totalPages: z.number().positive(),
   author: optionalInput(z.string().trim()),
@@ -59,40 +59,44 @@ const addBookFormSchema = z.object({
   description: optionalInput(z.string().trim()),
 });
 
-export function AddBookDialog({
+export function EditBookDialog({
+  book,
   open,
   onOpenChange,
 }: {
+  book: Book;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const mutation = useAddBookMutation();
+  const mutation = useEditBookMutation();
   const [errorMessage, setErrorMessage] = useState("");
 
-  const defaultValues: z.input<typeof addBookFormSchema> = {
-    title: "",
-    totalPages: 0,
-    author: "",
-    language: "",
-    publishDate: "",
-    isbn: "",
-    description: "",
+  const defaultValues: z.input<typeof editBookFormSchema> = {
+    title: book.title,
+    totalPages: book.totalPages,
+    author: book.author ?? "",
+    language: book.language ?? "",
+    publishDate: book.publishDate
+      ? format(new Date(book.publishDate), "yyyy-MM-dd")
+      : "",
+    isbn: book.isbn13 ?? "",
+    description: book.description ?? "",
   };
 
   const form = useForm({
     defaultValues,
     validators: {
-      onSubmit: addBookFormSchema,
+      onSubmit: editBookFormSchema,
     },
     onSubmit: ({ value }) => {
-      const data = addBookFormSchema.parse(value);
+      const data = editBookFormSchema.parse(value);
 
       setErrorMessage("");
 
       mutation.mutate(
         {
-          id: uuidv7(),
-          ...data,
+          bookId: book.id,
+          updatedBook: data,
         },
         {
           onSuccess: () => {
@@ -127,13 +131,13 @@ export function AddBookDialog({
     >
       <DialogContent className="overflow-y-scroll max-h-screen">
         <DialogHeader>
-          <DialogTitle>Add a new book</DialogTitle>
+          <DialogTitle>Edit your book</DialogTitle>
           <DialogDescription>
-            Please enter the information to add a new book to your library
+            Please enter updated information to change book in your library
           </DialogDescription>
         </DialogHeader>
         <form
-          id="add-book-form"
+          id="edit-book-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -372,9 +376,9 @@ export function AddBookDialog({
           <Button
             disabled={mutation.isPending}
             type="submit"
-            form="add-book-form"
+            form="edit-book-form"
           >
-            Create
+            Update
           </Button>
         </DialogFooter>
       </DialogContent>

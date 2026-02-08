@@ -24,6 +24,7 @@ readingSessions.get(
       .selectAll()
       .where("userId", "=", userId)
       .where("runId", "=", runId)
+      .orderBy("startTime", "desc")
       .execute();
 
     return c.json(result);
@@ -152,7 +153,7 @@ readingSessions.delete(
       throw new HTTPException(404);
     }
 
-    return c.status(204);
+    return c.body(null, 204);
   },
 );
 

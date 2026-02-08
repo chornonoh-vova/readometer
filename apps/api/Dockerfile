@@ -1,4 +1,5 @@
 FROM oven/bun:1 AS base
+RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 FROM base AS prepare
@@ -18,5 +19,7 @@ WORKDIR /app
 COPY --from=builder /app .
 USER bun
 EXPOSE 3000/tcp
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+  CMD curl -sf http://localhost:3000/api/healthz || exit 1
 WORKDIR /app/apps/api
 ENTRYPOINT ["bun", "run", "src/index.ts"]
