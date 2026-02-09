@@ -37,7 +37,7 @@ export function ReadingSessionsList({
         <Item key={readingSession.id} className="min-h-24" variant="outline">
           <ItemContent>
             <ItemTitle>Session #{readingSessions.length - idx}</ItemTitle>
-            <div className="flex flex-wrap flex-col md:flex-row gap-1 md:gap-3 md:items-center">
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
               <div className="flex gap-2 items-center">
                 <Tooltip>
                   <TooltipTrigger
@@ -59,7 +59,7 @@ export function ReadingSessionsList({
                 </div>
               )}
             </div>
-            <div className="flex flex-wrap gap-3 items-center">
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
               <div className="flex gap-2 items-center">
                 <BookOpenIcon className="size-3.5" />
                 <span>
