@@ -23,10 +23,11 @@ services:
       - proxy
       - database
     environment:
-      - BETTER_AUTH_SECRET=cc4jaIIoZviyZ3XmBXcx53FJalipGVS6
+      - NODE_ENV=development
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - BETTER_AUTH_URL=http://readometer.local
       - TRUSTED_ORIGINS=http://readometer.local
-      - DATABASE_URL=postgres://app:password@postgres:5432/readometer
+      - DATABASE_URL=${DATABASE_URL}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`readometer.local`) && PathPrefix(`/api`)"

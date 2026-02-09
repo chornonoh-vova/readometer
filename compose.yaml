@@ -1,0 +1,13 @@
+services:
+  api:
+    image: ghcr.io/chornonoh-vova/readometer-api:latest
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_URL=https://readometer.app
+      - TRUSTED_ORIGINS=https://readometer.app
+      - DATABASE_URL=${DATABASE_URL}
+  web:
+    image: ghcr.io/chornonoh-vova/readometer-web:latest
+    restart: unless-stopped
