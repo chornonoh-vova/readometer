@@ -28,6 +28,7 @@ services:
       - BETTER_AUTH_URL=http://readometer.local
       - TRUSTED_ORIGINS=http://readometer.local
       - DATABASE_URL=${DATABASE_URL}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`readometer.local`) && PathPrefix(`/api`)"
@@ -37,6 +38,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
+      args:
+        - TURNSTILE_SITE_KEY
     networks:
       - proxy
     labels:

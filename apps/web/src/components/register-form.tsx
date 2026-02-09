@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const registerFormSchema = z.object({
   name: z.string().nonempty(),
@@ -31,6 +32,7 @@ const registerFormSchema = z.object({
 
 export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
   const router = useRouter();
+  const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const defaultValues: z.input<typeof registerFormSchema> = {
@@ -49,10 +51,16 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
 
       setErrorMessage("");
 
-      authClient.signUp.email(data, {
-        onSuccess: () => router.navigate({ to: "/" }),
-        onError: (ctx) => {
-          setErrorMessage(ctx.error.message);
+      authClient.signUp.email({
+        ...data,
+        fetchOptions: {
+          headers: {
+            "x-captcha-response": token,
+          },
+          onSuccess: () => router.navigate({ to: "/" }),
+          onError: (ctx) => {
+            setErrorMessage(ctx.error.message);
+          },
         },
       });
     },
@@ -164,6 +172,11 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
                   </Field>
                 );
               }}
+            />
+
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={setToken}
             />
 
             <Field>

@@ -23,6 +23,7 @@ import { useRouter, Link } from "@tanstack/react-router";
 import { AlertCircleIcon } from "lucide-react";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const loginFormSchema = z.object({
   email: z.email(),
@@ -36,6 +37,7 @@ export type LoginFormProps = {
 
 export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   const router = useRouter();
+  const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const defaultValues: z.input<typeof loginFormSchema> = {
@@ -54,10 +56,16 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
 
       setErrorMessage("");
 
-      authClient.signIn.email(data, {
-        onSuccess: () => router.navigate({ to: redirect }),
-        onError: (ctx) => {
-          setErrorMessage(ctx.error.message);
+      authClient.signIn.email({
+        ...data,
+        fetchOptions: {
+          headers: {
+            "x-captcha-response": token,
+          },
+          onSuccess: () => router.navigate({ to: redirect }),
+          onError: (ctx) => {
+            setErrorMessage(ctx.error.message);
+          },
         },
       });
     },
@@ -162,6 +170,11 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
                   </Field>
                 );
               }}
+            />
+
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={setToken}
             />
 
             <Field>

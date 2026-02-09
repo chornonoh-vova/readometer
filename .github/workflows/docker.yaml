@@ -43,6 +43,8 @@ jobs:
           context: ${{ matrix.context }}
           push: true
           file: ${{ matrix.file }}
+          build-args: |
+            TURNSTILE_SITE_KEY=${{ secrets.TURNSTILE_SITE_KEY }}
           tags: |
             ghcr.io/${{ matrix.image }}:${{ github.sha }}
             ghcr.io/${{ matrix.image }}:latest
