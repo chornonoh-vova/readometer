@@ -22,4 +22,4 @@ EXPOSE 3000/tcp
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
   CMD curl -sf http://localhost:3000/api/healthz || exit 1
 WORKDIR /app/apps/api
-ENTRYPOINT ["bun", "run", "src/index.ts"]
+CMD ["bun", "run", "src/index.ts"]
