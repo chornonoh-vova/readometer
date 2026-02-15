@@ -128,4 +128,13 @@
   html {
     @apply font-sans;
   }
+
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }

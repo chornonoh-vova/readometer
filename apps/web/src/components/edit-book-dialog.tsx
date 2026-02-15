@@ -138,7 +138,7 @@ export function EditBookDialog({
         </DialogHeader>
         <form
           id="edit-book-form"
-          className="-mx-4 max-h-[50vh] overflow-auto px-4 pb-1"
+          className="-mx-4 max-h-[65vh] overflow-y-auto px-4 pb-1"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
