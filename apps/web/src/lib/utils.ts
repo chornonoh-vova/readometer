@@ -14,6 +14,10 @@ export function formatDateTime(date: string) {
   return format(new Date(date), "yyyy-MM-dd HH:mm");
 }
 
+export function formatTime(date: string) {
+  return format(new Date(date), "HH:mm");
+}
+
 export function formatReadingTime(readingTime: number) {
   const hours = Math.floor(readingTime / (60 * 60));
   const minutes = Math.floor(readingTime / 60)

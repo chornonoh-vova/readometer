@@ -9,7 +9,7 @@ import { BookDescriptionDialog } from "./book-description-dialog";
 
 function BookInfo({ children }: { children: ReactNode }) {
   return (
-    <p className="bg-muted rounded px-2 py-1 text-sm max-w-fit">{children}</p>
+    <li className="bg-muted rounded px-2 py-1 text-sm max-w-fit">{children}</li>
   );
 }
 
@@ -40,7 +40,7 @@ export function BookDetailsContent({
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <ul className="flex flex-wrap gap-2">
         <BookInfo>Pages: {book.totalPages}</BookInfo>
         {book.language && (
           <BookInfo>Language: {langToName[book.language]}</BookInfo>
@@ -49,7 +49,7 @@ export function BookDetailsContent({
           <BookInfo>Published: {formatDate(book.publishDate)}</BookInfo>
         )}
         {book.isbn13 && <BookInfo>ISBN-13: {book.isbn13}</BookInfo>}
-      </div>
+      </ul>
 
       {readingRuns.length === 0 && <ReadingRunsEmpty book={book} />}
 

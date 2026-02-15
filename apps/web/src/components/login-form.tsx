@@ -24,6 +24,7 @@ import { AlertCircleIcon } from "lucide-react";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { Spinner } from "./ui/spinner";
 
 const loginFormSchema = z.object({
   email: z.email(),
@@ -39,6 +40,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   const router = useRouter();
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const defaultValues: z.input<typeof loginFormSchema> = {
     email: "",
@@ -55,6 +57,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
       const data = loginFormSchema.parse(value);
 
       setErrorMessage("");
+      setLoading(true);
 
       authClient.signIn.email({
         ...data,
@@ -65,6 +68,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
           onSuccess: () => router.navigate({ to: redirect }),
           onError: (ctx) => {
             setErrorMessage(ctx.error.message);
+            setLoading(false);
           },
         },
       });
@@ -178,7 +182,16 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
             />
 
             <Field>
-              <Button type="submit">Sign in</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner />
+                    Loading...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
 
               <FieldDescription className="text-center">
                 Don&apos;t have an account? <Link to="/register">Register</Link>

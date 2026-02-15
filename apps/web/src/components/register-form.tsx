@@ -23,6 +23,7 @@ import { Input } from "./ui/input";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { Spinner } from "./ui/spinner";
 
 const registerFormSchema = z.object({
   name: z.string().nonempty(),
@@ -34,6 +35,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
   const router = useRouter();
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const defaultValues: z.input<typeof registerFormSchema> = {
     name: "",
@@ -49,6 +51,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
     onSubmit: ({ value }) => {
       const data = registerFormSchema.parse(value);
 
+      setLoading(true);
       setErrorMessage("");
 
       authClient.signUp.email({
@@ -60,6 +63,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
           onSuccess: () => router.navigate({ to: "/" }),
           onError: (ctx) => {
             setErrorMessage(ctx.error.message);
+            setLoading(false);
           },
         },
       });
@@ -180,7 +184,16 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
             />
 
             <Field>
-              <Button type="submit">Sign up</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner />
+                    Loading...
+                  </>
+                ) : (
+                  "Sign up"
+                )}
+              </Button>
 
               <FieldDescription className="text-center">
                 Already have an account? <Link to="/login">Login</Link>

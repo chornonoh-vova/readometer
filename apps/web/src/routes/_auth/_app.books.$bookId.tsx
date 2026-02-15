@@ -8,10 +8,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   bookDetailsQueryOptions,
   useBookDetailsSuspenseQuery,
-  type BookDetails,
 } from "@/lib/books";
 import {
   readingRunsQueryOptions,
@@ -21,13 +21,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/_app/books/$bookId")({
   component: Book,
+  pendingComponent: BookLoading,
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(bookDetailsQueryOptions(params.bookId));
     context.queryClient.ensureQueryData(readingRunsQueryOptions(params.bookId));
   },
 });
 
-function BookDetailsHeader({ book }: { book: BookDetails }) {
+function BookDetailsHeader({ title }: { title: string }) {
   return (
     <PageHeader>
       <PageHeaderName>
@@ -38,12 +39,25 @@ function BookDetailsHeader({ book }: { book: BookDetails }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{book.title}</BreadcrumbPage>
+              <BreadcrumbPage>{title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </PageHeaderName>
     </PageHeader>
+  );
+}
+
+function BookLoading() {
+  return (
+    <>
+      <BookDetailsHeader title="Loading..." />
+      <div className="px-4 flex flex-col gap-2">
+        <Skeleton className="h-14 w-full" />
+        <Skeleton className="h-7 w-3/4" />
+        <Skeleton className="h-64 w-full rounded-none md:rounded-md border-y md:border" />
+      </div>
+    </>
   );
 }
 
@@ -53,7 +67,7 @@ function Book() {
   const { data: readingRuns } = useReadingRunsSuspenseQuery(bookId);
   return (
     <>
-      <BookDetailsHeader book={book} />
+      <BookDetailsHeader title={book.title} />
       <BookDetailsContent book={book} readingRuns={readingRuns} />
     </>
   );

@@ -26,7 +26,7 @@ export function BookItem({ book }: { book: Book }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   return (
-    <Item variant="outline">
+    <Item variant="outline" render={<li />}>
       <ItemContent className="gap-2 h-full">
         <Link
           className="grow group"

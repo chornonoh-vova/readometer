@@ -8,10 +8,10 @@ export function BooksList({ books }: { books: Book[] }) {
   }
 
   return (
-    <div className="p-2 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+    <ul className="p-2 w-full grid grid-cols-1 gap-4">
       {books.map((book) => (
         <BookItem key={book.id} book={book} />
       ))}
-    </div>
+    </ul>
   );
 }
