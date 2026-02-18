@@ -38,8 +38,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
-      args:
-        - TURNSTILE_SITE_KEY
+      secrets:
+        - site-key
     networks:
       - proxy
     labels:
@@ -73,3 +73,7 @@ networks:
     name: proxy
   database:
     name: database
+
+secrets:
+  site-key:
+    environment: TURNSTILE_SITE_KEY

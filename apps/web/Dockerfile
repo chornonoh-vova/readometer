@@ -13,9 +13,8 @@ COPY --from=prepare /app/out/json/ .
 RUN bun install
 COPY --from=prepare /app/out/full/ .
 
-ARG TURNSTILE_SITE_KEY
-ENV VITE_TURNSTILE_SITE_KEY=$TURNSTILE_SITE_KEY
-RUN bun turbo build --filter=web
+RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
+  bun turbo build --filter=web
 
 FROM nginx:1.29 AS runner
 COPY --from=builder /app/apps/web/nginx.conf /etc/nginx/conf.d/default.conf
