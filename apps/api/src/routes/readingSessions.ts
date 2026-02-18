@@ -54,6 +54,7 @@ readingSessions.post(
           .updateTable("readingRun")
           .set({
             completedPages: request.endPage,
+            updatedAt: sql`CURRENT_TIMESTAMP`,
           })
           .where("id", "=", request.runId)
           .returning("id")
