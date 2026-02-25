@@ -1,14 +1,7 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-
 import { Pool } from "pg";
-import {
-  FileMigrationProvider,
-  Kysely,
-  Migrator,
-  PostgresDialect,
-} from "kysely";
+import { Kysely, Migrator, PostgresDialect } from "kysely";
 import type { DB } from "./db.d.ts";
+import { migrations } from "../migrations/index.ts";
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -23,11 +16,11 @@ export const db = new Kysely<DB>({
 export async function migrateToLatest() {
   const migrator = new Migrator({
     db,
-    provider: new FileMigrationProvider({
-      fs: { readdir },
-      path: { join },
-      migrationFolder: join(process.cwd(), "migrations"),
-    }),
+    provider: {
+      getMigrations: () => {
+        return Promise.resolve(migrations);
+      },
+    },
   });
 
   const { error, results } = await migrator.migrateToLatest();
@@ -45,4 +38,6 @@ export async function migrateToLatest() {
     console.error(error);
     process.exit(1);
   }
+
+  console.log("all migrations were completed");
 }

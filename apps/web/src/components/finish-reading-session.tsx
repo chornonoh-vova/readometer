@@ -18,7 +18,7 @@ import { useAddReadingSessionMutation } from "@/lib/reading-sessions";
 import { v7 as uuidv7 } from "uuid";
 import { Alert, AlertTitle } from "./ui/alert";
 import * as z from "zod";
-import { useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 
 const finishReadingSessionSchema = z.object({
   endPage: z.number().positive(),
@@ -32,14 +32,31 @@ export function FinishReadingSession() {
   const finish = useReadingSessionStore((state) => state.finish);
   const addReadingSession = useAddReadingSessionMutation(session!.book.id);
 
+  const startPage = session?.startPage ?? 0;
+  const totalPages = session?.book.totalPages;
+
   const defaultValues: z.input<typeof finishReadingSessionSchema> = {
-    endPage: session?.startPage ?? 0,
+    endPage: startPage,
   };
 
   const form = useForm({
     defaultValues,
+    validationLogic: revalidateLogic(),
     validators: {
       onSubmit: finishReadingSessionSchema,
+      onDynamic: ({ value }) => {
+        if (!totalPages) {
+          return undefined;
+        }
+
+        if (value.endPage < startPage) {
+          return { endPage: "End page cannot be less than " + startPage };
+        }
+
+        if (value.endPage > totalPages) {
+          return { endPage: "End page cannot be greater than " + totalPages };
+        }
+      },
     },
     onSubmit: ({ value }) => {
       if (!session) {
@@ -131,6 +148,8 @@ export function FinishReadingSession() {
                       aria-invalid={isInvalid}
                       required
                       autoComplete="off"
+                      min={startPage}
+                      max={totalPages}
                     />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

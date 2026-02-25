@@ -1,7 +1,16 @@
 services:
+  migration:
+    image: ghcr.io/chornonoh-vova/readometer-api:latest
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    command: /app/api migrate
   api:
     image: ghcr.io/chornonoh-vova/readometer-api:latest
     restart: unless-stopped
+    depends_on:
+      migration:
+        condition: service_completed_successfully
     environment:
       - NODE_ENV=production
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}

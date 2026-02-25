@@ -24,7 +24,7 @@ import { v7 as uuidv7 } from "uuid";
 import { useReadingSessionStore } from "@/store/reading-session";
 import { Alert, AlertTitle } from "./ui/alert";
 import * as z from "zod";
-import { useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 
 const startReadingSessionSchema = z.object({
   startPage: z.number().positive(),
@@ -43,14 +43,33 @@ export function StartReadingSession({
   const start = useReadingSessionStore((state) => state.start);
   const addReadingRun = useAddReadingRunMutation();
 
+  const startPage = readingRun?.completedPages ?? 0;
+  const totalPages = book.totalPages;
+
   const defaultValues: z.input<typeof startReadingSessionSchema> = {
-    startPage: readingRun?.completedPages ?? 0,
+    startPage,
   };
 
   const form = useForm({
     defaultValues,
+    validationLogic: revalidateLogic(),
     validators: {
       onSubmit: startReadingSessionSchema,
+      onDynamic: ({ value }) => {
+        if (!totalPages) {
+          return undefined;
+        }
+
+        if (value.startPage < startPage) {
+          return { startPage: "Start page cannot be less than " + startPage };
+        }
+
+        if (value.startPage > totalPages) {
+          return {
+            startPage: "Start page cannot be greater than " + totalPages,
+          };
+        }
+      },
     },
     onSubmit: async ({ value }) => {
       const startedAt = new Date().toISOString();
@@ -161,6 +180,8 @@ export function StartReadingSession({
                       aria-invalid={isInvalid}
                       required
                       autoComplete="off"
+                      min={startPage}
+                      max={totalPages}
                     />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

@@ -13,13 +13,14 @@ WORKDIR /app
 COPY --from=prepare /app/out/json/ .
 RUN bun install
 COPY --from=prepare /app/out/full/ .
+WORKDIR /app/apps/api
+RUN bun build src/index.ts --compile --outfile api
 
 FROM base AS runner
 WORKDIR /app
-COPY --from=builder /app .
+COPY --from=builder /app/apps/api/api .
 USER bun
 EXPOSE 3000/tcp
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
   CMD curl -sf http://localhost:3000/api/healthz || exit 1
-WORKDIR /app/apps/api
-CMD ["bun", "run", "src/index.ts"]
+CMD ["/app/api"]

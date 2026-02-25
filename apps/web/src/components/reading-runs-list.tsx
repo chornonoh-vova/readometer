@@ -86,6 +86,7 @@ export function ReadingRunsList({
                 <ReadingSessionsList
                   runId={readingRun.id}
                   bookId={readingRun.bookId}
+                  totalPages={book.totalPages}
                 />
               </Suspense>
             </CollapsibleContent>

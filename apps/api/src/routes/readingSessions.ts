@@ -48,6 +48,21 @@ readingSessions.post(
     const userId = c.get("user")!.id;
     const request = c.req.valid("json");
 
+    const { totalPages } = (await db
+      .selectFrom("book")
+      .select("totalPages")
+      .innerJoin("readingRun", "book.id", "readingRun.bookId")
+      .where("readingRun.id", "=", request.runId)
+      .executeTakeFirst()) ?? { totalPages: null };
+
+    if (totalPages === null) {
+      throw new HTTPException(404);
+    }
+
+    if (request.endPage > totalPages) {
+      throw new HTTPException(400);
+    }
+
     try {
       const result = db.transaction().execute(async (trx) => {
         await trx
@@ -55,6 +70,10 @@ readingSessions.post(
           .set({
             completedPages: request.endPage,
             updatedAt: sql`CURRENT_TIMESTAMP`,
+            finishedAt:
+              request.endPage === totalPages
+                ? sql`CURRENT_TIMESTAMP`
+                : undefined,
           })
           .where("id", "=", request.runId)
           .returning("id")
@@ -96,6 +115,7 @@ const updateReadingSessionSchema = z.object({
   startTime: z.iso.datetime().optional(),
   endTime: z.iso.datetime().optional(),
   readTime: z.number().positive().optional(),
+  updateRun: z.boolean(),
 });
 
 readingSessions.put(
@@ -108,31 +128,77 @@ readingSessions.put(
 
     const request = c.req.valid("json");
 
-    const updateReadingSessionQuery = db
-      .updateTable("readingSession")
-      .set({
-        startPage: request.startPage,
-        endPage: request.endPage,
-        readPages:
-          request.startPage && request.endPage
-            ? request.endPage - request.startPage
-            : undefined,
-        startTime: request.startTime ? new Date(request.startTime) : undefined,
-        endTime: request.endTime ? new Date(request.endTime) : undefined,
-        updatedAt: sql`CURRENT_TIMESTAMP`,
-      })
-      .where("id", "=", sessionId)
-      .where("userId", "=", userId)
-      .returningAll();
+    const { id: runId } = (await db
+      .selectFrom("readingRun")
+      .select("readingRun.id")
+      .innerJoin("readingSession", "readingRun.id", "readingSession.runId")
+      .where("readingSession.id", "=", sessionId)
+      .executeTakeFirst()) ?? { id: null };
 
-    const result = await updateReadingSessionQuery.executeTakeFirst();
-
-    if (!result) {
+    if (runId === null) {
       throw new HTTPException(404);
     }
 
-    c.status(200);
-    return c.json(result);
+    const { totalPages } = (await db
+      .selectFrom("book")
+      .select("totalPages")
+      .innerJoin("readingRun", "book.id", "readingRun.bookId")
+      .where("readingRun.id", "=", runId)
+      .executeTakeFirst()) ?? { totalPages: null };
+
+    if (totalPages === null) {
+      throw new HTTPException(404);
+    }
+
+    if (request.endPage && request.endPage > totalPages) {
+      throw new HTTPException(400);
+    }
+
+    try {
+      const result = db.transaction().execute(async (trx) => {
+        if (request.endPage && request.updateRun) {
+          await trx
+            .updateTable("readingRun")
+            .set({
+              completedPages: request.endPage,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+              finishedAt:
+                request.endPage === totalPages
+                  ? sql`CURRENT_TIMESTAMP`
+                  : undefined,
+            })
+            .where("id", "=", runId)
+            .returning("id")
+            .executeTakeFirstOrThrow();
+        }
+
+        return await trx
+          .updateTable("readingSession")
+          .set({
+            startPage: request.startPage,
+            endPage: request.endPage,
+            readPages:
+              request.startPage && request.endPage
+                ? request.endPage - request.startPage
+                : undefined,
+            startTime: request.startTime
+              ? new Date(request.startTime)
+              : undefined,
+            endTime: request.endTime ? new Date(request.endTime) : undefined,
+            updatedAt: sql`CURRENT_TIMESTAMP`,
+          })
+          .where("id", "=", sessionId)
+          .where("userId", "=", userId)
+          .returningAll()
+          .executeTakeFirst();
+      });
+
+      c.status(200);
+      return c.json(result);
+    } catch (error) {
+      console.error(error);
+      throw new HTTPException(404);
+    }
   },
 );
 

@@ -4,7 +4,7 @@ import { db } from "./src/lib/database.ts";
 export default defineConfig({
   kysely: db,
   migrations: {
-    migrationFolder: "./migrations",
+    migrationFolder: "./src/migrations",
     getMigrationPrefix: getKnexTimestampPrefix,
   },
 });

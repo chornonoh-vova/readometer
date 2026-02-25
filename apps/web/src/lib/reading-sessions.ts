@@ -28,6 +28,12 @@ export type NewReadingSession = {
   readTime: number;
 };
 
+export type UpdatedReadingSession = {
+  startPage: number;
+  endPage: number;
+  updateRun: boolean;
+};
+
 async function fetchReadingSessions(runId: string): Promise<ReadingSession[]> {
   const searchParams = new URLSearchParams({ runId });
   return await fetchApi(`/reading-sessions?${searchParams}`);
@@ -78,25 +84,59 @@ export function useAddReadingSessionMutation(bookId: string) {
   });
 }
 
+async function editReadingSession(
+  sessionId: string,
+  updatedReadingSession: UpdatedReadingSession,
+): Promise<ReadingSession> {
+  return fetchApi(`/reading-sessions/${sessionId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedReadingSession),
+  });
+}
+
+export function useEditReadingSessionMutation(
+  sessionId: string,
+  runId: string,
+  bookId: string,
+) {
+  return useMutation({
+    mutationFn: (updatedReadingSession: UpdatedReadingSession) =>
+      editReadingSession(sessionId, updatedReadingSession),
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({
+        queryKey: books.list,
+      });
+      context.client.invalidateQueries({
+        queryKey: books.details(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingRuns.byBook(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: readingSessions.byRun(runId),
+      });
+    },
+  });
+}
+
 async function deleteReadingSession(sessionId: string): Promise<void> {
   return fetchApi(`/reading-sessions/${sessionId}`, {
-    method: "DELEte",
+    method: "DELETE",
     noContent: true,
   });
 }
 
-export function useDeleteReadingSessionMutation() {
+export function useDeleteReadingSessionMutation(
+  sessionId: string,
+  runId: string,
+  bookId: string,
+) {
   return useMutation({
-    mutationFn: ({
-      sessionId,
-    }: {
-      sessionId: string;
-      runId: string;
-      bookId: string;
-    }) => deleteReadingSession(sessionId),
-
-    onSuccess: (_data, variables, _onMutateResult, context) => {
-      const { runId, bookId } = variables;
+    mutationFn: () => deleteReadingSession(sessionId),
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
       context.client.invalidateQueries({
         queryKey: books.list,
       });
