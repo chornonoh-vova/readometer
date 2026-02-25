@@ -27,18 +27,15 @@ export function DeleteReadingSessionAlert({
   onOpenChange: (newOpen: boolean) => void;
   onSuccess?: () => void;
 }) {
-  const mutation = useDeleteReadingSessionMutation();
+  const mutation = useDeleteReadingSessionMutation(sessionId, runId, bookId);
 
   const handleDelete = () => {
-    mutation.mutate(
-      { sessionId, runId, bookId },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          onSuccess?.();
-        },
+    mutation.mutate(void 0, {
+      onSuccess: () => {
+        onOpenChange(false);
+        onSuccess?.();
       },
-    );
+    });
   };
 
   return (
