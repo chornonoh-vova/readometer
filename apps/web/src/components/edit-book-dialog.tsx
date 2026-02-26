@@ -19,13 +19,6 @@ import {
 } from "./ui/field";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { useEditBookMutation, type Book } from "@/lib/books";
 import { useForm } from "@tanstack/react-form";
 import { langToName, langToEmoji } from "@/lib/lang";
@@ -34,9 +27,10 @@ import { isbnSchema } from "@/lib/isbn";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { format } from "date-fns";
+import { NativeSelect, NativeSelectOption } from "./ui/native-select";
 
 const languages = [
-  { label: "Select a language", value: null },
+  { label: "Select a language", value: "" },
   ...Object.entries(langToName).map(([code, name]) => ({
     label: `${name} ${langToEmoji[code]}`,
     value: code,
@@ -192,6 +186,9 @@ export function EditBookDialog({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Total pages</FieldLabel>
+                    <FieldDescription>
+                      Number of pages for this book
+                    </FieldDescription>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -224,6 +221,7 @@ export function EditBookDialog({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Book author</FieldLabel>
+                    <FieldDescription>Full name of the author</FieldDescription>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -260,24 +258,19 @@ export function EditBookDialog({
                         <FieldError errors={field.state.meta.errors} />
                       )}
                     </FieldContent>
-                    <Select
+                    <NativeSelect
                       id={field.name}
                       name={field.name}
                       value={field.state.value}
-                      items={languages}
-                      onValueChange={(value) => field.handleChange(value!)}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
                     >
-                      <SelectTrigger aria-invalid={isInvalid}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent alignItemWithTrigger={false}>
-                        {languages.map((lang) => (
-                          <SelectItem key={lang.value} value={lang.value}>
-                            {lang.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      {languages.map(({ label, value }) => (
+                        <NativeSelectOption key={value} value={value}>
+                          {label}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
                   </Field>
                 );
               }}
@@ -292,6 +285,9 @@ export function EditBookDialog({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Publish date</FieldLabel>
+                    <FieldDescription>
+                      Date, when the book was published
+                    </FieldDescription>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -320,6 +316,9 @@ export function EditBookDialog({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>ISBN</FieldLabel>
+                    <FieldDescription>
+                      ISBN-10 or ISBN-13 code for a book
+                    </FieldDescription>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -347,6 +346,9 @@ export function EditBookDialog({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                    <FieldDescription>
+                      Detailed book description or synopsis
+                    </FieldDescription>
                     <Textarea
                       id={field.name}
                       name={field.name}

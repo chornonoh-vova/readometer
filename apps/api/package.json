@@ -4,6 +4,7 @@
     "dev": "bun --watch src/index.ts",
     "db:migrate": "kysely migrate",
     "db:generate": "kysely-codegen --out-file ./src/lib/db.d.ts",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "fmt": "prettier . --write"
   },
