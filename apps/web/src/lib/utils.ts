@@ -29,3 +29,7 @@ export function formatReadingTime(readingTime: number) {
 
   return `${hours ? hours + ":" : ""}${minutes}:${seconds}`;
 }
+
+export function getBucket(v: number, max: number, count = 5) {
+  return Math.min(count - 1, Math.floor((v / max) * count));
+}

@@ -6,15 +6,16 @@ import { compress } from "hono/compress";
 import { logger } from "hono/logger";
 import { showRoutes } from "hono/dev";
 
-import session from "./middlewares/session";
-import requireAuth from "./middlewares/requireAuth";
+import session from "./middlewares/session.ts";
+import requireAuth from "./middlewares/requireAuth.ts";
 
-import healthz from "./routes/healthz";
-import readyz from "./routes/readyz";
-import me from "./routes/me";
-import books from "./routes/books";
-import readingRuns from "./routes/readingRuns";
-import readingSessions from "./routes/readingSessions";
+import healthz from "./routes/healthz.ts";
+import readyz from "./routes/readyz.ts";
+import me from "./routes/me.ts";
+import books from "./routes/books.ts";
+import readingActivity from "./routes/readingActivity.ts";
+import readingRuns from "./routes/readingRuns.ts";
+import readingSessions from "./routes/readingSessions.ts";
 
 const app = new Hono<AppEnv>().basePath("/api");
 
@@ -37,6 +38,7 @@ app.use("*", requireAuth);
 
 app.route("/me", me);
 app.route("/books", books);
+app.route("/reading-activity", readingActivity);
 app.route("/reading-runs", readingRuns);
 app.route("/reading-sessions", readingSessions);
 

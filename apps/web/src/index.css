@@ -38,6 +38,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --activity-default-0: oklch(0.9597 0.0052 247.88);
+  --activity-default-1: oklch(0.8915 0.0964 151.11);
+  --activity-default-2: oklch(0.7257 0.1643 149.45);
+  --activity-default-3: oklch(0.6343 0.162 148.39);
+  --activity-default-4: oklch(0.4391 0.1179 148.07);
 }
 
 .dark {
@@ -72,6 +78,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.439 0 0);
+
+  --activity-default-0: oklch(0.2198 0.0182 255.71);
+  --activity-default-1: oklch(0.3054 0.0826 149.34);
+  --activity-default-2: oklch(0.4681 0.1231 147.6);
+  --activity-default-3: oklch(0.6222 0.1661 146.22);
+  --activity-default-4: oklch(0.7717 0.188 145.48);
 }
 
 @theme inline {
@@ -114,6 +126,12 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-activity-default-0: var(--activity-default-0);
+  --color-activity-default-1: var(--activity-default-1);
+  --color-activity-default-2: var(--activity-default-2);
+  --color-activity-default-3: var(--activity-default-3);
+  --color-activity-default-4: var(--activity-default-4);
 }
 
 @layer base {

@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { BookMarkedIcon } from "lucide-react";
+import { ActivityIcon, BookMarkedIcon } from "lucide-react";
 
 const active =
   "data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground";
@@ -19,6 +19,12 @@ export function NavMain() {
           <SidebarMenuItem>
             <SidebarMenuButton className={active} render={<Link to="/" />}>
               <BookMarkedIcon /> Books
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className={active}
+              render={<Link to="/activity" />}
+            >
+              <ActivityIcon /> Activity
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

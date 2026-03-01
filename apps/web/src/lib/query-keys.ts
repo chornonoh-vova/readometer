@@ -12,3 +12,7 @@ export const readingSessions = {
   list: ["reading-sessions"],
   byRun: (runId: string) => [readingSessions.list, runId],
 };
+
+export const readingActivity = {
+  byYear: (year: number) => ["reading-activity", year],
+};
