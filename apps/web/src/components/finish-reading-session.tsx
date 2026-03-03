@@ -102,7 +102,7 @@ export function FinishReadingSession() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="ghost" size="icon" title="Finish" onClick={pause}>
+          <Button size="icon" title="Finish" onClick={pause}>
             <FlagIcon />
           </Button>
         }

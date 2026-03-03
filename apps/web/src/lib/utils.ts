@@ -6,8 +6,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string) {
-  return format(new Date(date), "yyyy-MM-dd");
+export const DATE_FORMAT = "yyyy-MM-dd";
+
+export function formatDate(date: Date): string;
+export function formatDate(date: string): string;
+export function formatDate(date: Date | string) {
+  if (date instanceof Date) {
+    return format(date, DATE_FORMAT);
+  } else {
+    return format(new Date(date), "yyyy-MM-dd");
+  }
 }
 
 export function formatDateTime(date: string) {
@@ -30,6 +38,11 @@ export function formatReadingTime(readingTime: number) {
   return `${hours ? hours + ":" : ""}${minutes}:${seconds}`;
 }
 
-export function getBucket(v: number, max: number, count = 5) {
-  return Math.min(count - 1, Math.floor((v / max) * count));
+export function getBucket(value: number, max: number, count = 5) {
+  if (value <= 0 || max <= 0) return 0;
+
+  const scaled = (value / max) * (count - 1);
+  const level = Math.floor(scaled);
+
+  return Math.min(count - 1, level + 1);
 }

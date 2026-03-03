@@ -56,14 +56,13 @@ export function CurrentReadingSession() {
         !isMobile && open && "pl-64",
       )}
     >
-      <div className="border rounded-md px-3 py-4 shadow-md flex items-center justify-between bg-background">
+      <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary text-primary-foreground">
         <div className="grid text-sm leading-tight">
           <p className="font-semibold">{session.book.title}</p>
-          <p className="text-muted-foreground">{formattedReadingTime}</p>
+          <p>{formattedReadingTime}</p>
         </div>
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
             size="icon"
             title={session.paused ? "Continue" : "Pause"}
             onClick={() => (session.paused ? play() : pause())}

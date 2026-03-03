@@ -1,5 +1,6 @@
 import { PageHeader, PageHeaderName } from "@/components/page-header";
 import { ReadingActivityHeatmap } from "@/components/reading-activity-heatmap";
+import { ReadingActivityToolbar } from "@/components/reading-activity-toolbar";
 import { readingActivityQueryOptions } from "@/lib/reading-activity";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -16,12 +17,13 @@ export const Route = createFileRoute("/_auth/_app/activity")({
   }),
 });
 
-function ActivityHeader() {
+function ActivityHeader({ year }: { year: number }) {
   return (
     <PageHeader>
       <PageHeaderName>
         <h1 className="text-sm">Activity</h1>
       </PageHeaderName>
+      <ReadingActivityToolbar year={year} />
     </PageHeader>
   );
 }
@@ -33,7 +35,7 @@ function Activity() {
   );
   return (
     <>
-      <ActivityHeader />
+      <ActivityHeader year={year} />
       <ReadingActivityHeatmap year={year} readingActivity={readingActivity} />
     </>
   );

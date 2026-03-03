@@ -1,10 +1,7 @@
 import type { ReadingActivity } from "@/lib/reading-activity";
-import { cn, formatReadingTime, getBucket } from "@/lib/utils";
-import { format, getDaysInMonth, getWeekOfMonth } from "date-fns";
-import { useState } from "react";
-import { NativeSelect, NativeSelectOption } from "./ui/native-select";
-import { Field, FieldContent, FieldLabel } from "./ui/field";
-import { useNavigate } from "@tanstack/react-router";
+import { cn, formatDate, formatReadingTime, getBucket } from "@/lib/utils";
+import { getDaysInMonth, getWeekOfMonth } from "date-fns";
+import { useMemo } from "react";
 import {
   Popover,
   PopoverContent,
@@ -12,6 +9,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "./ui/popover";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 type ActivityMap = Map<
   string,
@@ -25,6 +23,8 @@ type ActivityMap = Map<
 
 type DisplayBy = "time" | "pages";
 
+type WeekStart = "monday" | "sunday";
+
 const bgClass = [
   "bg-activity-default-0",
   "bg-activity-default-1",
@@ -33,18 +33,111 @@ const bgClass = [
   "bg-activity-default-4",
 ];
 
-const minYear = 2026;
+function getActivityMap(readingActivity: ReadingActivity[]): ActivityMap {
+  const map: ActivityMap = new Map();
+  let maxTime = 0;
+  let maxPages = 0;
 
-function MonthHeatmap({
+  for (const { date, totalReadPages, totalReadTime } of readingActivity) {
+    const readPages = Number(totalReadPages);
+    const readTime = Number(totalReadTime);
+    map.set(formatDate(date), {
+      totalReadPages: readPages,
+      totalReadTime: readTime,
+      pagesBucket: 0,
+      timeBucket: 0,
+    });
+    maxPages = Math.max(maxPages, readPages);
+    maxTime = Math.max(maxTime, readTime);
+  }
+
+  for (const value of map.values()) {
+    value.timeBucket = getBucket(value.totalReadTime, maxTime, bgClass.length);
+    value.pagesBucket = getBucket(
+      value.totalReadPages,
+      maxPages,
+      bgClass.length,
+    );
+  }
+  return map;
+}
+
+function getCalendarPosition(date: Date, weekStart: WeekStart) {
+  const day = date.getDay();
+  const dayOfWeek = weekStart === "monday" ? ((day + 6) % 7) + 1 : day + 1;
+  const week = getWeekOfMonth(date, {
+    weekStartsOn: weekStart === "monday" ? 1 : 0,
+  });
+
+  return { col: dayOfWeek, row: week };
+}
+
+function Day({
+  id,
+  date,
+  activity,
+  display,
+  weekStart,
+}: {
+  id: string;
+  date: Date;
+  activity: ActivityMap;
+  display: DisplayBy;
+  weekStart: WeekStart;
+}) {
+  const { row, col } = getCalendarPosition(date, weekStart);
+
+  const commonClasses = "text-center rounded-sm";
+  const style = {
+    gridColumn: col,
+    gridRow: row,
+  };
+
+  const entry = activity.get(id);
+
+  if (!entry) {
+    return (
+      <div className={cn(commonClasses, bgClass[0])} style={style}>
+        <span className="sr-only">No reading activity for {id}</span>
+      </div>
+    );
+  }
+
+  const bucket = display === "time" ? entry.timeBucket : entry.pagesBucket;
+  const pages = entry.totalReadPages;
+  const time = formatReadingTime(entry.totalReadTime);
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        className={cn(commonClasses, bgClass[bucket])}
+        style={style}
+        aria-label={`Reading activity for ${id}. ${pages} pages, ${time}`}
+        openOnHover
+      />
+      <PopoverContent>
+        <PopoverHeader>Reading activity at {id}</PopoverHeader>
+        <PopoverDescription render={<ul />}>
+          <li>Read time: {time}</li>
+          <li>Pages read: {pages}</li>
+        </PopoverDescription>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function Month({
   year,
   month,
   activity,
   display,
+  weekStart,
 }: {
   year: number;
   month: number;
   activity: ActivityMap;
   display: DisplayBy;
+  weekStart: WeekStart;
 }) {
   const firstDate = new Date(year, month, 1);
   const days = getDaysInMonth(firstDate);
@@ -53,42 +146,20 @@ function MonthHeatmap({
       <p className="text-sm">
         {firstDate.toLocaleString("default", { month: "long" })}
       </p>
-      <div className="grid grid-rows-[repeat(6,22px)] grid-cols-[repeat(7,22px)] gap-1">
-        {Array.from({ length: days }, (_, i) => i).map((day) => {
+      <div className="grid grid-rows-[repeat(6,20px)] grid-cols-[repeat(7,20px)] gap-1">
+        {Array.from({ length: days }, (_, day) => {
           const date = new Date(year, month, day + 1);
-          const dateKey = format(date, "yyyy-MM-dd");
-          const dayOfWeek = date.getDay() + 1;
-          const week = getWeekOfMonth(date);
-
-          let bucket = 0;
-
-          const entry = activity.get(dateKey);
-
-          if (entry) {
-            bucket = display === "time" ? entry.timeBucket : entry.pagesBucket;
-          }
+          const dateKey = formatDate(date);
 
           return (
-            <Popover key={dateKey}>
-              <PopoverTrigger
-                className={cn("text-center rounded-sm", bgClass[bucket])}
-                style={{
-                  gridColumn: dayOfWeek,
-                  gridRow: week,
-                }}
-                aria-label={`Reading activity for ${dateKey}`}
-                openOnHover
-              />
-              <PopoverContent>
-                <PopoverHeader>Reading activity at {dateKey}</PopoverHeader>
-                <PopoverDescription>
-                  <p>
-                    Read time: {formatReadingTime(entry?.totalReadTime ?? 0)}
-                  </p>
-                  <p>Pages read: {entry?.totalReadPages ?? 0}</p>
-                </PopoverDescription>
-              </PopoverContent>
-            </Popover>
+            <Day
+              key={dateKey}
+              id={dateKey}
+              date={date}
+              activity={activity}
+              display={display}
+              weekStart={weekStart}
+            />
           );
         })}
       </div>
@@ -103,94 +174,31 @@ export function ReadingActivityHeatmap({
   year: number;
   readingActivity: ReadingActivity[];
 }) {
-  const navigate = useNavigate();
-  const [displayBy, setDisplayBy] = useState<DisplayBy>("time");
+  const [displayBy] = useLocalStorage<DisplayBy>(
+    "reading-activity-display",
+    "time",
+  );
+  const [weekStart] = useLocalStorage<WeekStart>(
+    "reading-activity-week-start",
+    "monday",
+  );
 
-  const activity: ActivityMap = new Map();
-  let maxTime = 0;
-  let maxPages = 0;
-
-  for (const { date, totalReadPages, totalReadTime } of readingActivity) {
-    const readPages = Number(totalReadPages);
-    const readTime = Number(totalReadTime);
-    activity.set(format(date, "yyyy-MM-dd"), {
-      totalReadPages: readPages,
-      totalReadTime: readTime,
-      pagesBucket: 0,
-      timeBucket: 0,
-    });
-    maxPages = Math.max(maxPages, readPages);
-    maxTime = Math.max(maxTime, readTime);
-  }
-
-  const maxTimeNormalized = Math.log2(maxTime + 1);
-  const maxPagesNormalized = Math.log2(maxPages + 1);
-
-  for (const value of activity.values()) {
-    value.timeBucket = getBucket(
-      Math.log2(value.totalReadTime + 1),
-      maxTimeNormalized,
-      bgClass.length,
-    );
-    value.pagesBucket = getBucket(
-      Math.log2(value.totalReadPages + 1),
-      maxPagesNormalized,
-      bgClass.length,
-    );
-  }
-
-  const maxYear = new Date().getFullYear() + 1;
+  const activity = useMemo(
+    () => getActivityMap(readingActivity),
+    [readingActivity],
+  );
 
   return (
     <div className="w-full grid grid-cols-1 gap-4 p-2">
-      <div className="grid grid-cols-2 gap-2.5">
-        <Field orientation="responsive">
-          <FieldContent>
-            <FieldLabel htmlFor="display">Display</FieldLabel>
-          </FieldContent>
-          <NativeSelect
-            id="display"
-            value={displayBy}
-            onChange={(e) => setDisplayBy(e.target.value as DisplayBy)}
-          >
-            <NativeSelectOption value="time">
-              By reading time
-            </NativeSelectOption>
-            <NativeSelectOption value="pages">By pages read</NativeSelectOption>
-          </NativeSelect>
-        </Field>
-        <Field orientation="responsive">
-          <FieldContent>
-            <FieldLabel htmlFor="year">Year</FieldLabel>
-          </FieldContent>
-          <NativeSelect
-            id="year"
-            value={year}
-            onChange={(e) =>
-              navigate({
-                to: "/activity",
-                search: { year: Number(e.target.value) },
-              })
-            }
-          >
-            {Array.from({ length: maxYear - minYear }, (_, i) => i).map(
-              (idx) => (
-                <NativeSelectOption key={minYear + idx} value={minYear + idx}>
-                  {minYear + idx}
-                </NativeSelectOption>
-              ),
-            )}
-          </NativeSelect>
-        </Field>
-      </div>
       <section className="flex flex-wrap items-center justify-center gap-2.5">
-        {Array.from({ length: 12 }, (_, i) => i).map((month) => (
-          <MonthHeatmap
+        {Array.from({ length: 12 }, (_, month) => (
+          <Month
             key={month}
             year={year}
             month={month}
             activity={activity}
             display={displayBy}
+            weekStart={weekStart}
           />
         ))}
       </section>
