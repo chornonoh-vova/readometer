@@ -3,7 +3,7 @@ import { langToEmoji, langToName } from "@/lib/lang";
 import { ReadingRunsEmpty } from "./reading-runs-empty";
 import { ReadingRunsList } from "./reading-runs-list";
 import type { ReactNode } from "react";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
 import type { ReadingRun } from "@/lib/reading-runs";
 import { BookDescriptionDialog } from "./book-description-dialog";
 

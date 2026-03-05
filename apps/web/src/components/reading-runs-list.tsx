@@ -13,7 +13,7 @@ import { StartReadingSession } from "./start-reading-session";
 import type { BookDetails } from "@/lib/books";
 import { Suspense } from "react";
 import { ReadingSessionsList } from "./reading-sessions-list";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
 import { ReadingSessionsLoading } from "./reading-sessions-loading";
 
 export function ReadingRunsList({

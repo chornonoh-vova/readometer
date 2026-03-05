@@ -4,7 +4,7 @@ import type { AppEnv } from "../types.ts";
 import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
 import z from "zod";
-import { isbnSchema, normalizeIsbnToIsbn13 } from "../lib/isbn.ts";
+import { isbnSchema, normalizeIsbnToIsbn13 } from "isbn";
 import { sql } from "kysely";
 
 const books = new Hono<AppEnv>();

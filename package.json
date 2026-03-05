@@ -6,7 +6,8 @@
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "fmt": "turbo run fmt"
+    "fmt": "turbo run fmt",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "prettier": "^3.8.1",
@@ -18,6 +19,7 @@
   },
   "packageManager": "bun@1.3.5",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ]
 }

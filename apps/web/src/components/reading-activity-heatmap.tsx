@@ -1,5 +1,7 @@
 import type { ReadingActivity } from "@/lib/reading-activity";
-import { cn, formatDate, formatReadingTime, getBucket } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { formatDate, formatReadingTime } from "@/lib/format";
+import { getBucket } from "@/lib/bucket";
 import { getDaysInMonth, getWeekOfMonth } from "date-fns";
 import { useMemo } from "react";
 import {

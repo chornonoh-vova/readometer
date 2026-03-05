@@ -1,5 +1,5 @@
 import { useReadingSessionsSuspenseQuery } from "@/lib/reading-sessions";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
 import { Fragment } from "react";
 import { ReadingSessionItem } from "./reading-session-item";
 

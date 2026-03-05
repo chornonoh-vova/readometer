@@ -6,8 +6,9 @@ import {
 } from "@/store/reading-session";
 import { useEffect, useState } from "react";
 import { useSidebar } from "./ui/sidebar";
-import { cn, formatReadingTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { FinishReadingSession } from "./finish-reading-session";
+import { formatReadingTime } from "@/lib/format";
 
 function getReadingTime(session: ReadingSessionState["session"]) {
   if (!session) return 0;
@@ -56,13 +57,14 @@ export function CurrentReadingSession() {
         !isMobile && open && "pl-64",
       )}
     >
-      <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary text-primary-foreground">
-        <div className="grid text-sm leading-tight">
+      <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary">
+        <div className="grid text-sm leading-tight text-primary-foreground">
           <p className="font-semibold">{session.book.title}</p>
           <p>{formattedReadingTime}</p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Button
+            variant="secondary"
             size="icon"
             title={session.paused ? "Continue" : "Pause"}
             onClick={() => (session.paused ? play() : pause())}

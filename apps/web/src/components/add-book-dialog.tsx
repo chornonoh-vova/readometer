@@ -24,7 +24,7 @@ import { useForm } from "@tanstack/react-form";
 import { v7 as uuidv7 } from "uuid";
 import { langToName, langToEmoji } from "@/lib/lang";
 import * as z from "zod";
-import { isbnSchema } from "@/lib/isbn";
+import { isbnSchema } from "isbn";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { NativeSelect, NativeSelectOption } from "./ui/native-select";

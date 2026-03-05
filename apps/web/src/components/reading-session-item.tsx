@@ -9,7 +9,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
-import { formatReadingTime, formatTime } from "@/lib/utils";
+import { formatReadingTime, formatTime } from "@/lib/format";
 import {
   DropdownMenu,
   DropdownMenuContent,

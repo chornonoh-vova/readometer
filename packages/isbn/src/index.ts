@@ -43,6 +43,22 @@ export function isbn10ToIsbn13(isbn10: string): string {
   return core + checkDigit;
 }
 
+export function normalizeIsbnToIsbn13(input?: string | null): string | null {
+  if (!input) return null;
+
+  const isbn = stripIsbn(input);
+
+  if (isbn.length === 13 && isValidIsbn13(isbn)) {
+    return isbn;
+  }
+
+  if (isbn.length === 10 && isValidIsbn10(isbn)) {
+    return isbn10ToIsbn13(isbn);
+  }
+
+  return null;
+}
+
 export const isbnSchema = z.string().refine((value) => {
   if (!value) return true;
 
@@ -58,3 +74,4 @@ export const isbnSchema = z.string().refine((value) => {
 
   return false;
 }, "Invalid ISBN");
+

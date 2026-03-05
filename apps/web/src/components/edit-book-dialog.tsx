@@ -23,7 +23,7 @@ import { useEditBookMutation, type Book } from "@/lib/books";
 import { useForm } from "@tanstack/react-form";
 import { langToName, langToEmoji } from "@/lib/lang";
 import * as z from "zod";
-import { isbnSchema } from "@/lib/isbn";
+import { isbnSchema } from "isbn";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { format } from "date-fns";
