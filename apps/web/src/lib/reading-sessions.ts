@@ -62,7 +62,7 @@ async function addReadingSession(
   });
 }
 
-export function useAddReadingSessionMutation(bookId: string) {
+export function useAddReadingSessionMutation(bookId: string | undefined) {
   return useMutation({
     mutationFn: (newReadingSession: NewReadingSession) =>
       addReadingSession(newReadingSession),
@@ -71,12 +71,14 @@ export function useAddReadingSessionMutation(bookId: string) {
       context.client.invalidateQueries({
         queryKey: books.list,
       });
-      context.client.invalidateQueries({
-        queryKey: books.details(bookId),
-      });
-      context.client.invalidateQueries({
-        queryKey: readingRuns.byBook(bookId),
-      });
+      if (bookId) {
+        context.client.invalidateQueries({
+          queryKey: books.details(bookId),
+        });
+        context.client.invalidateQueries({
+          queryKey: readingRuns.byBook(bookId),
+        });
+      }
       context.client.invalidateQueries({
         queryKey: readingSessions.byRun(runId),
       });

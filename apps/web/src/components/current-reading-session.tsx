@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { useSidebar } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import { FinishReadingSession } from "./finish-reading-session";
-import { formatReadingTime } from "@/lib/format";
+import { AnimatePresence, motion } from "motion/react";
+import { ReadingTimer } from "./reading-timer";
 
 function getReadingTime(session: ReadingSessionState["session"]) {
   if (!session) return 0;
@@ -44,36 +45,42 @@ export function CurrentReadingSession() {
     };
   }, [session]);
 
-  if (!session) {
-    return null;
-  }
-
-  const formattedReadingTime = formatReadingTime(readingTime);
-
   return (
-    <div
-      className={cn(
-        "fixed bottom-0 left-0 right-0 p-2 md:transition-[padding] md:duration-200 md:ease-linear",
-        !isMobile && open && "pl-64",
+    <AnimatePresence>
+      {session && (
+        <motion.div
+          initial={{ y: "100%", opacity: 0, scale: 0.95 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: "100%", opacity: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+          }}
+          className={cn(
+            "fixed bottom-0 left-0 right-0 p-2 md:transition-[padding] md:duration-200 md:ease-linear",
+            !isMobile && open && "pl-64",
+          )}
+        >
+          <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary">
+            <div className="grid text-sm font-medium leading-tight text-primary-foreground">
+              <p className="font-semibold">{session.book.title}</p>
+              <ReadingTimer time={readingTime} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="icon-lg"
+                title={session.paused ? "Continue" : "Pause"}
+                onClick={() => (session.paused ? play() : pause())}
+              >
+                {session.paused ? <PlayIcon /> : <PauseIcon />}
+              </Button>
+              <FinishReadingSession />
+            </div>
+          </div>
+        </motion.div>
       )}
-    >
-      <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary">
-        <div className="grid text-sm leading-tight text-primary-foreground">
-          <p className="font-semibold">{session.book.title}</p>
-          <p>{formattedReadingTime}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="icon"
-            title={session.paused ? "Continue" : "Pause"}
-            onClick={() => (session.paused ? play() : pause())}
-          >
-            {session.paused ? <PlayIcon /> : <PauseIcon />}
-          </Button>
-          <FinishReadingSession />
-        </div>
-      </div>
-    </div>
+    </AnimatePresence>
   );
 }

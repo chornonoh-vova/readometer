@@ -30,7 +30,7 @@ export function FinishReadingSession() {
   const session = useReadingSessionStore((state) => state.session);
   const pause = useReadingSessionStore((state) => state.pause);
   const finish = useReadingSessionStore((state) => state.finish);
-  const addReadingSession = useAddReadingSessionMutation(session!.book.id);
+  const addReadingSession = useAddReadingSessionMutation(session?.book.id);
 
   const startPage = session?.startPage ?? 0;
   const totalPages = session?.book.totalPages;
@@ -104,7 +104,7 @@ export function FinishReadingSession() {
         render={
           <Button
             variant="secondary"
-            size="icon"
+            size="icon-lg"
             title="Finish"
             onClick={pause}
           >

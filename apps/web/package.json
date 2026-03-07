@@ -26,6 +26,7 @@
     "date-fns": "^4.1.0",
     "isbn": "workspace:*",
     "lucide-react": "^0.577.0",
+    "motion": "^12.35.0",
     "react": "^19.2.4",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.4",

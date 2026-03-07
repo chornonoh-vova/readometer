@@ -1,6 +1,6 @@
 import {
   AlertCircleIcon,
-  LoaderCircleIcon,
+  LoaderIcon,
   PlayIcon,
   RotateCcwIcon,
 } from "lucide-react";
@@ -109,21 +109,25 @@ export function StartReadingSession({
       setOpen(false);
 
       start(book, startReadingRun.id, startedAt, value.startPage);
+
+      if (navigator.vibrate) {
+        navigator.vibrate([20, 30, 20]);
+      }
     },
   });
 
   let ButtonIcon = PlayIcon;
-  let buttonLabel = "Start reading";
+  let buttonLabel = "Start";
 
   if (readingRun) {
     if (readingRun.completedPages === book.totalPages) {
       ButtonIcon = RotateCcwIcon;
-      buttonLabel = "Read again";
+      buttonLabel = "Restart";
     } else if (readingRun.id === session?.runId) {
-      ButtonIcon = LoaderCircleIcon;
+      ButtonIcon = LoaderIcon;
       buttonLabel = "Reading...";
     } else {
-      buttonLabel = "Continue reading";
+      buttonLabel = "Continue";
     }
   }
 
@@ -133,9 +137,7 @@ export function StartReadingSession({
         render={
           <Button disabled={!!session}>
             <ButtonIcon />
-            <span className="sr-only md:block md:not-sr-only">
-              {buttonLabel}
-            </span>
+            <span>{buttonLabel}</span>
           </Button>
         }
       />
