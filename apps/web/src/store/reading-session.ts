@@ -22,6 +22,7 @@ export type ReadingSessionState = {
   pause: () => void;
   play: () => void;
   finish: () => void;
+  cancel: () => void;
 };
 
 export const useReadingSessionStore = create<ReadingSessionState>()(
@@ -91,6 +92,7 @@ export const useReadingSessionStore = create<ReadingSessionState>()(
           };
         }),
       finish: () => set(() => ({ session: null })),
+      cancel: () => set(() => ({ session: null })),
     }),
     { name: "reading-session" },
   ),

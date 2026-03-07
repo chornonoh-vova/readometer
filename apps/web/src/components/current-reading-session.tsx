@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { FinishReadingSession } from "./finish-reading-session";
 import { AnimatePresence, motion } from "motion/react";
 import { ReadingTimer } from "./reading-timer";
+import { AbandonReadingSession } from "./abandon-reading-session";
 
 function getReadingTime(session: ReadingSessionState["session"]) {
   if (!session) return 0;
@@ -28,11 +29,29 @@ function getReadingTime(session: ReadingSessionState["session"]) {
   );
 }
 
+function PauseReadingSession() {
+  const pause = useReadingSessionStore((state) => state.pause);
+
+  return (
+    <Button onClick={pause}>
+      <PauseIcon /> Pause
+    </Button>
+  );
+}
+
+function ContinueReadingSession() {
+  const play = useReadingSessionStore((state) => state.play);
+
+  return (
+    <Button onClick={play}>
+      <PlayIcon /> Continue
+    </Button>
+  );
+}
+
 export function CurrentReadingSession() {
   const { open, isMobile } = useSidebar();
   const session = useReadingSessionStore((state) => state.session);
-  const pause = useReadingSessionStore((state) => state.pause);
-  const play = useReadingSessionStore((state) => state.play);
   const [readingTime, setReadingTime] = useState(() => getReadingTime(session));
 
   useEffect(() => {
@@ -58,26 +77,27 @@ export function CurrentReadingSession() {
             damping: 20,
           }}
           className={cn(
-            "fixed bottom-0 left-0 right-0 p-2 md:transition-[padding] md:duration-200 md:ease-linear",
+            "fixed bottom-0 left-0 right-0 p-2 transition-[height] md:transition-[height,padding] duration-200 ease-linear",
             !isMobile && open && "pl-64",
           )}
         >
-          <div className="border rounded-lg px-3 py-4 shadow-md flex items-center justify-between bg-primary">
-            <div className="grid text-sm font-medium leading-tight text-primary-foreground">
-              <p className="font-semibold">{session.book.title}</p>
-              <ReadingTimer time={readingTime} />
+          <div className="border border-primary rounded-lg px-3 py-4 shadow-md grid grid-cols-1 gap-2.5 bg-background">
+            <div className="flex items-center justify-between">
+              <div className="grid grid-cols-1 gap-0.5">
+                <p className="text-foreground leading-tight">
+                  {session.book.title}
+                </p>
+                <ReadingTimer time={readingTime} />
+              </div>
+              {!session.paused && <PauseReadingSession />}
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="icon-lg"
-                title={session.paused ? "Continue" : "Pause"}
-                onClick={() => (session.paused ? play() : pause())}
-              >
-                {session.paused ? <PlayIcon /> : <PauseIcon />}
-              </Button>
-              <FinishReadingSession />
-            </div>
+            {session.paused && (
+              <div className="flex items-center justify-between gap-2">
+                <ContinueReadingSession />
+                <FinishReadingSession />
+                <AbandonReadingSession />
+              </div>
+            )}
           </div>
         </motion.div>
       )}

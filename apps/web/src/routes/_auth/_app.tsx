@@ -11,7 +11,7 @@ function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="pb-24">
+      <SidebarInset className="pb-32">
         <Outlet />
         <CurrentReadingSession />
       </SidebarInset>

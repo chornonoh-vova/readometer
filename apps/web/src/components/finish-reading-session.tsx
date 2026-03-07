@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { AlertCircleIcon, SquareIcon } from "lucide-react";
+import { AlertCircleIcon, FlagIcon } from "lucide-react";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { useReadingSessionStore } from "@/store/reading-session";
@@ -28,7 +28,6 @@ export function FinishReadingSession() {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const session = useReadingSessionStore((state) => state.session);
-  const pause = useReadingSessionStore((state) => state.pause);
   const finish = useReadingSessionStore((state) => state.finish);
   const addReadingSession = useAddReadingSessionMutation(session?.book.id);
 
@@ -102,13 +101,8 @@ export function FinishReadingSession() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button
-            variant="secondary"
-            size="icon-lg"
-            title="Finish"
-            onClick={pause}
-          >
-            <SquareIcon />
+          <Button>
+            <FlagIcon /> Finish
           </Button>
         }
       />
