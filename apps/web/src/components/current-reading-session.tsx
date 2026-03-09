@@ -64,24 +64,25 @@ export function CurrentReadingSession() {
     };
   }, [session]);
 
+  const safePaddings =
+    "p-2 pl-[calc(8px+env(safe-area-inset-left))] pr-[calc(8px+env(safe-area-inset-right))] pb-[calc(8px+env(safe-area-inset-bottom))]";
+
   return (
-    <AnimatePresence>
-      {session && (
-        <motion.div
-          initial={{ y: "100%", opacity: 0, scale: 0.95 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: "100%", opacity: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 260,
-            damping: 20,
-          }}
-          className={cn(
-            "fixed bottom-0 left-0 right-0 p-2 transition-[height] md:transition-[height,padding] duration-200 ease-linear",
-            !isMobile && open && "pl-64",
-          )}
-        >
-          <div className="border border-primary rounded-lg px-3 py-4 shadow-md grid grid-cols-1 gap-2.5 bg-background">
+    <div
+      className={cn(
+        "fixed bottom-0 left-0 right-0 md:transition-[padding] duration-200 ease-linear",
+        safePaddings,
+        !isMobile && open && "pl-64",
+      )}
+    >
+      <AnimatePresence>
+        {session && (
+          <motion.div
+            initial={{ y: "100%", opacity: 0, scale: 0.8 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            className="border border-primary rounded-lg px-3 py-4 shadow-md grid grid-cols-1 gap-2.5 bg-background"
+          >
             <div className="flex items-center justify-between">
               <div className="grid grid-cols-1 gap-0.5">
                 <p className="text-foreground leading-tight">
@@ -98,9 +99,9 @@ export function CurrentReadingSession() {
                 <AbandonReadingSession />
               </div>
             )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
