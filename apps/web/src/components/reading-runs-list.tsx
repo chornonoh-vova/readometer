@@ -56,6 +56,7 @@ export function ReadingRunsList({
               totalPages={book.totalPages}
             />
             <BookProgress
+              title={`${book.title}, reading #${readingRuns.length - idx}`}
               completedPages={readingRun.completedPages}
               totalPages={book.totalPages}
             />

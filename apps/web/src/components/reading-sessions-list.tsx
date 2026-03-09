@@ -27,7 +27,7 @@ export function ReadingSessionsList({
       {Object.entries(groupedSessions).map(([day, sessions]) => (
         <Fragment key={day}>
           <h4 className="text-sm">{day}</h4>
-          <ul role="group" className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-1">
             {sessions?.map((readingSession) => (
               <ReadingSessionItem
                 key={readingSession.id}

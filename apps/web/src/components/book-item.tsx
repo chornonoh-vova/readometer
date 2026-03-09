@@ -42,6 +42,7 @@ export function BookItem({ book }: { book: Book }) {
           totalPages={book.totalPages}
         />
         <BookProgress
+          title={book.title}
           completedPages={book.completedPages}
           totalPages={book.totalPages}
         />

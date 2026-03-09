@@ -1,9 +1,11 @@
 import { Progress } from "./ui/progress";
 
 export function BookProgress({
+  title,
   completedPages,
   totalPages,
 }: {
+  title: string;
   completedPages: number;
   totalPages: number;
 }) {
@@ -15,7 +17,11 @@ export function BookProgress({
         {completedPages} / {totalPages}
       </span>
       <span className="text-right">{percentage} %</span>
-      <Progress className="col-span-2" value={percentage} />
+      <Progress
+        className="col-span-2"
+        value={percentage}
+        aria-label={`Progress for ${title}`}
+      />
     </div>
   );
 }
