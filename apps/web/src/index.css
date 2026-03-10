@@ -156,3 +156,15 @@
     min-width: 0;
   }
 }
+
+@utility bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0);
+}
+
+@utility left-safe {
+  left: env(safe-area-inset-left, 0);
+}
+
+@utility right-safe {
+  right: env(safe-area-inset-right, 0);
+}

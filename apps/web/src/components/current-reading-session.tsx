@@ -64,14 +64,10 @@ export function CurrentReadingSession() {
     };
   }, [session]);
 
-  const safePaddings =
-    "p-2 pl-[calc(8px+env(safe-area-inset-left))] pr-[calc(8px+env(safe-area-inset-right))] pb-[calc(8px+env(safe-area-inset-bottom))]";
-
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 md:transition-[padding] duration-200 ease-linear",
-        safePaddings,
+        "fixed bottom-safe left-safe right-safe p-2 md:transition-[padding] duration-200 ease-linear",
         !isMobile && open && "pl-64",
       )}
     >
