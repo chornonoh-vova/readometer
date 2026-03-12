@@ -72,7 +72,7 @@ const createBookSchema = z.object({
   author: z.string().trim().optional(),
   totalPages: z.number().positive(),
   publishDate: z.iso.date().optional(),
-  isbn: isbnSchema,
+  isbn: isbnSchema.optional(),
   language: z.string().trim().optional(),
 });
 

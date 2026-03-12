@@ -80,8 +80,8 @@ export function CurrentReadingSession() {
             className="border border-primary rounded-lg px-3 py-4 shadow-md grid grid-cols-1 gap-2.5 bg-background"
           >
             <div className="flex items-center justify-between">
-              <div className="grid grid-cols-1 gap-0.5">
-                <p className="text-foreground leading-tight">
+              <div className="flex flex-col gap-0.5 items-start">
+                <p className="text-sm text-foreground leading-tight">
                   {session.book.title}
                 </p>
                 <ReadingTimer time={readingTime} />

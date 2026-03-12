@@ -22,7 +22,7 @@ function AnimatedDigit({ value }: { value: string }) {
 export function ReadingTimer({ time }: { time: number }) {
   const readingTime = formatReadingTime(time);
   return (
-    <p className="inline-flex items-center text-sm tabular-nums">
+    <p className="bg-muted rounded-sm inline-flex items-center text-sm tabular-nums px-1">
       {readingTime.split("").map((char, i) => {
         const key = `${char}-${i}`;
         return char === ":" ? (

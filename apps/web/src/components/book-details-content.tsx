@@ -9,7 +9,9 @@ import { BookDescriptionDialog } from "./book-description-dialog";
 
 function BookInfo({ children }: { children: ReactNode }) {
   return (
-    <li className="bg-muted rounded px-2 py-1 text-sm max-w-fit">{children}</li>
+    <li className="bg-muted rounded-sm px-2 py-1 text-sm max-w-fit">
+      {children}
+    </li>
   );
 }
 
