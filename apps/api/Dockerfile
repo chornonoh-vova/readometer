@@ -13,8 +13,13 @@ WORKDIR /app
 COPY --from=prepare /app/out/json/ .
 RUN bun install
 COPY --from=prepare /app/out/full/ .
-WORKDIR /app/apps/api
-RUN bun build src/index.ts --compile --outfile api
+
+ARG TURBO_TEAM
+ENV TURBO_TEAM=$TURBO_TEAM
+ARG TURBO_TOKEN
+ENV TURBO_TOKEN=$TURBO_TOKEN
+
+RUN bun turbo build --filter=api
 
 FROM base AS runner
 WORKDIR /app

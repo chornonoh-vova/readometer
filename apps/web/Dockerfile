@@ -13,6 +13,11 @@ COPY --from=prepare /app/out/json/ .
 RUN bun install
 COPY --from=prepare /app/out/full/ .
 
+ARG TURBO_TEAM
+ENV TURBO_TEAM=$TURBO_TEAM
+ARG TURBO_TOKEN
+ENV TURBO_TOKEN=$TURBO_TOKEN
+
 RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
   bun turbo build --filter=web
 
