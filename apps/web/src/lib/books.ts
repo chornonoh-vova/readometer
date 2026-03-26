@@ -15,6 +15,8 @@ export type Book = {
   totalPages: number;
   publishDate?: string;
   isbn13?: string;
+  coverId?: string;
+  coverColor?: string;
   language?: string;
   updatedAt: string;
   createdAt: string;

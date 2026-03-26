@@ -1,5 +1,8 @@
 # deps
 node_modules/
 
+# storage
+storage/
+
 # binary
 api

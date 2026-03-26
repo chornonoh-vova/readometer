@@ -12,7 +12,7 @@ export function BookProgress({
   const percentage = Math.floor((completedPages / totalPages) * 100);
 
   return (
-    <div className="grid grid-cols-2 text-muted-foreground text-xs flex-1">
+    <div className="grid grid-cols-2 text-muted-foreground text-xs gap-1">
       <span>
         {completedPages} / {totalPages}
       </span>

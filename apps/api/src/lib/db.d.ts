@@ -30,6 +30,8 @@ export interface Account {
 
 export interface Book {
   author: string | null;
+  coverColor: string | null;
+  coverId: string | null;
   createdAt: Generated<Timestamp>;
   description: string | null;
   id: string;

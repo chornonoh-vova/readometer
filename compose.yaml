@@ -18,6 +18,12 @@ services:
       - TRUSTED_ORIGINS=https://readometer.app
       - DATABASE_URL=${DATABASE_URL}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
+      - STORAGE_PATH=/storage
+    volumes:
+      - storage_data:/storage
   web:
     image: ghcr.io/chornonoh-vova/readometer-web:latest
     restart: unless-stopped
+
+volumes:
+  storage_data:

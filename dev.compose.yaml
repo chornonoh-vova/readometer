@@ -24,7 +24,7 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=${DATABASE_URL}
-    command: /app/api migrate
+    command: bun /app/dist/index.js migrate
   api:
     build:
       context: .
@@ -44,6 +44,9 @@ services:
       - TRUSTED_ORIGINS=http://readometer.local
       - DATABASE_URL=${DATABASE_URL}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
+      - STORAGE_PATH=/storage
+    volumes:
+      - ./apps/api/storage:/storage
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`readometer.local`) && PathPrefix(`/api`)"
