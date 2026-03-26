@@ -4,7 +4,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
-    command: /app/api migrate
+    command: bun /app/dist/index.js migrate
   api:
     image: ghcr.io/chornonoh-vova/readometer-api:latest
     restart: unless-stopped

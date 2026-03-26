@@ -30,8 +30,6 @@ WORKDIR /app
 
 COPY --from=builder /app/apps/api/dist ./dist
 RUN bun add sharp
-
-USER bun
 EXPOSE 3000/tcp
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
   CMD curl -sf http://localhost:3000/api/healthz || exit 1
