@@ -1,18 +1,28 @@
+import type { ComponentPropsWithoutRef } from "react";
 import { Progress } from "./ui/progress";
+import { cn } from "@/lib/utils";
 
 export function BookProgress({
   title,
   completedPages,
   totalPages,
+  className,
+  ...rest
 }: {
   title: string;
   completedPages: number;
   totalPages: number;
-}) {
+} & ComponentPropsWithoutRef<"div">) {
   const percentage = Math.floor((completedPages / totalPages) * 100);
 
   return (
-    <div className="grid grid-cols-2 text-muted-foreground text-xs gap-1">
+    <div
+      className={cn(
+        "grid grid-cols-2 text-muted-foreground text-xs gap-1",
+        className,
+      )}
+      {...rest}
+    >
       <span>
         {completedPages} / {totalPages}
       </span>

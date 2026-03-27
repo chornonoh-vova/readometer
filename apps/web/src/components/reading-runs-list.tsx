@@ -24,76 +24,78 @@ export function ReadingRunsList({
   readingRuns: ReadingRun[];
 }) {
   return (
-    <>
-      {readingRuns.map((readingRun, idx) => (
-        <section
-          key={readingRun.id}
-          className="flex flex-col gap-2 md:rounded-md border-y md:border md:px-4 py-2"
-        >
-          <div className="flex gap-1.5 items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Reading #{readingRuns.length - idx}
-            </h2>
+    <ul>
+      {readingRuns.map((readingRun, idx) => {
+        const num = readingRuns.length - idx;
+        return (
+          <li
+            key={readingRun.id}
+            className="flex flex-col gap-2 md:rounded-md border-y md:border md:px-4 py-2"
+          >
+            <div className="flex gap-1.5 items-center justify-between">
+              <h2 className="text-lg font-semibold">Reading #{num}</h2>
 
-            <StartReadingSession book={book} readingRun={readingRun} />
-          </div>
+              <StartReadingSession book={book} readingRun={readingRun} />
+            </div>
 
-          <div className="flex gap-1.5 items-center text-sm">
-            <CalendarIcon className="size-4" />
-            Started: {formatDate(readingRun.startedAt)}
-          </div>
-
-          {readingRun.finishedAt && (
             <div className="flex gap-1.5 items-center text-sm">
               <CalendarIcon className="size-4" />
-              Finished: {formatDate(readingRun.finishedAt)}
+              Started: {formatDate(readingRun.startedAt)}
             </div>
-          )}
 
-          <div className="flex gap-2">
-            <BookStatus
-              completedPages={readingRun.completedPages}
-              totalPages={book.totalPages}
-            />
-            <BookProgress
-              title={`${book.title}, reading #${readingRuns.length - idx}`}
-              completedPages={readingRun.completedPages}
-              totalPages={book.totalPages}
-            />
-          </div>
+            {readingRun.finishedAt && (
+              <div className="flex gap-1.5 items-center text-sm">
+                <CalendarIcon className="size-4" />
+                Finished: {formatDate(readingRun.finishedAt)}
+              </div>
+            )}
 
-          <Separator className="mt-2" />
-
-          <Collapsible
-            defaultOpen={
-              idx === 0 || readingRun.completedPages < book.totalPages
-            }
-          >
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <h3 className="text-sm font-semibold">Sessions</h3>
-              <CollapsibleTrigger
-                render={
-                  <Button variant="ghost" size="icon">
-                    <ChevronsUpDownIcon />
-                    <span className="sr-only">
-                      Toggle sessions for run {idx + 1}
-                    </span>
-                  </Button>
-                }
+            <div className="flex gap-2">
+              <BookStatus
+                completedPages={readingRun.completedPages}
+                totalPages={book.totalPages}
+              />
+              <BookProgress
+                title={`${book.title}, reading #${num}`}
+                completedPages={readingRun.completedPages}
+                totalPages={book.totalPages}
+                className="flex-1"
               />
             </div>
-            <CollapsibleContent>
-              <Suspense fallback={<ReadingSessionsLoading />}>
-                <ReadingSessionsList
-                  runId={readingRun.id}
-                  bookId={readingRun.bookId}
-                  totalPages={book.totalPages}
+
+            <Separator className="mt-2" />
+
+            <Collapsible
+              defaultOpen={
+                idx === 0 || readingRun.completedPages < book.totalPages
+              }
+            >
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <h3 className="text-sm font-semibold">Sessions</h3>
+                <CollapsibleTrigger
+                  render={
+                    <Button variant="ghost" size="icon">
+                      <ChevronsUpDownIcon />
+                      <span className="sr-only">
+                        Toggle sessions for run {num}
+                      </span>
+                    </Button>
+                  }
                 />
-              </Suspense>
-            </CollapsibleContent>
-          </Collapsible>
-        </section>
-      ))}
-    </>
+              </div>
+              <CollapsibleContent>
+                <Suspense fallback={<ReadingSessionsLoading />}>
+                  <ReadingSessionsList
+                    runId={readingRun.id}
+                    bookId={readingRun.bookId}
+                    totalPages={book.totalPages}
+                  />
+                </Suspense>
+              </CollapsibleContent>
+            </Collapsible>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
