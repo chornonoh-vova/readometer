@@ -16,6 +16,7 @@ services:
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
+    image: readometer-api:dev
     depends_on:
       postgres:
         condition: service_healthy
@@ -26,9 +27,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
     command: bun /app/dist/index.js migrate
   api:
-    build:
-      context: .
-      dockerfile: ./apps/api/Dockerfile
+    image: readometer-api:dev
     depends_on:
       postgres:
         condition: service_healthy

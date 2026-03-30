@@ -1,9 +1,4 @@
 FROM oven/bun:1 AS base
-RUN apt-get update && apt-get install -y \
-  curl \
-  libvips \
-  --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 FROM base AS prepare
@@ -25,7 +20,12 @@ ENV TURBO_TOKEN=$TURBO_TOKEN
 
 RUN bun turbo build --filter=api
 
-FROM base AS runner
+FROM oven/bun:1 AS runner
+RUN apt-get update && apt-get install -y \
+  curl \
+  libvips \
+  --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY --from=builder /app/apps/api/dist ./dist
