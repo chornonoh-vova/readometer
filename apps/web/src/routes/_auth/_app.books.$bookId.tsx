@@ -1,4 +1,5 @@
 import { BookDetailsContent } from "@/components/book-details-content";
+import { BookDetailsMenu } from "@/components/book-details-menu";
 import { PageHeader, PageHeaderName } from "@/components/page-header";
 import {
   Breadcrumb,
@@ -12,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   bookDetailsQueryOptions,
   useBookDetailsSuspenseQuery,
+  type Book,
+  type BookDetails,
 } from "@/lib/books";
 import {
   readingRunsQueryOptions,
@@ -28,22 +31,24 @@ export const Route = createFileRoute("/_auth/_app/books/$bookId")({
   },
 });
 
-function BookDetailsHeader({ title }: { title: string }) {
+function BookDetailsHeader({ book }: { book?: BookDetails }) {
   return (
     <PageHeader>
       <PageHeaderName>
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="flex-nowrap">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to="/">Books</Link>} />
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{title}</BreadcrumbPage>
+            <BreadcrumbItem className="truncate">
+              <BreadcrumbPage>{book?.title ?? "Loading"}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </PageHeaderName>
+
+      {book && <BookDetailsMenu book={book as Book} />}
     </PageHeader>
   );
 }
@@ -51,7 +56,7 @@ function BookDetailsHeader({ title }: { title: string }) {
 function BookLoading() {
   return (
     <>
-      <BookDetailsHeader title="Loading..." />
+      <BookDetailsHeader />
       <div className="px-4 flex flex-col gap-2">
         <Skeleton className="h-14 w-full" />
         <Skeleton className="h-7 w-3/4" />
@@ -67,7 +72,7 @@ function Book() {
   const { data: readingRuns } = useReadingRunsSuspenseQuery(bookId);
   return (
     <>
-      <BookDetailsHeader title={book.title} />
+      <BookDetailsHeader book={book} />
       <BookDetailsContent book={book} readingRuns={readingRuns} />
     </>
   );

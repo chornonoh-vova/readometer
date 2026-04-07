@@ -4,11 +4,11 @@ import { SidebarTrigger } from "./ui/sidebar";
 
 export function PageHeaderName({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap1 lg:gap-2">
+    <div className="flex items-center gap-1">
       <SidebarTrigger />
       <Separator
         orientation="vertical"
-        className="mr-2 my-auto data-[orientation=vertical]:h-4"
+        className="mr-1.5 my-auto data-[orientation=vertical]:h-4"
       />
       {children}
     </div>

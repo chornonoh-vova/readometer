@@ -20,6 +20,8 @@ export function NavMain() {
             <SidebarMenuButton className={active} render={<Link to="/" />}>
               <BookMarkedIcon /> Books
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton
               className={active}
               render={<Link to="/activity" />}
