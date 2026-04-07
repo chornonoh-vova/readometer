@@ -1,23 +1,14 @@
 import type { ReactNode } from "react";
-import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 
 export function PageHeaderName({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex items-center gap-1">
-      <SidebarTrigger />
-      <Separator
-        orientation="vertical"
-        className="mr-1.5 my-auto data-[orientation=vertical]:h-4"
-      />
-      {children}
-    </div>
-  );
+  return <div className="mr-auto min-w-0">{children}</div>;
 }
 
 export function PageHeader({ children }: { children: ReactNode }) {
   return (
-    <header className="flex items-center justify-between h-16 w-full px-4">
+    <header className="min-w-0 flex items-center justify-between gap-1 h-16 w-full px-2 md:px-4">
+      <SidebarTrigger />
       {children}
     </header>
   );

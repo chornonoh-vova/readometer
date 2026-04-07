@@ -7,14 +7,16 @@ import { BookItemCover } from "./book-item-cover";
 
 export function BookItem({ book }: { book: Book }) {
   return (
-    <Item variant="outline" className="group" render={<Link to="/books/$bookId" params={{ bookId: book.id }} />}>
+    <Item
+      variant="outline"
+      className="group"
+      render={<Link to="/books/$bookId" params={{ bookId: book.id }} />}
+    >
       <BookItemCover book={book} />
 
       <ItemContent className="gap-2 h-full">
         <div className="flex flex-col gap-1 items-start mb-auto">
-          <ItemTitle className="group-hover:underline">
-            {book.title}
-          </ItemTitle>
+          <ItemTitle className="group-hover:underline">{book.title}</ItemTitle>
           <ItemDescription>{book.author}</ItemDescription>
         </div>
 

@@ -41,8 +41,10 @@ function BookDetailsHeader({ book }: { book?: BookDetails }) {
               <BreadcrumbLink render={<Link to="/">Books</Link>} />
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem className="truncate">
-              <BreadcrumbPage>{book?.title ?? "Loading"}</BreadcrumbPage>
+            <BreadcrumbItem className="min-w-0">
+              <BreadcrumbPage className="truncate">
+                {book?.title ?? "Loading"}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

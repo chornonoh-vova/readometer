@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
-import { Progress } from "./ui/progress";
+import { Progress, ProgressLabel, ProgressValue } from "./ui/progress";
 import { cn } from "@/lib/utils";
 
 export function BookProgress({
@@ -16,22 +16,12 @@ export function BookProgress({
   const percentage = Math.floor((completedPages / totalPages) * 100);
 
   return (
-    <div
-      className={cn(
-        "grid grid-cols-2 text-muted-foreground text-xs gap-1",
-        className,
-      )}
-      {...rest}
-    >
-      <span>
+    <Progress className={cn("gap-1", className)} value={percentage} {...rest}>
+      <ProgressLabel className="text-xs">
+        <span className="sr-only">{title}</span>
         {completedPages} / {totalPages}
-      </span>
-      <span className="text-right">{percentage} %</span>
-      <Progress
-        className="col-span-2"
-        value={percentage}
-        aria-label={`Progress for ${title}`}
-      />
-    </div>
+      </ProgressLabel>
+      <ProgressValue className="text-xs" />
+    </Progress>
   );
 }

@@ -1,9 +1,15 @@
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { EditBookDialog } from "./edit-book-dialog";
 import { DeleteBookAlert } from "./delete-book-alert";
-import type { Book, } from "@/lib/books";
+import type { Book } from "@/lib/books";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 

@@ -50,7 +50,7 @@ export function ReadingRunsList({
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <BookStatus
                 completedPages={readingRun.completedPages}
                 totalPages={book.totalPages}
