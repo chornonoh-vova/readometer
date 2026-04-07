@@ -62,7 +62,11 @@ export function ReadingSessionItem({
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger
             render={
-              <Button variant="outline" size="icon-sm">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label={`Open session #${readingSession.num} menu`}
+              >
                 <MoreHorizontalIcon />
               </Button>
             }

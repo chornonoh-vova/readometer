@@ -8,6 +8,7 @@ import { BookItemCover } from "./book-item-cover";
 export function BookItem({ book }: { book: Book }) {
   return (
     <Item
+      size="sm"
       variant="outline"
       className="group"
       render={<Link to="/books/$bookId" params={{ bookId: book.id }} />}
