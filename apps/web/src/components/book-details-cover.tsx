@@ -1,89 +1,127 @@
-import { fetchApi } from "@/lib/api";
 import type { BookDetails } from "@/lib/books";
 import { cn } from "@/lib/utils";
-import { BookImageIcon, PlusIcon } from "lucide-react";
-import { useRef, type ChangeEvent } from "react";
+import {
+  BookImageIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  RefreshCcwIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { books } from "@/lib/query-keys";
+import {
+  bookCover,
+  uploadBookCover,
+  useUploadBookCoverSuccess,
+} from "@/lib/cover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { DeleteBookCoverAlert } from "./delete-book-cover-alert";
 
 export function BookDetailsCover({
   book,
 }: {
   book: Pick<BookDetails, "id" | "title" | "coverId" | "coverColor">;
 }) {
+  const [deleteBookCoverOpen, setDeleteBookCoverOpen] = useState(false);
   const coverRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
-
-  const hasCover = !!book.coverId;
-  const coverSrc = `/api/covers/${book.coverId}-md.webp`;
-  const coverAlt = `Cover image for book ${book.title}`;
+  const onUploadBookCoverSuccess = useUploadBookCoverSuccess(book.id);
+  const cover = bookCover(book, "md");
 
   const handleUploadClick = () => {
     coverRef.current?.click();
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files![0];
-    const formData = new FormData();
-    formData.append("cover", file);
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
 
-    toast.promise(
-      () =>
-        fetchApi(`/books/${book.id}/cover`, {
-          method: "POST",
-          body: formData,
-        }),
-      {
-        loading: "Uploading cover...",
-        success: () => {
-          queryClient.invalidateQueries({
-            queryKey: books.list,
-          });
-          queryClient.invalidateQueries({
-            queryKey: books.details(book.id),
-          });
-          return {
-            message: "Cover succesfully uploaded!",
-          };
-        },
-        error: "Error uploading book cover",
+    const file = event.target.files[0];
+
+    toast.promise(() => uploadBookCover(book.id, file), {
+      loading: "Uploading cover...",
+      success: () => {
+        onUploadBookCoverSuccess();
+        return {
+          message: "Cover succesfully uploaded!",
+        };
       },
-    );
+      error: "Error uploading book cover",
+    });
 
-    coverRef.current!.value = "";
+    event.target.value = "";
   };
 
   return (
     <div
       className={cn(
-        "flex items-center justify-center aspect-2/3 w-32 sm:w-40 rounded-sm overflow-hidden",
-        !hasCover && "border border-primary border-dashed",
+        "relative flex items-center justify-center aspect-2/3 w-32 sm:w-40 rounded-sm overflow-hidden",
+        !cover && "border border-primary border-dashed",
       )}
       style={{
         backgroundColor: book.coverColor,
       }}
     >
-      {hasCover ? (
-        <img
-          className="object-contain h-full w-full"
-          src={coverSrc}
-          alt={coverAlt}
-        />
+      <input
+        ref={coverRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      {cover ? (
+        <>
+          <img
+            className="object-contain h-full w-full"
+            src={cover.src}
+            alt={cover.alt}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={`Open book cover menu for ${book.title}`}
+                  className="absolute top-1 right-1"
+                >
+                  <MoreHorizontalIcon />
+                </Button>
+              }
+            />
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={handleUploadClick}>
+                  <RefreshCcwIcon /> Replace
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setDeleteBookCoverOpen(true)}
+                >
+                  <Trash2Icon /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DeleteBookCoverAlert
+            bookId={book.id}
+            open={deleteBookCoverOpen}
+            onOpenChange={setDeleteBookCoverOpen}
+          />
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center gap-2">
           <BookImageIcon className="text-primary" />
           <span className="text-center text-xs text-muted-foreground">
             {book.title}
           </span>
-          <input
-            ref={coverRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
           <Button variant="link" onClick={handleUploadClick}>
             <PlusIcon /> Add cover
           </Button>

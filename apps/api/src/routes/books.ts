@@ -59,7 +59,7 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   const found = await bookQuery.executeTakeFirst();
 
   if (!found) {
-    throw new HTTPException(404);
+    throw new HTTPException(404, { message: "Book not found" });
   }
 
   return c.json(found);
@@ -99,8 +99,7 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
 
   const result = await createBookQuery.executeTakeFirst();
 
-  c.status(201);
-  return c.json(result);
+  return c.json(result, 201);
 });
 
 const updateBookSchema = z.object({
@@ -144,10 +143,9 @@ books.put(
     const result = await updateBookQuery.executeTakeFirst();
 
     if (!result) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Book not found" });
     }
 
-    c.status(200);
     return c.json(result);
   },
 );
@@ -164,7 +162,7 @@ books.delete("/:bookId", zValidator("param", bookSchema), async (c) => {
   const result = await deleteBookQuery.executeTakeFirst();
 
   if (!result.numDeletedRows) {
-    throw new HTTPException(404);
+    throw new HTTPException(404, { message: "Book not found" });
   }
 
   return c.body(null, 204);

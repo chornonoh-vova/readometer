@@ -54,11 +54,10 @@ readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
   const result = await createReadingRunQuery.executeTakeFirst();
 
   if (!result) {
-    throw new HTTPException(404);
+    throw new HTTPException(404, { message: "Not found" });
   }
 
-  c.status(201);
-  return c.json(result);
+  return c.json(result, 201);
 });
 
 const runIdSchema = z.object({
@@ -96,10 +95,9 @@ readingRuns.put(
     const result = await updateReadingRunQuery.executeTakeFirst();
 
     if (!result) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Not found" });
     }
 
-    c.status(200);
     return c.json(result);
   },
 );
@@ -116,7 +114,7 @@ readingRuns.delete("/:runId", zValidator("param", runIdSchema), async (c) => {
   const result = await deleteReadingRunQuery.executeTakeFirst();
 
   if (!result.numDeletedRows) {
-    throw new HTTPException(404);
+    throw new HTTPException(404, { message: "Not found" });
   }
 
   return c.body(null, 204);

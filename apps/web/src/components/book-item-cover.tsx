@@ -2,31 +2,30 @@ import type { Book } from "@/lib/books";
 import { ItemMedia } from "./ui/item";
 import { BookImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { bookCover } from "@/lib/cover";
 
 export function BookItemCover({
   book,
 }: {
   book: Pick<Book, "title" | "coverId" | "coverColor">;
 }) {
-  const hasCover = !!book.coverId;
-  const coverSrc = `/api/covers/${book.coverId}-sm.webp`;
-  const coverAlt = `Cover image for book ${book.title}`;
+  const cover = bookCover(book, "sm");
 
   return (
     <ItemMedia
       className={cn(
         "aspect-2/3 w-20 rounded-sm overflow-hidden",
-        !hasCover && "border border-primary border-dashed",
+        !cover && "border border-primary border-dashed",
       )}
       style={{
         backgroundColor: book.coverColor,
       }}
     >
-      {hasCover ? (
+      {cover ? (
         <img
           className="object-contain h-full w-full"
-          src={coverSrc}
-          alt={coverAlt}
+          src={cover.src}
+          alt={cover.alt}
         />
       ) : (
         <div className="flex flex-col items-center justify-center gap-2">

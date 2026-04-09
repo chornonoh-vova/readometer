@@ -56,11 +56,11 @@ readingSessions.post(
       .executeTakeFirst()) ?? { totalPages: null };
 
     if (totalPages === null) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Not found" });
     }
 
     if (request.endPage > totalPages) {
-      throw new HTTPException(400);
+      throw new HTTPException(400, { message: "Incorrect end page" });
     }
 
     try {
@@ -96,11 +96,10 @@ readingSessions.post(
           .executeTakeFirst();
       });
 
-      c.status(201);
-      return c.json(result);
+      return c.json(result, 201);
     } catch (error) {
       console.error(error);
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Not found" });
     }
   },
 );
@@ -136,7 +135,7 @@ readingSessions.put(
       .executeTakeFirst()) ?? { id: null };
 
     if (runId === null) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Run not found" });
     }
 
     const { totalPages } = (await db
@@ -147,11 +146,11 @@ readingSessions.put(
       .executeTakeFirst()) ?? { totalPages: null };
 
     if (totalPages === null) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Book not found" });
     }
 
     if (request.endPage && request.endPage > totalPages) {
-      throw new HTTPException(400);
+      throw new HTTPException(400, { message: "Incorrect end page" });
     }
 
     try {
@@ -193,11 +192,10 @@ readingSessions.put(
           .executeTakeFirst();
       });
 
-      c.status(200);
       return c.json(result);
     } catch (error) {
       console.error(error);
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Not found" });
     }
   },
 );
@@ -217,7 +215,7 @@ readingSessions.delete(
     const result = await deleteReadingSessionQuery.executeTakeFirst();
 
     if (!result.numDeletedRows) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, { message: "Session not found" });
     }
 
     return c.body(null, 204);
