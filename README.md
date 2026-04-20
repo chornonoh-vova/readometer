@@ -1,135 +1,119 @@
-# Turborepo starter
+# Readometer
 
-This Turborepo starter is maintained by the Turborepo core team.
+Readometer is a reading tracker. It lets you catalogue your
+books, log reading runs and sessions, and visualise your daily reading
+activity as a yearly heatmap.
 
-## Using this example
+The project is a [Turborepo](https://turborepo.com) monorepo managed with
+[Bun](https://bun.com) workspaces.
 
-Run the following command:
+## Repository layout
+
+```
+readometer/
+├── apps/
+│   ├── api/         # Hono + Bun REST API (see apps/api/README.md)
+│   └── web/         # React + Vite PWA frontend (see apps/web/README.md)
+├── packages/
+│   └── isbn/        # Shared ISBN-10/13 validator and normalizer
+├── compose.yaml     # Production compose stack (published images)
+└── dev.compose.yaml # Local compose stack with Postgres + Traefik
+```
+
+## Stack
+
+- **Runtime & tooling**: Bun, Turborepo, TypeScript
+- **API**: [Hono](https://hono.dev), [Kysely](https://kysely.dev),
+  [Better Auth](https://better-auth.com) with Cloudflare Turnstile captcha,
+  [Sharp](https://sharp.pixelplumbing.com) for cover images, PostgreSQL
+- **Web**: React 19, Vite, Tailwind CSS v4, shadcn/ui, TanStack Router,
+  TanStack Query, TanStack Form, Zustand, `vite-plugin-pwa`
+- **Deployment**: Docker images published to GHCR
+  (`ghcr.io/chornonoh-vova/readometer-api`,
+  `ghcr.io/chornonoh-vova/readometer-web`)
+
+## Prerequisites
+
+- [Bun](https://bun.com) ≥ 1.3 (pinned via `packageManager`)
+- Node.js ≥ 18 (for tools that need it)
+- PostgreSQL 18 (or run via `dev.compose.yaml`)
+- A Cloudflare Turnstile site key/secret — the `sample.env` files include
+  dummy test keys that always pass.
+
+## Getting started
 
 ```sh
-npx create-turbo@latest
+# Install workspace dependencies
+bun install
+
+# Copy environment samples
+cp sample.env .env
+cp apps/api/sample.env apps/api/.env
+cp apps/web/sample.env apps/web/.env
+
+# Start Postgres (the dev compose file also includes it)
+docker compose -f dev.compose.yaml up postgres -d
+
+# Run database migrations
+bun --cwd apps/api run db:migrate
+
+# Start everything in watch mode
+bun run dev
 ```
 
-## What's inside?
+The web app will be served on <http://localhost:5173> and the API on
+<http://localhost:3000>. Vite proxies `/api` to the API server, so no CORS
+setup is needed in development.
 
-This Turborepo includes the following packages/apps:
+## Turborepo tasks
 
-### Apps and Packages
+All tasks are wired through `turbo.json` and run across the whole workspace.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```sh
+bun run dev         # turbo run dev     — start all apps in watch mode
+bun run build       # turbo run build   — build every package/app
+bun run typecheck   # turbo run typecheck
+bun run lint        # turbo run lint
+bun run test        # turbo run test
+bun run fmt         # turbo run fmt     — prettier --write
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Filter to a single workspace with `--filter`:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```sh
+bun run build --filter=api
+bun run dev   --filter=web
+bun run test  --filter=isbn
 ```
 
-### Develop
+## Environment variables
 
-To develop all apps and packages, run the following command:
+Root `.env` (consumed by `dev.compose.yaml` / `compose.yaml`):
 
-```
-cd my-turborepo
+| Variable               | Purpose                                     |
+| ---------------------- | ------------------------------------------- |
+| `BETTER_AUTH_SECRET`   | Better Auth session signing secret          |
+| `DATABASE_URL`         | Postgres connection string                  |
+| `TURNSTILE_SITE_KEY`   | Cloudflare Turnstile site key (web build)   |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret (API)           |
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+See `apps/api/sample.env` and `apps/web/sample.env` for per-app variables.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+## Deployment
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+The production stack lives in `compose.yaml` and pulls pre-built images
+from GHCR. The `migration` service runs `bun dist/index.js migrate` once
+and exits; the `api` service starts only after the migration completes
+successfully. Cover images are persisted to a named `storage_data` volume
+mounted at `/storage`.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+To build locally with Traefik routing on `readometer.local`, use
+`dev.compose.yaml` (add `127.0.0.1 readometer.local` to `/etc/hosts`).
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+## CI/CD
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- `.github/workflows/ci.yaml` — lint, typecheck, and test on every PR and
+  `main` push.
+- `.github/workflows/docker.yaml` — on a successful CI run against `main`,
+  builds `apps/api` and `apps/web` for `linux/amd64` and `linux/arm64`,
+  and publishes to GHCR tagged with both the commit SHA and `latest`.

@@ -63,3 +63,5 @@ export function start() {
 
   console.log(`Listening on ${server.url}`);
 }
+
+export default app;

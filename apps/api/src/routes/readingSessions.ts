@@ -64,7 +64,7 @@ readingSessions.post(
     }
 
     try {
-      const result = db.transaction().execute(async (trx) => {
+      const result = await db.transaction().execute(async (trx) => {
         await trx
           .updateTable("readingRun")
           .set({
@@ -154,7 +154,7 @@ readingSessions.put(
     }
 
     try {
-      const result = db.transaction().execute(async (trx) => {
+      const result = await db.transaction().execute(async (trx) => {
         if (request.endPage && request.updateRun) {
           await trx
             .updateTable("readingRun")
