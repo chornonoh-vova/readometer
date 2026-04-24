@@ -12,7 +12,9 @@ export type TestUser = {
   updatedAt: Date;
 };
 
-export async function makeUser(overrides: Partial<TestUser> = {}): Promise<TestUser> {
+export async function makeUser(
+  overrides: Partial<TestUser> = {},
+): Promise<TestUser> {
   const now = new Date();
   const user: TestUser = {
     id: overrides.id ?? randomUUID(),

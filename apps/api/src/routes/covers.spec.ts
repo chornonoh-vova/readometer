@@ -37,11 +37,9 @@ describe("/api/covers static serving", () => {
   it("rejects path-traversal attempts with 404", async () => {
     const user = await makeUser();
 
-    const response = await call(
-      "GET",
-      "/api/covers/..%2F..%2Fetc%2Fpasswd",
-      { as: user },
-    );
+    const response = await call("GET", "/api/covers/..%2F..%2Fetc%2Fpasswd", {
+      as: user,
+    });
 
     expect(response.status).toBe(404);
   });

@@ -288,14 +288,10 @@ describe("/api/reading-sessions", () => {
     it("returns 404 for a missing session", async () => {
       const user = await makeUser();
 
-      const response = await call(
-        "PUT",
-        `/api/reading-sessions/${uuidv7()}`,
-        {
-          as: user,
-          body: { updateRun: false },
-        },
-      );
+      const response = await call("PUT", `/api/reading-sessions/${uuidv7()}`, {
+        as: user,
+        body: { updateRun: false },
+      });
 
       expect(response.status).toBe(404);
     });

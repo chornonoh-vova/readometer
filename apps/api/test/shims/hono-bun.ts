@@ -41,7 +41,8 @@ export function serveStatic(opts: ServeStaticOptions = {}): MiddlewareHandler {
       return;
     }
 
-    const type = MIME[extname(requested).toLowerCase()] ?? "application/octet-stream";
+    const type =
+      MIME[extname(requested).toLowerCase()] ?? "application/octet-stream";
     const body = await readFile(requested);
     return c.body(new Uint8Array(body), 200, { "content-type": type });
   };

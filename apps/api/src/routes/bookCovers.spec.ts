@@ -159,12 +159,12 @@ describe("/api/books/:bookId/cover", () => {
       });
       expect(deleteResp.status).toBe(204);
 
-      expect(
-        existsSync(join(coversDir(), `${uploaded.coverId}-sm.webp`)),
-      ).toBe(false);
-      expect(
-        existsSync(join(coversDir(), `${uploaded.coverId}-md.webp`)),
-      ).toBe(false);
+      expect(existsSync(join(coversDir(), `${uploaded.coverId}-sm.webp`))).toBe(
+        false,
+      );
+      expect(existsSync(join(coversDir(), `${uploaded.coverId}-md.webp`))).toBe(
+        false,
+      );
 
       const row = await db
         .selectFrom("book")

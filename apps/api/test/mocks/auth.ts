@@ -18,21 +18,22 @@ export function setAuthenticatedUser(user: TestUser | null) {
 }
 
 export function installAuthMock() {
-  (auth.api as unknown as { getSession: typeof auth.api.getSession }).getSession =
-    vi.fn(async () => {
-      if (!currentUser) return null;
-      return {
-        user: currentUser,
-        session: {
-          id: "test-session-id",
-          userId: currentUser.id,
-          token: "test-token",
-          expiresAt: new Date(Date.now() + 3_600_000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          ipAddress: null,
-          userAgent: null,
-        },
-      };
-    }) as unknown as typeof auth.api.getSession;
+  (
+    auth.api as unknown as { getSession: typeof auth.api.getSession }
+  ).getSession = vi.fn(async () => {
+    if (!currentUser) return null;
+    return {
+      user: currentUser,
+      session: {
+        id: "test-session-id",
+        userId: currentUser.id,
+        token: "test-token",
+        expiresAt: new Date(Date.now() + 3_600_000),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ipAddress: null,
+        userAgent: null,
+      },
+    };
+  }) as unknown as typeof auth.api.getSession;
 }

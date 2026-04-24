@@ -28,18 +28,18 @@ session-based authentication.
 All routes are mounted under `/api`. Everything except `/healthz`,
 `/readyz`, and `/auth/*` is gated by the `requireAuth` middleware.
 
-| Route                       | Purpose                                             |
-| --------------------------- | --------------------------------------------------- |
-| `GET  /healthz`             | Liveness probe                                      |
-| `GET  /readyz`              | Readiness probe — `SELECT 1` against Postgres       |
-| `*    /auth/*`              | Better Auth handler (sign-up, sign-in, sessions)    |
-| `GET  /me`                  | Current user + session                              |
-| `GET/POST/PUT/DELETE /books`| Book CRUD                                           |
-| `POST/DELETE /books/:id/cover` | Upload or delete a book cover                    |
-| `GET  /covers/*`            | Serves files from `STORAGE_PATH`                    |
-| `GET  /reading-activity`    | Aggregated daily reading stats for a given year     |
-| `GET/POST/PUT/DELETE /reading-runs` | Reading runs (a pass through a book)        |
-| `GET/POST/PUT/DELETE /reading-sessions` | Individual reading sessions             |
+| Route                                   | Purpose                                          |
+| --------------------------------------- | ------------------------------------------------ |
+| `GET  /healthz`                         | Liveness probe                                   |
+| `GET  /readyz`                          | Readiness probe — `SELECT 1` against Postgres    |
+| `*    /auth/*`                          | Better Auth handler (sign-up, sign-in, sessions) |
+| `GET  /me`                              | Current user + session                           |
+| `GET/POST/PUT/DELETE /books`            | Book CRUD                                        |
+| `POST/DELETE /books/:id/cover`          | Upload or delete a book cover                    |
+| `GET  /covers/*`                        | Serves files from `STORAGE_PATH`                 |
+| `GET  /reading-activity`                | Aggregated daily reading stats for a given year  |
+| `GET/POST/PUT/DELETE /reading-runs`     | Reading runs (a pass through a book)             |
+| `GET/POST/PUT/DELETE /reading-sessions` | Individual reading sessions                      |
 
 `reading-sessions` writes are transactional: creating or updating a
 session also updates its parent `readingRun.completedPages`, and sets
@@ -78,16 +78,16 @@ the `migrate` CLI subcommand, so production deployments never need
 
 See `sample.env` for a working development configuration.
 
-| Variable               | Required | Description                                           |
-| ---------------------- | -------- | ----------------------------------------------------- |
-| `PORT`                 | no       | Defaults to `3000`                                    |
-| `NODE_ENV`             | no       | `development` enables verbose route logging           |
-| `DATABASE_URL`         | yes      | Postgres connection string                            |
-| `BETTER_AUTH_SECRET`   | yes      | Session signing secret                                |
-| `BETTER_AUTH_URL`      | yes      | Public URL of the deployment                          |
-| `TRUSTED_ORIGINS`      | no       | Comma-separated CORS allowlist (defaults to above)    |
-| `TURNSTILE_SECRET_KEY` | yes      | Cloudflare Turnstile secret                           |
-| `STORAGE_PATH`         | yes      | Directory for cover images (`sm`/`md` WebP variants)  |
+| Variable               | Required | Description                                          |
+| ---------------------- | -------- | ---------------------------------------------------- |
+| `PORT`                 | no       | Defaults to `3000`                                   |
+| `NODE_ENV`             | no       | `development` enables verbose route logging          |
+| `DATABASE_URL`         | yes      | Postgres connection string                           |
+| `BETTER_AUTH_SECRET`   | yes      | Session signing secret                               |
+| `BETTER_AUTH_URL`      | yes      | Public URL of the deployment                         |
+| `TRUSTED_ORIGINS`      | no       | Comma-separated CORS allowlist (defaults to above)   |
+| `TURNSTILE_SECRET_KEY` | yes      | Cloudflare Turnstile secret                          |
+| `STORAGE_PATH`         | yes      | Directory for cover images (`sm`/`md` WebP variants) |
 
 ## Docker
 

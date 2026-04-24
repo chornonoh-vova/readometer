@@ -77,11 +77,9 @@ describe("/api/books", () => {
     it("returns 404 for a missing book", async () => {
       const user = await makeUser();
 
-      const response = await call(
-        "GET",
-        `/api/books/${uuidv7()}`,
-        { as: user },
-      );
+      const response = await call("GET", `/api/books/${uuidv7()}`, {
+        as: user,
+      });
 
       expect(response.status).toBe(404);
     });

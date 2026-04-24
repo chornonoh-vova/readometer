@@ -67,9 +67,9 @@ During `dev`, Vite proxies `/api` to `http://localhost:3000` (see
 
 See `sample.env`. Only one build-time variable is needed:
 
-| Variable                  | Required | Description                     |
-| ------------------------- | -------- | ------------------------------- |
-| `VITE_TURNSTILE_SITE_KEY` | yes      | Cloudflare Turnstile site key   |
+| Variable                  | Required | Description                   |
+| ------------------------- | -------- | ----------------------------- |
+| `VITE_TURNSTILE_SITE_KEY` | yes      | Cloudflare Turnstile site key |
 
 The sample value is Cloudflare's always-passing testing key.
 
