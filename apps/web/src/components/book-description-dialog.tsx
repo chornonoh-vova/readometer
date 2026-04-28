@@ -49,7 +49,11 @@ export function BookDescriptionDialog({
       trigger={<BookDescriptionTrigger />}
       title={dialogTitle}
       description={dialogDescription}
-      close={<Button variant="outline">Close</Button>}
+      close={
+        <Button variant="outline" className="flex-1">
+          Close
+        </Button>
+      }
     >
       <BookDescriptionContent
         description={description}

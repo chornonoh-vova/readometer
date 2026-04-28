@@ -233,7 +233,7 @@ function Sidebar({
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
-          "pt-[max(env(safe-area-inset-top),calc(var(--spacing)*2))] pb-[max(env(safe-area-inset-bottom),calc(var(--spacing)*2))] pl-[max(env(safe-area-inset-left),calc(var(--spacing)*2))]",
+          "pt-[calc(env(safe-area-inset-top)+var(--spacing)*2)] pb-[calc(env(safe-area-inset-bottom)+var(--spacing)*2)] pl-[calc(env(safe-area-inset-left)+var(--spacing)*2)]",
           className,
         )}
         {...props}

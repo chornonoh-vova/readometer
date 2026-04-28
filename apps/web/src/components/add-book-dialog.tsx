@@ -20,12 +20,12 @@ export function AddBookDialog({
       title={title}
       description={description}
       close={
-        <Button type="button" variant="secondary">
+        <Button type="button" variant="secondary" className="flex-1">
           Cancel
         </Button>
       }
       action={
-        <Button type="submit" form="add-book-form">
+        <Button type="submit" form="add-book-form" className="flex-1">
           Create
         </Button>
       }

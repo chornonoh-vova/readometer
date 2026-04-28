@@ -62,7 +62,12 @@ export function ResponsiveDrawerDialog({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer
+      handleOnly
+      repositionInputs={false}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent>
         <DrawerHeader>
@@ -70,7 +75,7 @@ export function ResponsiveDrawerDialog({
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         {children}
-        <DrawerFooter className="pt-2">
+        <DrawerFooter>
           <DrawerClose asChild>{close}</DrawerClose>
           {action}
         </DrawerFooter>
