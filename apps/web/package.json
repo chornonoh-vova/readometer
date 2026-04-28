@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "eslint .",
     "fmt": "prettier . --write",
     "preview": "vite preview",
