@@ -37,7 +37,7 @@ export interface Book {
   id: string;
   isbn13: string | null;
   language: string | null;
-  publishDate: Timestamp | null;
+  publishDate: string | null;
   title: string;
   totalPages: number;
   updatedAt: Generated<Timestamp>;

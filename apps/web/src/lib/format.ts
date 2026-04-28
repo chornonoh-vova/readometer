@@ -20,6 +20,29 @@ export function formatTime(date: string) {
   return format(new Date(date), "HH:mm");
 }
 
+export function formatPartialDate(value: string): string {
+  return value;
+}
+
+export function buildPartialDate(
+  year: number | undefined,
+  month: number | undefined,
+  day: number | undefined,
+): string | undefined {
+  if (year === undefined) return undefined;
+  const y = String(year).padStart(4, "0");
+  if (month === undefined) return y;
+  const m = String(month).padStart(2, "0");
+  if (day === undefined) return `${y}-${m}`;
+  const d = String(day).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export function splitPartialDate(value: string | undefined) {
+  const [year = "", month = "", day = ""] = (value ?? "").split("-");
+  return { year, month, day };
+}
+
 export function formatReadingTime(readingTime: number) {
   const hours = Math.floor(readingTime / 3600);
   const minutes = Math.floor((readingTime % 3600) / 60)

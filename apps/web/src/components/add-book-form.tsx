@@ -1,4 +1,5 @@
 import { useAddBookMutation } from "@/lib/books";
+import { buildPartialDate } from "@/lib/format";
 import { langToEmoji, langToName } from "@/lib/lang";
 import { useForm } from "@tanstack/react-form";
 import { isbnSchema } from "isbn";
@@ -33,15 +34,51 @@ const optionalInput = <T extends z.core.SomeType>(schema: T) =>
     .transform((val) => (val === "" ? undefined : val))
     .optional();
 
-const addBookFormSchema = z.object({
-  title: z.string().trim().nonempty(),
-  totalPages: z.number().positive(),
-  author: optionalInput(z.string().trim()),
-  language: optionalInput(z.string().trim()),
-  publishDate: optionalInput(z.iso.date()),
-  isbn: optionalInput(isbnSchema),
-  description: optionalInput(z.string().trim()),
-});
+const intInRange = (min: number, max: number) =>
+  z
+    .string()
+    .regex(/^\d+$/, "Must be a number")
+    .transform(Number)
+    .pipe(z.number().int().min(min).max(max));
+
+const addBookFormSchema = z
+  .object({
+    title: z.string().trim().nonempty(),
+    totalPages: z.number().positive(),
+    author: optionalInput(z.string().trim()),
+    language: optionalInput(z.string().trim()),
+    publishYear: optionalInput(intInRange(1, 9999)),
+    publishMonth: optionalInput(intInRange(1, 12)),
+    publishDay: optionalInput(intInRange(1, 31)),
+    isbn: optionalInput(isbnSchema),
+    description: optionalInput(z.string().trim()),
+  })
+  .refine(
+    (data) => data.publishMonth === undefined || data.publishYear !== undefined,
+    {
+      message: "Year is required when month is set",
+      path: ["publishYear"],
+    },
+  )
+  .refine(
+    (data) => data.publishDay === undefined || data.publishMonth !== undefined,
+    {
+      message: "Month is required when day is set",
+      path: ["publishMonth"],
+    },
+  )
+  .refine(
+    ({ publishYear: y, publishMonth: m, publishDay: d }) => {
+      if (y === undefined || m === undefined || d === undefined) return true;
+      const date = new Date(Date.UTC(y, m - 1, d));
+      return (
+        date.getUTCFullYear() === y &&
+        date.getUTCMonth() === m - 1 &&
+        date.getUTCDate() === d
+      );
+    },
+    { message: "Invalid date", path: ["publishDay"] },
+  );
 
 export function AddBookForm({
   className,
@@ -58,7 +95,9 @@ export function AddBookForm({
     totalPages: 0,
     author: "",
     language: "",
-    publishDate: "",
+    publishYear: "",
+    publishMonth: "",
+    publishDay: "",
     isbn: "",
     description: "",
   };
@@ -70,13 +109,20 @@ export function AddBookForm({
     },
     onSubmit: ({ value }) => {
       const data = addBookFormSchema.parse(value);
+      const { publishYear, publishMonth, publishDay, ...rest } = data;
+      const publishDate = buildPartialDate(
+        publishYear,
+        publishMonth,
+        publishDay,
+      );
 
       setErrorMessage("");
 
       mutation.mutate(
         {
           id: uuidv7(),
-          ...data,
+          ...rest,
+          publishDate,
         },
         {
           onSuccess: () => {
@@ -233,34 +279,120 @@ export function AddBookForm({
           }}
         />
 
-        <form.Field
-          name="publishDate"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+        <Field>
+          <FieldLabel>Publish date</FieldLabel>
+          <FieldDescription>
+            Date, when the book was published. Year is required if month or day
+            is set.
+          </FieldDescription>
+          <div className="grid grid-cols-3 gap-2">
+            <form.Field
+              name="publishYear"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
 
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Publish date</FieldLabel>
-                <FieldDescription>
-                  Date, when the book was published
-                </FieldDescription>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  type="date"
-                  aria-invalid={isInvalid}
-                  placeholder="Publish date"
-                  autoComplete="off"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        />
+                return (
+                  <div className="flex flex-col gap-1" data-invalid={isInvalid}>
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      Year
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="number"
+                      inputMode="numeric"
+                      aria-invalid={isInvalid}
+                      placeholder="YYYY"
+                      autoComplete="off"
+                      min={1}
+                      max={9999}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </div>
+                );
+              }}
+            />
+            <form.Field
+              name="publishMonth"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <div className="flex flex-col gap-1" data-invalid={isInvalid}>
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      Month
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="number"
+                      inputMode="numeric"
+                      aria-invalid={isInvalid}
+                      placeholder="MM"
+                      autoComplete="off"
+                      min={1}
+                      max={12}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </div>
+                );
+              }}
+            />
+            <form.Field
+              name="publishDay"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <div className="flex flex-col gap-1" data-invalid={isInvalid}>
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      Day
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      type="number"
+                      inputMode="numeric"
+                      aria-invalid={isInvalid}
+                      placeholder="DD"
+                      autoComplete="off"
+                      min={1}
+                      max={31}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </div>
+                );
+              }}
+            />
+          </div>
+        </Field>
 
         <form.Field
           name="isbn"

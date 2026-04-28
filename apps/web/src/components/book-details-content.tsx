@@ -3,7 +3,7 @@ import { langToEmoji, langToName } from "@/lib/lang";
 import { ReadingRunsEmpty } from "./reading-runs-empty";
 import { ReadingRunsList } from "./reading-runs-list";
 import { type ReactNode } from "react";
-import { formatDate } from "@/lib/format";
+import { formatPartialDate } from "@/lib/format";
 import type { ReadingRun } from "@/lib/reading-runs";
 import { BookDescriptionDialog } from "./book-description-dialog";
 import { BookDetailsCover } from "./book-details-cover";
@@ -44,7 +44,9 @@ export function BookDetailsContent({
             </BookInfo>
           )}
           {book.publishDate && (
-            <BookInfo>Published: {formatDate(book.publishDate)}</BookInfo>
+            <BookInfo>
+              Published: {formatPartialDate(book.publishDate)}
+            </BookInfo>
           )}
           {book.isbn13 && <BookInfo>ISBN-13: {book.isbn13}</BookInfo>}
         </ul>

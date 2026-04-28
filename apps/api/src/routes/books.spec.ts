@@ -151,6 +151,49 @@ describe("/api/books", () => {
 
       expect(response.status).toBe(400);
     });
+
+    it.each([
+      ["year only", "2020"],
+      ["year and month", "2020-04"],
+      ["full date", "2020-04-15"],
+    ])("persists publishDate as %s", async (_label, publishDate) => {
+      const user = await makeUser();
+      const id = uuidv7();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id, title: "x", totalPages: 100, publishDate },
+      });
+
+      expect(response.status).toBe(201);
+      const body = (await response.json()) as { publishDate: string | null };
+      expect(body.publishDate).toBe(publishDate);
+
+      const row = await db
+        .selectFrom("book")
+        .select("publishDate")
+        .where("id", "=", id)
+        .executeTakeFirstOrThrow();
+      expect(row.publishDate).toBe(publishDate);
+    });
+
+    it.each([
+      ["month-only string", "04"],
+      ["day-only string", "15"],
+      ["impossible month", "2020-13"],
+      ["impossible day", "2020-02-30"],
+      ["non-ISO format", "15/04/2020"],
+      ["empty string", ""],
+    ])("rejects publishDate %s", async (_label, publishDate) => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id: uuidv7(), title: "x", totalPages: 100, publishDate },
+      });
+
+      expect(response.status).toBe(400);
+    });
   });
 
   describe("PUT /api/books/:bookId", () => {
@@ -180,6 +223,39 @@ describe("/api/books", () => {
       expect(new Date(body.updatedAt).getTime()).toBeGreaterThan(
         new Date(book.updatedAt).getTime(),
       );
+    });
+
+    it.each([
+      ["year only", "2020"],
+      ["year and month", "2020-04"],
+      ["full date", "2020-04-15"],
+    ])("updates publishDate to %s", async (_label, publishDate) => {
+      const user = await makeUser();
+      const book = await makeBook({
+        userId: user.id,
+        publishDate: "1999-01-01",
+      });
+
+      const response = await call("PUT", `/api/books/${book.id}`, {
+        as: user,
+        body: { publishDate },
+      });
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { publishDate: string | null };
+      expect(body.publishDate).toBe(publishDate);
+    });
+
+    it("rejects an invalid publishDate", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+
+      const response = await call("PUT", `/api/books/${book.id}`, {
+        as: user,
+        body: { publishDate: "2020-13" },
+      });
+
+      expect(response.status).toBe(400);
     });
 
     it("returns 404 when updating a book owned by another user", async () => {

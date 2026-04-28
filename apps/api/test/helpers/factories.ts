@@ -36,7 +36,7 @@ type MakeBookInput = {
   description?: string | null;
   author?: string | null;
   totalPages?: number;
-  publishDate?: Date | null;
+  publishDate?: string | null;
   isbn13?: string | null;
   language?: string | null;
   coverId?: string | null;

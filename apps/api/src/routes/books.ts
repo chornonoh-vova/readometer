@@ -46,6 +46,24 @@ const bookSchema = z.object({
   bookId: z.uuidv7(),
 });
 
+const partialDateSchema = z.string().refine((value) => {
+  const match = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  if (year < 1 || year > 9999) return false;
+  if (match[2] === undefined) return true;
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) return false;
+  if (match[3] === undefined) return true;
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}, "Expected YYYY, YYYY-MM, or YYYY-MM-DD");
+
 books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
   const userId = c.get("user")!.id;
   const bookId = c.req.valid("param").bookId;
@@ -71,7 +89,7 @@ const createBookSchema = z.object({
   description: z.string().trim().optional(),
   author: z.string().trim().optional(),
   totalPages: z.number().positive(),
-  publishDate: z.iso.date().optional(),
+  publishDate: partialDateSchema.optional(),
   isbn: isbnSchema.optional(),
   language: z.string().trim().optional(),
 });
@@ -89,9 +107,7 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
       description: request.description,
       author: request.author,
       totalPages: request.totalPages,
-      publishDate: request.publishDate
-        ? new Date(request.publishDate)
-        : undefined,
+      publishDate: request.publishDate,
       isbn13: normalizeIsbnToIsbn13(request.isbn),
       language: request.language,
     })
@@ -107,7 +123,7 @@ const updateBookSchema = z.object({
   description: z.string().trim().optional(),
   author: z.string().trim().optional(),
   totalPages: z.number().positive().optional(),
-  publishDate: z.iso.date().optional(),
+  publishDate: partialDateSchema.optional(),
   isbn: isbnSchema.optional(),
   language: z.string().trim().optional(),
 });
@@ -129,9 +145,7 @@ books.put(
         description: request.description,
         author: request.author,
         totalPages: request.totalPages,
-        publishDate: request.publishDate
-          ? new Date(request.publishDate)
-          : undefined,
+        publishDate: request.publishDate,
         isbn13: request.isbn ? normalizeIsbnToIsbn13(request.isbn) : undefined,
         language: request.language,
         updatedAt: sql`CURRENT_TIMESTAMP`,
