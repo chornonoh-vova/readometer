@@ -33,21 +33,21 @@ function ContinueReadingSession() {
 export function CurrentReadingSession() {
   const { open, isMobile } = useSidebar();
   const session = useReadingSessionStore((state) => state.session);
-  const [readingTime, setReadingTime] = useState(() => getReadingTime(session));
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    setReadingTime(getReadingTime(session));
-
     if (!session || session.paused) return;
 
     const intervalId = setInterval(() => {
-      setReadingTime(getReadingTime(session));
+      setTick((t) => t + 1);
     }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
   }, [session]);
+
+  const readingTime = getReadingTime(session);
 
   return (
     <div

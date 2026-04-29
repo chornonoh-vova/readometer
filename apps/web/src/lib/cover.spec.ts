@@ -3,7 +3,9 @@ import { bookCover } from "./cover";
 
 describe("bookCover", () => {
   it("returns undefined when the book has no coverId", () => {
-    expect(bookCover({ title: "Foo", coverId: undefined }, "sm")).toBeUndefined();
+    expect(
+      bookCover({ title: "Foo", coverId: undefined }, "sm"),
+    ).toBeUndefined();
   });
 
   it("builds a small cover URL", () => {
