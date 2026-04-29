@@ -1,33 +1,14 @@
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import {
-  useReadingSessionStore,
-  type ReadingSessionState,
-} from "@/store/reading-session";
+import { useReadingSessionStore } from "@/store/reading-session";
 import { useEffect, useState } from "react";
 import { useSidebar } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
+import { getReadingTime } from "@/lib/reading-session";
 import { FinishReadingSession } from "./finish-reading-session";
 import { AnimatePresence, motion } from "motion/react";
 import { ReadingTimer } from "./reading-timer";
 import { AbandonReadingSession } from "./abandon-reading-session";
-
-function getReadingTime(session: ReadingSessionState["session"]) {
-  if (!session) return 0;
-
-  if (session.paused) return session.readTime;
-
-  const lastContinuedAt = session.lastContinuedAt
-    ? new Date(session.lastContinuedAt)
-    : new Date(session.startedAt);
-
-  const current = new Date();
-
-  return (
-    session.readTime +
-    (current.getTime() / 1000 - lastContinuedAt.getTime() / 1000)
-  );
-}
 
 function PauseReadingSession() {
   const pause = useReadingSessionStore((state) => state.pause);
@@ -55,6 +36,10 @@ export function CurrentReadingSession() {
   const [readingTime, setReadingTime] = useState(() => getReadingTime(session));
 
   useEffect(() => {
+    setReadingTime(getReadingTime(session));
+
+    if (!session || session.paused) return;
+
     const intervalId = setInterval(() => {
       setReadingTime(getReadingTime(session));
     }, 1000);

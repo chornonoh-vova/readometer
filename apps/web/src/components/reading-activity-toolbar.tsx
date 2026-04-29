@@ -1,4 +1,3 @@
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useNavigate } from "@tanstack/react-router";
 import { NativeSelect, NativeSelectOption } from "./ui/native-select";
 import {
@@ -12,10 +11,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { SettingsIcon } from "lucide-react";
-
-type DisplayBy = "time" | "pages";
-
-type WeekStart = "monday" | "sunday";
+import { useReadingActivityStore } from "@/store/reading-activity";
 
 const minYear = 2026;
 
@@ -24,14 +20,10 @@ export function ReadingActivityToolbar({ year }: { year: number }) {
 
   const maxYear = new Date().getFullYear() + 1;
 
-  const [displayBy, setDisplayBy] = useLocalStorage<DisplayBy>(
-    "reading-activity-display",
-    "time",
-  );
-  const [weekStart, setWeekStart] = useLocalStorage<WeekStart>(
-    "reading-activity-week-start",
-    "monday",
-  );
+  const displayBy = useReadingActivityStore((state) => state.displayBy);
+  const setDisplayBy = useReadingActivityStore((state) => state.setDisplayBy);
+  const weekStart = useReadingActivityStore((state) => state.weekStart);
+  const setWeekStart = useReadingActivityStore((state) => state.setWeekStart);
 
   return (
     <div className="flex items-end justify-end-safe gap-2">

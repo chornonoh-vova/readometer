@@ -1,8 +1,13 @@
 import type { ReadingActivity } from "@/lib/reading-activity";
 import { cn } from "@/lib/utils";
 import { formatDate, formatReadingTime } from "@/lib/format";
-import { getBucket } from "@/lib/bucket";
-import { getDaysInMonth, getWeekOfMonth } from "date-fns";
+import {
+  getActivityMap,
+  getCalendarPosition,
+  type ActivityMap,
+  type WeekStart,
+} from "@/lib/heatmap";
+import { getDaysInMonth } from "date-fns";
 import { useMemo } from "react";
 import {
   Popover,
@@ -11,21 +16,10 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "./ui/popover";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-
-type ActivityMap = Map<
-  string,
-  {
-    totalReadPages: number;
-    totalReadTime: number;
-    pagesBucket: number;
-    timeBucket: number;
-  }
->;
-
-type DisplayBy = "time" | "pages";
-
-type WeekStart = "monday" | "sunday";
+import {
+  useReadingActivityStore,
+  type DisplayBy,
+} from "@/store/reading-activity";
 
 const bgClass = [
   "bg-activity-default-0",
@@ -34,45 +28,6 @@ const bgClass = [
   "bg-activity-default-3",
   "bg-activity-default-4",
 ];
-
-function getActivityMap(readingActivity: ReadingActivity[]): ActivityMap {
-  const map: ActivityMap = new Map();
-  let maxTime = 0;
-  let maxPages = 0;
-
-  for (const { date, totalReadPages, totalReadTime } of readingActivity) {
-    const readPages = Number(totalReadPages);
-    const readTime = Number(totalReadTime);
-    map.set(formatDate(date), {
-      totalReadPages: readPages,
-      totalReadTime: readTime,
-      pagesBucket: 0,
-      timeBucket: 0,
-    });
-    maxPages = Math.max(maxPages, readPages);
-    maxTime = Math.max(maxTime, readTime);
-  }
-
-  for (const value of map.values()) {
-    value.timeBucket = getBucket(value.totalReadTime, maxTime, bgClass.length);
-    value.pagesBucket = getBucket(
-      value.totalReadPages,
-      maxPages,
-      bgClass.length,
-    );
-  }
-  return map;
-}
-
-function getCalendarPosition(date: Date, weekStart: WeekStart) {
-  const day = date.getDay();
-  const dayOfWeek = weekStart === "monday" ? ((day + 6) % 7) + 1 : day + 1;
-  const week = getWeekOfMonth(date, {
-    weekStartsOn: weekStart === "monday" ? 1 : 0,
-  });
-
-  return { col: dayOfWeek, row: week };
-}
 
 function Day({
   id,
@@ -176,17 +131,11 @@ export function ReadingActivityHeatmap({
   year: number;
   readingActivity: ReadingActivity[];
 }) {
-  const [displayBy] = useLocalStorage<DisplayBy>(
-    "reading-activity-display",
-    "time",
-  );
-  const [weekStart] = useLocalStorage<WeekStart>(
-    "reading-activity-week-start",
-    "monday",
-  );
+  const displayBy = useReadingActivityStore((state) => state.displayBy);
+  const weekStart = useReadingActivityStore((state) => state.weekStart);
 
   const activity = useMemo(
-    () => getActivityMap(readingActivity),
+    () => getActivityMap(readingActivity, bgClass.length),
     [readingActivity],
   );
 

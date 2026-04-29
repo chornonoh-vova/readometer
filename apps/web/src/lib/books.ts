@@ -26,6 +26,15 @@ export type Book = {
 
 export type BookDetails = Omit<Book, "completedPages" | "lastUpdatedAt">;
 
+export function progressPercentage(
+  completedPages: number,
+  totalPages: number,
+): number {
+  if (totalPages <= 0) return 0;
+  if (completedPages >= totalPages) return 100;
+  return Math.floor((completedPages / totalPages) * 100);
+}
+
 async function fetchBooks(): Promise<Book[]> {
   return fetchApi("/books");
 }

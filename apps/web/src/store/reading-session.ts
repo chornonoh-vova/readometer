@@ -1,18 +1,10 @@
 import type { BookDetails } from "@/lib/books";
+import type { ReadingSession } from "@/lib/reading-session";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type ReadingSessionState = {
-  session: {
-    book: BookDetails;
-    runId: string;
-    paused: boolean;
-    startedAt: string;
-    startPage: number;
-    readTime: number;
-    lastPausedAt: string | null;
-    lastContinuedAt: string | null;
-  } | null;
+  session: ReadingSession | null;
   start: (
     book: BookDetails,
     runId: string,

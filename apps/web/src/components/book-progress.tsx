@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { Progress, ProgressLabel, ProgressValue } from "./ui/progress";
 import { cn } from "@/lib/utils";
+import { progressPercentage } from "@/lib/books";
 
 export function BookProgress({
   title,
@@ -13,7 +14,7 @@ export function BookProgress({
   completedPages: number;
   totalPages: number;
 } & ComponentPropsWithoutRef<"div">) {
-  const percentage = Math.floor((completedPages / totalPages) * 100);
+  const percentage = progressPercentage(completedPages, totalPages);
 
   return (
     <Progress className={cn("gap-1", className)} value={percentage} {...rest}>
