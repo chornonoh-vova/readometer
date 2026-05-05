@@ -25,7 +25,7 @@ describe("DeleteReadingSessionAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    expect(screen.getByText("Delete this session?")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Delete this session?" })).toBeInTheDocument();
   });
 
   it("renders the permanent deletion warning", () => {
@@ -66,6 +66,6 @@ describe("DeleteReadingSessionAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    expect(screen.queryByText("Delete this session?")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Delete this session?" })).not.toBeInTheDocument();
   });
 });

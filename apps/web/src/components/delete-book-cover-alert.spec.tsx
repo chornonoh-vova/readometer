@@ -16,7 +16,7 @@ describe("DeleteBookCoverAlert", () => {
       <DeleteBookCoverAlert bookId="b1" open={true} onOpenChange={vi.fn()} />,
     );
     expect(
-      screen.getByText("Delete book cover for this book?"),
+      screen.getByRole("heading", { name: "Delete book cover for this book?" }),
     ).toBeInTheDocument();
   });
 
@@ -41,7 +41,7 @@ describe("DeleteBookCoverAlert", () => {
       <DeleteBookCoverAlert bookId="b1" open={false} onOpenChange={vi.fn()} />,
     );
     expect(
-      screen.queryByText("Delete book cover for this book?"),
+      screen.queryByRole("heading", { name: "Delete book cover for this book?" }),
     ).not.toBeInTheDocument();
   });
 });

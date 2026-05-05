@@ -20,7 +20,7 @@ describe("DeleteBookAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    expect(screen.getByText(/Delete book "Dune"\?/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Delete book "Dune"\?/ })).toBeInTheDocument();
   });
 
   it("renders the permanent deletion warning", () => {
@@ -58,6 +58,6 @@ describe("DeleteBookAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    expect(screen.queryByText(/Delete book/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /Delete book/ })).not.toBeInTheDocument();
   });
 });

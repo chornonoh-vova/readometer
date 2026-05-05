@@ -27,14 +27,14 @@ afterEach(() => {
 describe("ReadingActivityToolbar", () => {
   it("offers years from minYear up through current year", () => {
     render(<ReadingActivityToolbar year={2026} />);
-    const select = screen.getByLabelText("Year") as HTMLSelectElement;
+    const select = screen.getByRole("combobox", { name: "Year" }) as HTMLSelectElement;
     const values = Array.from(select.options).map((o) => o.value);
     expect(values).toEqual(["2026", "2027", "2028", "2029", "2030"]);
   });
 
   it("navigates with the picked year", () => {
     render(<ReadingActivityToolbar year={2026} />);
-    const select = screen.getByLabelText("Year");
+    const select = screen.getByRole("combobox", { name: "Year" });
     fireEvent.change(select, { target: { value: "2028" } });
 
     expect(navigate).toHaveBeenCalledWith({
@@ -45,7 +45,7 @@ describe("ReadingActivityToolbar", () => {
 
   it("reflects the controlled year prop on the select", () => {
     render(<ReadingActivityToolbar year={2028} />);
-    const select = screen.getByLabelText("Year") as HTMLSelectElement;
+    const select = screen.getByRole("combobox", { name: "Year" }) as HTMLSelectElement;
     expect(select.value).toBe("2028");
   });
 

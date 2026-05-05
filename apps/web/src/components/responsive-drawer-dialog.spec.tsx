@@ -28,7 +28,7 @@ describe("ResponsiveDrawerDialog — desktop (Dialog)", () => {
         <p>Dialog body</p>
       </ResponsiveDrawerDialog>,
     );
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Test Title" })).toBeInTheDocument();
     expect(screen.getByText("Test description")).toBeInTheDocument();
     expect(screen.getByText("Dialog body")).toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe("ResponsiveDrawerDialog — mobile (Drawer)", () => {
         <p>Drawer body</p>
       </ResponsiveDrawerDialog>,
     );
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Test Title" })).toBeInTheDocument();
     expect(screen.getByText("Test description")).toBeInTheDocument();
     expect(screen.getByText("Drawer body")).toBeInTheDocument();
   });

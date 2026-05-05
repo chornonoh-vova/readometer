@@ -161,7 +161,7 @@ export function EditBookForm({
         {errorMessage && (
           <Alert variant="destructive">
             <AlertCircleIcon />
-            <AlertTitle>Failed to create a new book: {errorMessage}</AlertTitle>
+            <AlertTitle>Failed to update your book: {errorMessage}</AlertTitle>
           </Alert>
         )}
 

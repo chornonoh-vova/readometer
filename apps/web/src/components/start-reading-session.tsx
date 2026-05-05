@@ -43,7 +43,8 @@ export function StartReadingSession({
   const start = useReadingSessionStore((state) => state.start);
   const addReadingRun = useAddReadingRunMutation();
 
-  const startPage = readingRun?.completedPages ?? 0;
+  const isNewRun = !readingRun || readingRun.completedPages === book.totalPages;
+  const startPage = isNewRun ? 0 : readingRun.completedPages;
   const totalPages = book.totalPages;
 
   const defaultValues: z.input<typeof startReadingSessionSchema> = {
@@ -76,10 +77,7 @@ export function StartReadingSession({
 
       let startReadingRun = readingRun;
 
-      if (
-        !startReadingRun ||
-        startReadingRun.completedPages === book.totalPages
-      ) {
+      if (isNewRun) {
         try {
           startReadingRun = await addReadingRun.mutateAsync({
             id: uuidv7(),
@@ -108,7 +106,7 @@ export function StartReadingSession({
 
       setOpen(false);
 
-      start(book, startReadingRun.id, startedAt, value.startPage);
+      start(book, startReadingRun!.id, startedAt, value.startPage);
 
       if (navigator.vibrate) {
         navigator.vibrate([20, 30, 20]);

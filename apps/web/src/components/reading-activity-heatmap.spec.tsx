@@ -68,9 +68,9 @@ describe("ReadingActivityHeatmap", () => {
         ]}
       />,
     );
-    const trigger = screen.getByLabelText(
-      /Reading activity for 2026-04-15\. 20 pages, 10:00/,
-    );
+    const trigger = screen.getByRole("button", {
+      name: /Reading activity for 2026-04-15\. 20 pages, 10:00/,
+    });
     expect(trigger.className).toMatch(/bg-activity-default-4/);
   });
 
@@ -85,14 +85,14 @@ describe("ReadingActivityHeatmap", () => {
       />,
     );
 
-    const before = screen.getByLabelText(/Reading activity for 2026-04-15/);
+    const before = screen.getByRole("button", { name: /Reading activity for 2026-04-15/ });
     expect(before.className).toMatch(/bg-activity-default-1/);
 
     act(() => {
       useReadingActivityStore.getState().setDisplayBy("pages");
     });
 
-    const after = screen.getByLabelText(/Reading activity for 2026-04-15/);
+    const after = screen.getByRole("button", { name: /Reading activity for 2026-04-15/ });
     expect(after.className).toMatch(/bg-activity-default-4/);
   });
 });
