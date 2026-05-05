@@ -34,7 +34,7 @@ readingSessions.get(
 const createReadingSessionSchema = z.object({
   id: z.uuidv7(),
   runId: z.uuidv7(),
-  startPage: z.number().positive(),
+  startPage: z.number().nonnegative(),
   endPage: z.number().positive(),
   startTime: z.iso.datetime(),
   endTime: z.iso.datetime(),
@@ -53,6 +53,7 @@ readingSessions.post(
       .select("totalPages")
       .innerJoin("readingRun", "book.id", "readingRun.bookId")
       .where("readingRun.id", "=", request.runId)
+      .where("readingRun.userId", "=", userId)
       .executeTakeFirst()) ?? { totalPages: null };
 
     if (totalPages === null) {
@@ -76,6 +77,7 @@ readingSessions.post(
                 : undefined,
           })
           .where("id", "=", request.runId)
+          .where("userId", "=", userId)
           .returning("id")
           .executeTakeFirstOrThrow();
 
@@ -109,7 +111,7 @@ const sessionIdSchema = z.object({
 });
 
 const updateReadingSessionSchema = z.object({
-  startPage: z.number().positive().optional(),
+  startPage: z.number().nonnegative().optional(),
   endPage: z.number().positive().optional(),
   startTime: z.iso.datetime().optional(),
   endTime: z.iso.datetime().optional(),
@@ -127,46 +129,38 @@ readingSessions.put(
 
     const request = c.req.valid("json");
 
-    const { id: runId } = (await db
-      .selectFrom("readingRun")
-      .select("readingRun.id")
-      .innerJoin("readingSession", "readingRun.id", "readingSession.runId")
+    const found = await db
+      .selectFrom("readingSession")
+      .innerJoin("readingRun", "readingRun.id", "readingSession.runId")
+      .innerJoin("book", "book.id", "readingRun.bookId")
+      .select(["readingRun.id", "book.totalPages"])
       .where("readingSession.id", "=", sessionId)
-      .executeTakeFirst()) ?? { id: null };
+      .where("readingSession.userId", "=", userId)
+      .executeTakeFirst();
 
-    if (runId === null) {
-      throw new HTTPException(404, { message: "Run not found" });
+    if (!found) {
+      throw new HTTPException(404, { message: "Not found" });
     }
 
-    const { totalPages } = (await db
-      .selectFrom("book")
-      .select("totalPages")
-      .innerJoin("readingRun", "book.id", "readingRun.bookId")
-      .where("readingRun.id", "=", runId)
-      .executeTakeFirst()) ?? { totalPages: null };
+    const { id: runId, totalPages } = found;
 
-    if (totalPages === null) {
-      throw new HTTPException(404, { message: "Book not found" });
-    }
-
-    if (request.endPage && request.endPage > totalPages) {
+    if (request.endPage !== undefined && request.endPage > totalPages) {
       throw new HTTPException(400, { message: "Incorrect end page" });
     }
 
     try {
       const result = await db.transaction().execute(async (trx) => {
-        if (request.endPage && request.updateRun) {
+        if (request.endPage !== undefined && request.updateRun) {
           await trx
             .updateTable("readingRun")
             .set({
               completedPages: request.endPage,
               updatedAt: sql`CURRENT_TIMESTAMP`,
               finishedAt:
-                request.endPage === totalPages
-                  ? sql`CURRENT_TIMESTAMP`
-                  : undefined,
+                request.endPage === totalPages ? sql`CURRENT_TIMESTAMP` : null,
             })
             .where("id", "=", runId)
+            .where("userId", "=", userId)
             .returning("id")
             .executeTakeFirstOrThrow();
         }
@@ -177,7 +171,7 @@ readingSessions.put(
             startPage: request.startPage,
             endPage: request.endPage,
             readPages:
-              request.startPage && request.endPage
+              request.startPage !== undefined && request.endPage !== undefined
                 ? request.endPage - request.startPage
                 : undefined,
             startTime: request.startTime

@@ -80,6 +80,7 @@ export function BookDetailsCover({
         <>
           <img
             className="object-contain h-full w-full"
+            loading="lazy"
             src={cover.src}
             alt={cover.alt}
           />

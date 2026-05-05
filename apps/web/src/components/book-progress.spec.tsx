@@ -5,7 +5,11 @@ import { BookProgress } from "./book-progress";
 describe("BookProgress", () => {
   it("renders the X / Y label", () => {
     render(
-      <BookProgress title="Refactoring" completedPages={120} totalPages={400} />,
+      <BookProgress
+        title="Refactoring"
+        completedPages={120}
+        totalPages={400}
+      />,
     );
     expect(screen.getByText("120 / 400")).toBeInTheDocument();
   });

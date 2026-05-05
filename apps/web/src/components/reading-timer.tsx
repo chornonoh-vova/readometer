@@ -23,13 +23,15 @@ export function ReadingTimer({ time }: { time: number }) {
   const readingTime = formatReadingTime(time);
   return (
     <p className="bg-muted rounded-sm inline-flex items-center text-sm tabular-nums px-1">
-      {readingTime.split("").map((char, i) =>
-        char === ":" ? (
-          <span key={i}>{char}</span>
-        ) : (
-          <AnimatedDigit key={i} value={char} />
-        ),
-      )}
+      {readingTime
+        .split("")
+        .map((char, i) =>
+          char === ":" ? (
+            <span key={i}>{char}</span>
+          ) : (
+            <AnimatedDigit key={i} value={char} />
+          ),
+        )}
     </p>
   );
 }

@@ -151,6 +151,75 @@ describe("/api/reading-sessions", () => {
       expect(response.status).toBe(404);
     });
 
+    it("accepts startPage 0 for a session starting at the beginning of a book", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 300 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 0,
+      });
+
+      const now = new Date();
+      const sessionId = uuidv7();
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: sessionId,
+          runId: run.id,
+          startPage: 0,
+          endPage: 40,
+          startTime: now.toISOString(),
+          endTime: new Date(now.getTime() + 60_000).toISOString(),
+          readTime: 60,
+        },
+      });
+
+      expect(response.status).toBe(201);
+
+      const sessionRow = await db
+        .selectFrom("readingSession")
+        .selectAll()
+        .where("id", "=", sessionId)
+        .executeTakeFirstOrThrow();
+      expect(sessionRow.startPage).toBe(0);
+      expect(sessionRow.readPages).toBe(40);
+    });
+
+    it("returns 404 when posting a session for another user's run", async () => {
+      const user = await makeUser();
+      const other = await makeUser();
+      const book = await makeBook({ userId: other.id, totalPages: 300 });
+      const otherRun = await makeRun({
+        userId: other.id,
+        bookId: book.id,
+        completedPages: 10,
+      });
+
+      const now = new Date();
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          runId: otherRun.id,
+          startPage: 10,
+          endPage: 50,
+          startTime: now.toISOString(),
+          endTime: new Date(now.getTime() + 60_000).toISOString(),
+          readTime: 60,
+        },
+      });
+
+      expect(response.status).toBe(404);
+
+      const runRow = await db
+        .selectFrom("readingRun")
+        .selectAll()
+        .where("id", "=", otherRun.id)
+        .executeTakeFirstOrThrow();
+      expect(runRow.completedPages).toBe(10);
+    });
+
     it("is atomic: a duplicate session id leaves the run unchanged", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 500 });
@@ -267,6 +336,71 @@ describe("/api/reading-sessions", () => {
       expect(runRow.completedPages).toBe(50);
     });
 
+    it("clears finishedAt when endPage is edited below totalPages", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 100 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 100,
+        finishedAt: new Date(),
+      });
+      const session = await makeSession({
+        userId: user.id,
+        runId: run.id,
+        startPage: 80,
+        endPage: 100,
+      });
+
+      const response = await call(
+        "PUT",
+        `/api/reading-sessions/${session.id}`,
+        {
+          as: user,
+          body: { endPage: 90, updateRun: true },
+        },
+      );
+
+      expect(response.status).toBe(200);
+
+      const runRow = await db
+        .selectFrom("readingRun")
+        .selectAll()
+        .where("id", "=", run.id)
+        .executeTakeFirstOrThrow();
+      expect(runRow.completedPages).toBe(90);
+      expect(runRow.finishedAt).toBeNull();
+    });
+
+    it("recalculates readPages when both startPage and endPage are updated", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 300 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 50,
+      });
+      const session = await makeSession({
+        userId: user.id,
+        runId: run.id,
+        startPage: 10,
+        endPage: 50,
+      });
+
+      const response = await call(
+        "PUT",
+        `/api/reading-sessions/${session.id}`,
+        {
+          as: user,
+          body: { startPage: 20, endPage: 60, updateRun: false },
+        },
+      );
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { readPages: number };
+      expect(body.readPages).toBe(40);
+    });
+
     it("rejects endPage beyond totalPages with 400", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 100 });
@@ -283,6 +417,25 @@ describe("/api/reading-sessions", () => {
       );
 
       expect(response.status).toBe(400);
+    });
+
+    it("returns 404 when editing another user's session", async () => {
+      const user = await makeUser();
+      const other = await makeUser();
+      const book = await makeBook({ userId: other.id, totalPages: 300 });
+      const run = await makeRun({ userId: other.id, bookId: book.id });
+      const session = await makeSession({ userId: other.id, runId: run.id });
+
+      const response = await call(
+        "PUT",
+        `/api/reading-sessions/${session.id}`,
+        {
+          as: user,
+          body: { endPage: 50, updateRun: false },
+        },
+      );
+
+      expect(response.status).toBe(404);
     });
 
     it("returns 404 for a missing session", async () => {

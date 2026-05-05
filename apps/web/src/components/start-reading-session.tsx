@@ -27,7 +27,7 @@ import * as z from "zod";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 
 const startReadingSessionSchema = z.object({
-  startPage: z.number().positive(),
+  startPage: z.number().nonnegative(),
 });
 
 export function StartReadingSession({

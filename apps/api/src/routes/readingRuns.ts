@@ -31,7 +31,7 @@ readingRuns.get("/", zValidator("query", readingRunsSchema), async (c) => {
 const createReadingRunSchema = z.object({
   id: z.uuidv7(),
   bookId: z.uuidv7(),
-  completedPages: z.number().positive(),
+  completedPages: z.number().nonnegative(),
   startedAt: z.iso.datetime(),
 });
 

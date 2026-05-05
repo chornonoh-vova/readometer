@@ -78,7 +78,7 @@ describe("/api/reading-runs", () => {
       expect(body.userId).toBe(user.id);
     });
 
-    it("rejects zero completedPages", async () => {
+    it("accepts zero completedPages (starting a run from the beginning)", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
 
@@ -92,7 +92,9 @@ describe("/api/reading-runs", () => {
         },
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(201);
+      const body = (await response.json()) as { completedPages: number };
+      expect(body.completedPages).toBe(0);
     });
 
     it("silently accepts a bookId belonging to another user (route does not verify ownership)", async () => {

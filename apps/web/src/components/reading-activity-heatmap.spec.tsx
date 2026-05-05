@@ -35,7 +35,9 @@ describe("ReadingActivityHeatmap", () => {
     const { container } = render(
       <ReadingActivityHeatmap year={2024} readingActivity={[]} />,
     );
-    const grids = container.querySelectorAll(".grid.grid-cols-\\[repeat\\(7\\,20px\\)\\]");
+    const grids = container.querySelectorAll(
+      ".grid.grid-cols-\\[repeat\\(7\\,20px\\)\\]",
+    );
     let totalDays = 0;
     grids.forEach((g) => {
       totalDays += g.children.length;
@@ -47,7 +49,9 @@ describe("ReadingActivityHeatmap", () => {
     const { container } = render(
       <ReadingActivityHeatmap year={2026} readingActivity={[]} />,
     );
-    const grids = container.querySelectorAll(".grid.grid-cols-\\[repeat\\(7\\,20px\\)\\]");
+    const grids = container.querySelectorAll(
+      ".grid.grid-cols-\\[repeat\\(7\\,20px\\)\\]",
+    );
     let totalDays = 0;
     grids.forEach((g) => {
       totalDays += g.children.length;

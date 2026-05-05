@@ -21,7 +21,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 const editReadingSessionFormSchema = z.object({
-  startPage: z.number().positive(),
+  startPage: z.number().nonnegative(),
   endPage: z.number().positive(),
 });
 

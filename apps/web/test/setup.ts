@@ -19,25 +19,31 @@ if (!window.matchMedia) {
 }
 
 if (!("ResizeObserver" in window)) {
-  window.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver;
+  Object.defineProperty(window, "ResizeObserver", {
+    writable: true,
+    value: class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  });
 }
 
 if (!("IntersectionObserver" in window)) {
-  window.IntersectionObserver = class {
-    root = null;
-    rootMargin = "";
-    thresholds = [];
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-    takeRecords() {
-      return [];
-    }
-  } as unknown as typeof IntersectionObserver;
+  Object.defineProperty(window, "IntersectionObserver", {
+    writable: true,
+    value: class {
+      root = null;
+      rootMargin = "";
+      thresholds = [];
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    },
+  });
 }
 
 beforeEach(() => {
