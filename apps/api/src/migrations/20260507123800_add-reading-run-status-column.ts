@@ -6,14 +6,8 @@ import type { Kysely } from "kysely";
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .alterTable("readingRun")
-    .dropConstraint("readingRun_completedPages_check")
-    .execute();
-
-  await db.schema
-    .alterTable("readingRun")
-    .addCheckConstraint(
-      "readingRun_completedPages_check",
-      sql`"completedPages" >= 0`,
+    .addColumn("status", "text", (col) =>
+      col.check(sql`"status" IN ('active','completed','abandoned')`),
     )
     .execute();
 }
@@ -21,16 +15,5 @@ export async function up(db: Kysely<any>): Promise<void> {
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema
-    .alterTable("readingRun")
-    .dropConstraint("readingRun_completedPages_check")
-    .execute();
-
-  await db.schema
-    .alterTable("readingRun")
-    .addCheckConstraint(
-      "readingRun_completedPages_check",
-      sql`"completedPages" > 0`,
-    )
-    .execute();
+  await db.schema.alterTable("readingRun").dropColumn("status").execute();
 }

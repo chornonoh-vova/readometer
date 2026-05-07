@@ -71,7 +71,7 @@ describe("/api/reading-sessions", () => {
       expect(sessionRow.userId).toBe(user.id);
     });
 
-    it("auto-finishes the run when endPage reaches totalPages", async () => {
+    it("auto-finishes the run (status='completed', finishedAt set) when endPage reaches totalPages", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 120 });
       const run = await makeRun({
@@ -103,6 +103,7 @@ describe("/api/reading-sessions", () => {
         .executeTakeFirstOrThrow();
       expect(runRow.completedPages).toBe(120);
       expect(runRow.finishedAt).not.toBeNull();
+      expect(runRow.status).toBe("completed");
     });
 
     it("rejects endPage beyond totalPages with 400", async () => {
@@ -336,7 +337,7 @@ describe("/api/reading-sessions", () => {
       expect(runRow.completedPages).toBe(50);
     });
 
-    it("clears finishedAt when endPage is edited below totalPages", async () => {
+    it("clears finishedAt and resets status to 'active' when endPage is edited below totalPages", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 100 });
       const run = await makeRun({
@@ -344,6 +345,7 @@ describe("/api/reading-sessions", () => {
         bookId: book.id,
         completedPages: 100,
         finishedAt: new Date(),
+        status: "completed",
       });
       const session = await makeSession({
         userId: user.id,
@@ -370,6 +372,7 @@ describe("/api/reading-sessions", () => {
         .executeTakeFirstOrThrow();
       expect(runRow.completedPages).toBe(90);
       expect(runRow.finishedAt).toBeNull();
+      expect(runRow.status).toBe("active");
     });
 
     it("recalculates readPages when both startPage and endPage are updated", async () => {

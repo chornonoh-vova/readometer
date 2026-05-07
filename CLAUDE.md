@@ -36,8 +36,9 @@ cd apps/api && bun run test
 cd apps/web && bun run test
 
 # API-specific
-cd apps/api && bun run db:migrate    # run pending migrations
-cd apps/api && bun run db:generate   # regenerate src/lib/db.d.ts from schema
+cd apps/api && bun run db:migrate              # run pending migrations
+cd apps/api && bun run db:migrate make <name>  # scaffold a new migration file (does not edit migrations/index.ts — register the new file there manually)
+cd apps/api && bun run db:generate             # regenerate src/lib/db.d.ts from schema
 
 # Web-specific
 cd apps/web && bun run dev           # dev server at localhost:5173
@@ -76,6 +77,8 @@ Web proxies `/api` → `http://localhost:3000` via Vite config. Auth uses cookie
 - **Better Auth** handles email+password auth, Cloudflare Turnstile CAPTCHA, and session cookies
 - **Sharp** processes cover images into WebP at 200px and 400px widths, and extracts dominant color
 - Route modules live in `src/routes/`; all authenticated routes check session middleware
+- Reading runs carry a lifecycle `status` of `'active' | 'completed' | 'abandoned'`. `finishedAt` is set when a run leaves `'active'`; `status` is set/reset by `readingSessions` when the run reaches/leaves `totalPages`, and explicitly via `PUT /api/reading-runs/:id`.
+- `/api/goals` stores per-user daily and yearly targets (one row per `(userId, type)`). Progress is **derived** on read by `GET /api/goals/progress?date&tz` from `readingSession` (daily minutes/pages) and `readingRun` (yearly completed books) — never stored. Both `/api/goals/progress` and `/api/reading-activity` accept an IANA `tz` query param and compute calendar-day boundaries with Postgres `AT TIME ZONE`.
 
 **Testing**: Vitest + testcontainers spins up a real PostgreSQL 16 container per test run. Coverage thresholds: lines/statements 85%, functions 80%, branches 70%.
 

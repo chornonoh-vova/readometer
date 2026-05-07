@@ -22,6 +22,8 @@ import readingActivity from "./routes/readingActivity.ts";
 import readingRuns from "./routes/readingRuns.ts";
 import readingSessions from "./routes/readingSessions.ts";
 import bookCover from "./routes/bookCovers.ts";
+import goals from "./routes/goals.ts";
+import { HTTPException } from "hono/http-exception";
 
 const app = new Hono<AppEnv>().basePath("/api");
 
@@ -53,6 +55,13 @@ app.route("/covers", covers);
 app.route("/reading-activity", readingActivity);
 app.route("/reading-runs", readingRuns);
 app.route("/reading-sessions", readingSessions);
+app.route("/goals", goals);
+
+app.onError((err, c) => {
+  console.error(`${err}`);
+  const status = err instanceof HTTPException ? err.status : 500;
+  return c.json({ message: err.message }, status);
+});
 
 export function start() {
   const isDev = process.env.NODE_ENV === "development";

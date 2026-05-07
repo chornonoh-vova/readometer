@@ -47,6 +47,7 @@ readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
       bookId: request.bookId,
       completedPages: request.completedPages,
       startedAt: new Date(request.startedAt),
+      status: "active",
       updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .returningAll();
@@ -67,6 +68,7 @@ const runIdSchema = z.object({
 const updateReadingRunSchema = z.object({
   completedPages: z.number().positive().optional(),
   finishedAt: z.iso.datetime().optional(),
+  status: z.enum(["active", "completed", "abandoned"]).optional(),
 });
 
 readingRuns.put(
@@ -79,13 +81,21 @@ readingRuns.put(
 
     const request = c.req.valid("json");
 
+    const finishedAt =
+      request.finishedAt !== undefined
+        ? new Date(request.finishedAt)
+        : request.status === "completed" || request.status === "abandoned"
+          ? sql<Date>`CURRENT_TIMESTAMP`
+          : request.status === "active"
+            ? null
+            : undefined;
+
     const updateReadingRunQuery = db
       .updateTable("readingRun")
       .set({
         completedPages: request.completedPages,
-        finishedAt: request.finishedAt
-          ? new Date(request.finishedAt)
-          : undefined,
+        finishedAt,
+        status: request.status,
         updatedAt: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", runId)

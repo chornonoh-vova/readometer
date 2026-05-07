@@ -41,6 +41,7 @@ const inProgressRun: ReadingRun = {
   startedAt: "2025-01-01T00:00:00Z",
   updatedAt: "2025-01-01T00:00:00Z",
   finishedAt: null,
+  status: null,
 };
 
 const completedRun: ReadingRun = {
@@ -172,7 +173,7 @@ describe("StartReadingSession", () => {
   });
 
   it("uses the existing run without creating a new one when continuing", async () => {
-    mockStart.mockImplementation(() => {});
+    mockStart.mockImplementation(() => { });
 
     const user = userEvent.setup();
     render(<StartReadingSession book={book} readingRun={inProgressRun} />);

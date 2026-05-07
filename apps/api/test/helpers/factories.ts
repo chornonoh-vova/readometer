@@ -70,6 +70,7 @@ type MakeRunInput = {
   completedPages?: number;
   startedAt?: Date;
   finishedAt?: Date | null;
+  status?: "active" | "completed" | "abandoned";
 };
 
 export async function makeRun(input: MakeRunInput) {
@@ -82,6 +83,7 @@ export async function makeRun(input: MakeRunInput) {
       completedPages: input.completedPages ?? 1,
       startedAt: input.startedAt ?? new Date(),
       finishedAt: input.finishedAt ?? null,
+      status: input.status ?? "active",
     })
     .returningAll()
     .executeTakeFirstOrThrow();

@@ -22,6 +22,7 @@ export type Book = {
   createdAt: string;
   completedPages: number;
   lastUpdatedAt: string;
+  status?: "active" | "completed" | "abandoned";
 };
 
 export type BookDetails = Omit<Book, "completedPages" | "lastUpdatedAt">;
@@ -47,6 +48,13 @@ export function booksQueryOptions() {
   return queryOptions({
     queryKey: books.list,
     queryFn: fetchBooks,
+  });
+}
+
+export function activeBooksQueryOptions() {
+  return queryOptions({
+    ...booksQueryOptions(),
+    select: (books) => books.filter((book) => book.status === "active"),
   });
 }
 

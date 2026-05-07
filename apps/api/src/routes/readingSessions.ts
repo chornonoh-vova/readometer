@@ -66,15 +66,14 @@ readingSessions.post(
 
     try {
       const result = await db.transaction().execute(async (trx) => {
+        const completed = request.endPage === totalPages;
         await trx
           .updateTable("readingRun")
           .set({
             completedPages: request.endPage,
             updatedAt: sql`CURRENT_TIMESTAMP`,
-            finishedAt:
-              request.endPage === totalPages
-                ? sql`CURRENT_TIMESTAMP`
-                : undefined,
+            finishedAt: completed ? sql`CURRENT_TIMESTAMP` : undefined,
+            status: completed ? "completed" : undefined,
           })
           .where("id", "=", request.runId)
           .where("userId", "=", userId)
@@ -151,13 +150,14 @@ readingSessions.put(
     try {
       const result = await db.transaction().execute(async (trx) => {
         if (request.endPage !== undefined && request.updateRun) {
+          const completed = request.endPage === totalPages;
           await trx
             .updateTable("readingRun")
             .set({
               completedPages: request.endPage,
               updatedAt: sql`CURRENT_TIMESTAMP`,
-              finishedAt:
-                request.endPage === totalPages ? sql`CURRENT_TIMESTAMP` : null,
+              finishedAt: completed ? sql`CURRENT_TIMESTAMP` : null,
+              status: completed ? "completed" : "active",
             })
             .where("id", "=", runId)
             .where("userId", "=", userId)

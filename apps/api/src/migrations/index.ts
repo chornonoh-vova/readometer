@@ -8,6 +8,10 @@ import * as addReadingSessionUserIdStartTimeIdx from "./20260301114402_add-readi
 import * as addBookCover from "./20260326140324_add-book-cover.ts";
 import * as changePublishDateToVarchar from "./20260428101858_change-publishdate-to-varchar.ts";
 import * as relaxCompletedPagesCheck from "./20260505000000_relax-completed-pages-check.ts";
+import * as addReadingRunStatusColumn from "./20260507123800_add-reading-run-status-column.ts";
+import * as backfillReadingRunStatus from "./20260507123810_backfill-reading-run-status.ts";
+import * as finalizeReadingRunStatusColumn from "./20260507123816_finalize-reading-run-status-column.ts";
+import * as createGoalTable from "./20260507123822_create-goal-table.ts";
 
 export const migrations = {
   "20260105144757_create-auth-tables": createAuthTables,
@@ -22,4 +26,9 @@ export const migrations = {
   "20260326140324_add-book-cover": addBookCover,
   "20260428101858_change-publishdate-to-varchar": changePublishDateToVarchar,
   "20260505000000_relax-completed-pages-check": relaxCompletedPagesCheck,
+  "20260507123800_add-reading-run-status-column": addReadingRunStatusColumn,
+  "20260507123810_backfill-reading-run-status": backfillReadingRunStatus,
+  "20260507123816_finalize-reading-run-status-column":
+    finalizeReadingRunStatusColumn,
+  "20260507123822_create-goal-table": createGoalTable,
 };

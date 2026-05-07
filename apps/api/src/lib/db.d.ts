@@ -44,12 +44,23 @@ export interface Book {
   userId: string;
 }
 
+export interface Goal {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  metric: string;
+  target: number;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+  userId: string;
+}
+
 export interface ReadingRun {
   bookId: string;
   completedPages: number;
   finishedAt: Timestamp | null;
   id: string;
   startedAt: Generated<Timestamp>;
+  status: Generated<string>;
   updatedAt: Generated<Timestamp>;
   userId: string;
 }
@@ -100,6 +111,7 @@ export interface Verification {
 export interface DB {
   account: Account;
   book: Book;
+  goal: Goal;
   readingRun: ReadingRun;
   readingSession: ReadingSession;
   session: Session;

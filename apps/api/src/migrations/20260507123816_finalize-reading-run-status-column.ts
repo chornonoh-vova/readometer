@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import type { Kysely } from "kysely";
 
 // `any` is required here since migrations should be frozen in time. alternatively, keep a "snapshot" db interface.
@@ -6,15 +5,12 @@ import type { Kysely } from "kysely";
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .alterTable("readingRun")
-    .dropConstraint("readingRun_completedPages_check")
+    .alterColumn("status", (col) => col.setDefault("active"))
     .execute();
 
   await db.schema
     .alterTable("readingRun")
-    .addCheckConstraint(
-      "readingRun_completedPages_check",
-      sql`"completedPages" >= 0`,
-    )
+    .alterColumn("status", (col) => col.setNotNull())
     .execute();
 }
 
@@ -23,14 +19,11 @@ export async function up(db: Kysely<any>): Promise<void> {
 export async function down(db: Kysely<any>): Promise<void> {
   await db.schema
     .alterTable("readingRun")
-    .dropConstraint("readingRun_completedPages_check")
+    .alterColumn("status", (col) => col.dropNotNull())
     .execute();
 
   await db.schema
     .alterTable("readingRun")
-    .addCheckConstraint(
-      "readingRun_completedPages_check",
-      sql`"completedPages" > 0`,
-    )
+    .alterColumn("status", (col) => col.dropDefault())
     .execute();
 }

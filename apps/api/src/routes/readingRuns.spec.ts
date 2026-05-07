@@ -57,7 +57,7 @@ describe("/api/reading-runs", () => {
   });
 
   describe("POST /api/reading-runs", () => {
-    it("creates a run for the caller's book", async () => {
+    it("creates a run for the caller's book with status='active'", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
 
@@ -73,9 +73,14 @@ describe("/api/reading-runs", () => {
       });
 
       expect(response.status).toBe(201);
-      const body = (await response.json()) as { id: string; userId: string };
+      const body = (await response.json()) as {
+        id: string;
+        userId: string;
+        status: string;
+      };
       expect(body.id).toBe(id);
       expect(body.userId).toBe(user.id);
+      expect(body.status).toBe("active");
     });
 
     it("accepts zero completedPages (starting a run from the beginning)", async () => {
@@ -139,6 +144,77 @@ describe("/api/reading-runs", () => {
       };
       expect(body.completedPages).toBe(50);
       expect(body.finishedAt).not.toBeNull();
+    });
+
+    it("sets status='abandoned' and finishedAt when abandoning a run", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 10,
+      });
+
+      const response = await call("PUT", `/api/reading-runs/${run.id}`, {
+        as: user,
+        body: { status: "abandoned" },
+      });
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as {
+        status: string;
+        finishedAt: string | null;
+      };
+      expect(body.status).toBe("abandoned");
+      expect(body.finishedAt).not.toBeNull();
+    });
+
+    it("sets status='completed' and finishedAt when marking complete without an explicit finishedAt", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 10,
+      });
+
+      const response = await call("PUT", `/api/reading-runs/${run.id}`, {
+        as: user,
+        body: { status: "completed" },
+      });
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as {
+        status: string;
+        finishedAt: string | null;
+      };
+      expect(body.status).toBe("completed");
+      expect(body.finishedAt).not.toBeNull();
+    });
+
+    it("clears finishedAt when reverting status to 'active'", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 10,
+        status: "abandoned",
+        finishedAt: new Date(),
+      });
+
+      const response = await call("PUT", `/api/reading-runs/${run.id}`, {
+        as: user,
+        body: { status: "active" },
+      });
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as {
+        status: string;
+        finishedAt: string | null;
+      };
+      expect(body.status).toBe("active");
+      expect(body.finishedAt).toBeNull();
     });
 
     it("returns 404 when updating another user's run", async () => {

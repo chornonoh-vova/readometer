@@ -20,7 +20,7 @@ books.get("/", async (c) => {
       (eb) =>
         eb
           .selectFrom("readingRun")
-          .select(["bookId", "completedPages", "updatedAt"])
+          .select(["bookId", "completedPages", "updatedAt", "status"])
           .whereRef("bookId", "=", "book.id")
           .orderBy("id", "desc")
           .limit(1)
@@ -34,6 +34,7 @@ books.get("/", async (c) => {
       eb.fn
         .coalesce("readingRun.updatedAt", "book.updatedAt")
         .as("lastUpdatedAt"),
+      "readingRun.status",
     ])
     .where("userId", "=", userId)
     .orderBy("lastUpdatedAt", "desc");

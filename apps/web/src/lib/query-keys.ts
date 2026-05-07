@@ -14,5 +14,5 @@ export const readingSessions = {
 };
 
 export const readingActivity = {
-  byYear: (year: number) => ["reading-activity", year],
+  byYear: (year: number, tz: string) => ["reading-activity", year, tz],
 };
