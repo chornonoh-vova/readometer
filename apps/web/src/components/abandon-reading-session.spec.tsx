@@ -16,7 +16,9 @@ describe("AbandonReadingSession", () => {
     const user = userEvent.setup();
     render(<AbandonReadingSession />);
     await user.click(screen.getByRole("button", { name: /abandon/i }));
-    expect(screen.getByRole("heading", { name: "Abandon current session?" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Abandon current session?" }),
+    ).toBeInTheDocument();
   });
 
   it("shows the warning description in the dialog", async () => {

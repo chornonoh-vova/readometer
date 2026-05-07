@@ -52,19 +52,25 @@ function renderForm(book = baseBook, onClose = vi.fn()) {
 describe("EditBookForm", () => {
   it("pre-populates the title field with the book title", () => {
     renderForm();
-    const input = screen.getByRole("textbox", { name: "Book title" }) as HTMLInputElement;
+    const input = screen.getByRole("textbox", {
+      name: "Book title",
+    }) as HTMLInputElement;
     expect(input.value).toBe("Original Title");
   });
 
   it("pre-populates the totalPages field", () => {
     renderForm();
-    const input = screen.getByRole("spinbutton", { name: "Total pages" }) as HTMLInputElement;
+    const input = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    }) as HTMLInputElement;
     expect(input.value).toBe("250");
   });
 
   it("pre-populates the author field", () => {
     renderForm();
-    const input = screen.getByRole("textbox", { name: "Book author" }) as HTMLInputElement;
+    const input = screen.getByRole("textbox", {
+      name: "Book author",
+    }) as HTMLInputElement;
     expect(input.value).toBe("Jane Doe");
   });
 
@@ -108,7 +114,9 @@ describe("EditBookForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
-    expect(screen.getByText(/Failed to update your book: conflict/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Failed to update your book: conflict/),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Failed to create/)).not.toBeInTheDocument();
   });
 });

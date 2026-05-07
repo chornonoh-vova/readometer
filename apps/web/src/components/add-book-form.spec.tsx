@@ -28,23 +28,36 @@ function renderForm(onClose = vi.fn()) {
 describe("AddBookForm", () => {
   it("renders Book title and Total pages fields", () => {
     renderForm();
-    expect(screen.getByRole("textbox", { name: "Book title" })).toBeInTheDocument();
-    expect(screen.getByRole("spinbutton", { name: "Total pages" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Book title" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: "Total pages" }),
+    ).toBeInTheDocument();
   });
 
   it("renders optional fields for author, ISBN, and description", () => {
     renderForm();
-    expect(screen.getByRole("textbox", { name: "Book author" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Book author" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "ISBN" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Description" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Description" }),
+    ).toBeInTheDocument();
   });
 
   it("calls mutate with title and totalPages on valid submit", async () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.type(screen.getByRole("textbox", { name: "Book title" }), "The Great Gatsby");
-    const totalPagesInput = screen.getByRole("spinbutton", { name: "Total pages" });
+    await user.type(
+      screen.getByRole("textbox", { name: "Book title" }),
+      "The Great Gatsby",
+    );
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
     await user.clear(totalPagesInput);
     await user.type(totalPagesInput, "180");
 
@@ -63,8 +76,13 @@ describe("AddBookForm", () => {
     const user = userEvent.setup();
     renderForm(mockOnClose);
 
-    await user.type(screen.getByRole("textbox", { name: "Book title" }), "Dune");
-    const totalPagesInput = screen.getByRole("spinbutton", { name: "Total pages" });
+    await user.type(
+      screen.getByRole("textbox", { name: "Book title" }),
+      "Dune",
+    );
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
     await user.clear(totalPagesInput);
     await user.type(totalPagesInput, "412");
     await user.click(screen.getByRole("button", { name: "Submit" }));
@@ -74,26 +92,38 @@ describe("AddBookForm", () => {
 
   it("shows server error message when mutation fails", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
-      onError?.({ message: "Network error", cause: { message: "Server down" } }),
+      onError?.({
+        message: "Network error",
+        cause: { message: "Server down" },
+      }),
     );
 
     const user = userEvent.setup();
     renderForm();
 
-    await user.type(screen.getByRole("textbox", { name: "Book title" }), "1984");
-    const totalPagesInput = screen.getByRole("spinbutton", { name: "Total pages" });
+    await user.type(
+      screen.getByRole("textbox", { name: "Book title" }),
+      "1984",
+    );
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
     await user.clear(totalPagesInput);
     await user.type(totalPagesInput, "328");
     await user.click(screen.getByRole("button", { name: "Submit" }));
 
-    expect(screen.getByText(/Failed to create a new book: Server down/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Failed to create a new book: Server down/),
+    ).toBeInTheDocument();
   });
 
   it("does not submit when title is empty", async () => {
     const user = userEvent.setup();
     renderForm();
 
-    const totalPagesInput = screen.getByRole("spinbutton", { name: "Total pages" });
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
     await user.clear(totalPagesInput);
     await user.type(totalPagesInput, "100");
     await user.click(screen.getByRole("button", { name: "Submit" }));
@@ -105,8 +135,13 @@ describe("AddBookForm", () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.type(screen.getByRole("textbox", { name: "Book title" }), "Valid Title");
-    const totalPagesInput = screen.getByRole("spinbutton", { name: "Total pages" });
+    await user.type(
+      screen.getByRole("textbox", { name: "Book title" }),
+      "Valid Title",
+    );
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
     await user.clear(totalPagesInput);
     await user.type(totalPagesInput, "0");
     await user.click(screen.getByRole("button", { name: "Submit" }));

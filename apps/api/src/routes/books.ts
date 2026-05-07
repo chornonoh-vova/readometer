@@ -1,11 +1,12 @@
 import { Hono } from "hono";
+import { endTime, startTime } from "hono/timing";
 import { HTTPException } from "hono/http-exception";
+import { sql } from "kysely";
 import type { AppEnv } from "../types.ts";
 import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
 import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "isbn";
-import { sql } from "kysely";
 
 const books = new Hono<AppEnv>();
 
@@ -37,7 +38,9 @@ books.get("/", async (c) => {
     .where("userId", "=", userId)
     .orderBy("lastUpdatedAt", "desc");
 
+  startTime(c, "db");
   const allBooks = await booksQuery.execute();
+  endTime(c, "db");
 
   return c.json(allBooks);
 });

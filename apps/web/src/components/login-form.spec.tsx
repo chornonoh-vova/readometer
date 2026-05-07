@@ -49,12 +49,16 @@ describe("LoginForm", () => {
 
   it("renders a Remember me checkbox", () => {
     render(<LoginForm redirect="/" />);
-    expect(screen.getByRole("checkbox", { name: /remember me/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /remember me/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders the Sign in submit button", () => {
     render(<LoginForm redirect="/" />);
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders a link to the register page", () => {
@@ -71,7 +75,10 @@ describe("LoginForm", () => {
     await fillAndSubmit(user);
 
     expect(mockSignInEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ email: "user@example.com", password: "password123" }),
+      expect.objectContaining({
+        email: "user@example.com",
+        password: "password123",
+      }),
     );
   });
 
@@ -103,7 +110,10 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm redirect="/" />);
 
-    await user.type(screen.getByRole("textbox", { name: "Email" }), "not-an-email");
+    await user.type(
+      screen.getByRole("textbox", { name: "Email" }),
+      "not-an-email",
+    );
     await user.type(screen.getByLabelText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
@@ -114,7 +124,10 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm redirect="/" />);
 
-    await user.type(screen.getByRole("textbox", { name: "Email" }), "user@example.com");
+    await user.type(
+      screen.getByRole("textbox", { name: "Email" }),
+      "user@example.com",
+    );
     await user.type(screen.getByLabelText("Password"), "short");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 

@@ -8,7 +8,10 @@ const mockMutate = vi.fn();
 const mockFinish = vi.fn();
 
 vi.mock("@/lib/reading-sessions", () => ({
-  useAddReadingSessionMutation: () => ({ mutate: mockMutate, isPending: false }),
+  useAddReadingSessionMutation: () => ({
+    mutate: mockMutate,
+    isPending: false,
+  }),
 }));
 
 const { FinishReadingSession } = await import("./finish-reading-session");
@@ -43,7 +46,10 @@ const pausedSession = {
 beforeEach(() => {
   mockMutate.mockClear();
   mockFinish.mockClear();
-  useReadingSessionStore.setState({ session: pausedSession, finish: mockFinish });
+  useReadingSessionStore.setState({
+    session: pausedSession,
+    finish: mockFinish,
+  });
 });
 
 async function openDialogAndSetEndPage(
@@ -53,7 +59,9 @@ async function openDialogAndSetEndPage(
   render(<FinishReadingSession />);
   await user.click(screen.getByRole("button", { name: /^finish$/i }));
   const dialog = screen.getByRole("dialog");
-  const endPageInput = within(dialog).getByRole("spinbutton", { name: "End page" });
+  const endPageInput = within(dialog).getByRole("spinbutton", {
+    name: "End page",
+  });
   await user.clear(endPageInput);
   await user.type(endPageInput, endPage);
   return { dialog };
@@ -72,7 +80,9 @@ describe("FinishReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /^finish$/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Finish reading session" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Finish reading session" }),
+    ).toBeInTheDocument();
   });
 
   it("shows an End page label in the dialog", async () => {
@@ -81,7 +91,9 @@ describe("FinishReadingSession", () => {
 
     await user.click(screen.getByRole("button", { name: /^finish$/i }));
 
-    expect(screen.getByRole("spinbutton", { name: "End page" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: "End page" }),
+    ).toBeInTheDocument();
   });
 
   it("defaults end page to the session startPage", async () => {
@@ -90,7 +102,9 @@ describe("FinishReadingSession", () => {
 
     await user.click(screen.getByRole("button", { name: /^finish$/i }));
 
-    const input = screen.getByRole("spinbutton", { name: "End page" }) as HTMLInputElement;
+    const input = screen.getByRole("spinbutton", {
+      name: "End page",
+    }) as HTMLInputElement;
     expect(input.value).toBe("40");
   });
 

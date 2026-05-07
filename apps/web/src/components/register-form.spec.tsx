@@ -33,7 +33,10 @@ beforeEach(() => {
 
 async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByRole("textbox", { name: "Name" }), "Alice Smith");
-  await user.type(screen.getByRole("textbox", { name: "Email" }), "alice@example.com");
+  await user.type(
+    screen.getByRole("textbox", { name: "Email" }),
+    "alice@example.com",
+  );
   await user.type(screen.getByLabelText("Password"), "securepassword");
   await user.click(screen.getByRole("button", { name: /sign up/i }));
 }
@@ -48,7 +51,9 @@ describe("RegisterForm", () => {
 
   it("renders the Sign up submit button", () => {
     render(<RegisterForm />);
-    expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign up/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders a link to the login page", () => {
@@ -102,7 +107,10 @@ describe("RegisterForm", () => {
     render(<RegisterForm />);
 
     await user.type(screen.getByRole("textbox", { name: "Name" }), "Alice");
-    await user.type(screen.getByRole("textbox", { name: "Email" }), "alice@example.com");
+    await user.type(
+      screen.getByRole("textbox", { name: "Email" }),
+      "alice@example.com",
+    );
     await user.type(screen.getByLabelText("Password"), "short");
     await user.click(screen.getByRole("button", { name: /sign up/i }));
 
@@ -113,7 +121,10 @@ describe("RegisterForm", () => {
     const user = userEvent.setup();
     render(<RegisterForm />);
 
-    await user.type(screen.getByRole("textbox", { name: "Email" }), "alice@example.com");
+    await user.type(
+      screen.getByRole("textbox", { name: "Email" }),
+      "alice@example.com",
+    );
     await user.type(screen.getByLabelText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign up/i }));
 

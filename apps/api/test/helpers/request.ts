@@ -2,6 +2,8 @@ import app from "../../src/app";
 import { setAuthenticatedUser } from "../mocks/auth";
 import type { TestUser } from "./factories";
 
+const ORIGIN = "http://localhost";
+
 export type CallOptions = {
   as?: TestUser;
   body?: unknown;
@@ -16,7 +18,10 @@ export async function call(
 ): Promise<Response> {
   setAuthenticatedUser(opts.as ?? null);
 
-  const headers: Record<string, string> = { ...opts.headers };
+  const headers: Record<string, string> = {
+    origin: ORIGIN,
+    ...opts.headers,
+  };
   let body: string | FormData | undefined;
 
   if (opts.formData) {

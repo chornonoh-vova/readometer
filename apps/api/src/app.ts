@@ -1,14 +1,17 @@
 import { Hono } from "hono";
 import type { AppEnv } from "./types";
 import { cors } from "hono/cors";
+import { csrf } from "hono/csrf";
 import { auth, trustedOrigins } from "./lib/auth";
 import { compress } from "hono/compress";
 import { logger } from "hono/logger";
 import { showRoutes } from "hono/dev";
 import { requestId } from "hono/request-id";
+import { timing } from "hono/timing";
+import { secureHeaders } from "hono/secure-headers";
 
-import session from "./middlewares/session.ts";
-import requireAuth from "./middlewares/requireAuth.ts";
+import { session } from "./middlewares/session.ts";
+import { requireAuth } from "./middlewares/requireAuth.ts";
 
 import healthz from "./routes/healthz.ts";
 import readyz from "./routes/readyz.ts";
@@ -28,17 +31,20 @@ app.use(
     credentials: true,
   }),
 );
+app.use(csrf());
 app.use(compress());
 app.use(logger());
-app.use("*", requestId());
-app.use("*", session);
+app.use(timing());
+app.use(secureHeaders());
+app.use(requestId());
+app.use(session());
 
 app.route("/healthz", healthz);
 app.route("/readyz", readyz);
 
 app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
 
-app.use("*", requireAuth);
+app.use("*", requireAuth());
 
 app.route("/me", me);
 app.route("/books", books);

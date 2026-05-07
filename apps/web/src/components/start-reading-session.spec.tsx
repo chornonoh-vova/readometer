@@ -58,17 +58,23 @@ beforeEach(() => {
 describe("StartReadingSession", () => {
   it("shows Start button when there is no reading run", () => {
     render(<StartReadingSession book={book} />);
-    expect(screen.getByRole("button", { name: /^start$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^start$/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows Continue button when an in-progress run exists", () => {
     render(<StartReadingSession book={book} readingRun={inProgressRun} />);
-    expect(screen.getByRole("button", { name: /continue/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /continue/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows Restart button when the book is completed", () => {
     render(<StartReadingSession book={book} readingRun={completedRun} />);
-    expect(screen.getByRole("button", { name: /restart/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /restart/i }),
+    ).toBeInTheDocument();
   });
 
   it("disables the button when a session is already active", () => {
@@ -85,7 +91,9 @@ describe("StartReadingSession", () => {
       },
     });
     render(<StartReadingSession book={book} readingRun={inProgressRun} />);
-    expect(screen.getByRole("button", { name: /reading\.\.\./i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /reading\.\.\./i }),
+    ).toBeDisabled();
   });
 
   it("opens the dialog when the Start button is clicked", async () => {
@@ -95,7 +103,9 @@ describe("StartReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /^start$/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Start reading session" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Start reading session" }),
+    ).toBeInTheDocument();
   });
 
   it("defaults start page to 0 when there is no run", async () => {
@@ -105,7 +115,9 @@ describe("StartReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /^start$/i }));
 
     const dialog = screen.getByRole("dialog");
-    const input = within(dialog).getByRole("spinbutton", { name: "Start page" }) as HTMLInputElement;
+    const input = within(dialog).getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
     expect(input.value).toBe("0");
     expect(input).toHaveAttribute("min", "0");
   });
@@ -117,7 +129,9 @@ describe("StartReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
     const dialog = screen.getByRole("dialog");
-    const input = within(dialog).getByRole("spinbutton", { name: "Start page" }) as HTMLInputElement;
+    const input = within(dialog).getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
     expect(input.value).toBe("50");
     expect(input).toHaveAttribute("min", "50");
   });
@@ -129,7 +143,9 @@ describe("StartReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /restart/i }));
 
     const dialog = screen.getByRole("dialog");
-    const input = within(dialog).getByRole("spinbutton", { name: "Start page" }) as HTMLInputElement;
+    const input = within(dialog).getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
     expect(input.value).toBe("0");
     expect(input).toHaveAttribute("min", "0");
   });
@@ -147,7 +163,12 @@ describe("StartReadingSession", () => {
     expect(mockMutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ bookId: "book-1", completedPages: 0 }),
     );
-    expect(mockStart).toHaveBeenCalledWith(book, "new-run-1", expect.any(String), 0);
+    expect(mockStart).toHaveBeenCalledWith(
+      book,
+      "new-run-1",
+      expect.any(String),
+      0,
+    );
   });
 
   it("uses the existing run without creating a new one when continuing", async () => {
@@ -161,6 +182,11 @@ describe("StartReadingSession", () => {
     await user.click(within(dialog).getByRole("button", { name: /^start$/i }));
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
-    expect(mockStart).toHaveBeenCalledWith(book, "run-1", expect.any(String), 50);
+    expect(mockStart).toHaveBeenCalledWith(
+      book,
+      "run-1",
+      expect.any(String),
+      50,
+    );
   });
 });

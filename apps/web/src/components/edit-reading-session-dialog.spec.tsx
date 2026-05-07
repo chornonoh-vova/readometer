@@ -6,10 +6,14 @@ import type { ReadingSession } from "@/lib/reading-sessions";
 const mockMutate = vi.fn();
 
 vi.mock("@/lib/reading-sessions", () => ({
-  useEditReadingSessionMutation: () => ({ mutate: mockMutate, isPending: false }),
+  useEditReadingSessionMutation: () => ({
+    mutate: mockMutate,
+    isPending: false,
+  }),
 }));
 
-const { EditReadingSessionDialog } = await import("./edit-reading-session-dialog");
+const { EditReadingSessionDialog } =
+  await import("./edit-reading-session-dialog");
 
 const session: ReadingSession = {
   id: "session-1",
@@ -57,8 +61,12 @@ function renderDialog(
 describe("EditReadingSessionDialog", () => {
   it("pre-populates startPage and endPage from the session", () => {
     renderDialog();
-    const startPageInput = screen.getByRole("spinbutton", { name: "Start page" }) as HTMLInputElement;
-    const endPageInput = screen.getByRole("spinbutton", { name: "End page" }) as HTMLInputElement;
+    const startPageInput = screen.getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
+    const endPageInput = screen.getByRole("spinbutton", {
+      name: "End page",
+    }) as HTMLInputElement;
     expect(startPageInput.value).toBe("20");
     expect(endPageInput.value).toBe("60");
   });
@@ -112,7 +120,9 @@ describe("EditReadingSessionDialog", () => {
 
     await user.click(screen.getByRole("button", { name: /update/i }));
 
-    expect(screen.getByText(/Failed to edit a reading session: Bad request/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Failed to edit a reading session: Bad request/),
+    ).toBeInTheDocument();
   });
 
   it("does not call mutate when endPage exceeds totalPages", async () => {
@@ -129,6 +139,8 @@ describe("EditReadingSessionDialog", () => {
 
   it("renders nothing when closed", () => {
     renderDialog({ open: false });
-    expect(screen.queryByRole("spinbutton", { name: "Start page" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: "Start page" }),
+    ).not.toBeInTheDocument();
   });
 });

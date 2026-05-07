@@ -6,6 +6,10 @@ import { extname, join, normalize, resolve, sep } from "node:path";
 type ServeStaticOptions = {
   root?: string;
   rewriteRequestPath?: (path: string) => string;
+  onFound?: (
+    path: string,
+    c: Parameters<MiddlewareHandler>[0],
+  ) => void | Promise<void>;
 };
 
 const MIME: Record<string, string> = {
@@ -43,8 +47,10 @@ export function serveStatic(opts: ServeStaticOptions = {}): MiddlewareHandler {
 
     const type =
       MIME[extname(requested).toLowerCase()] ?? "application/octet-stream";
+    c.header("Content-Type", type);
+    await opts.onFound?.(requested, c);
     const body = await readFile(requested);
-    return c.body(new Uint8Array(body), 200, { "content-type": type });
+    return c.body(new Uint8Array(body));
   };
 }
 
