@@ -1,84 +1,61 @@
+import { useDeleteGoalMutation, useUpsertGoalMutation } from "@/lib/goals";
+import { useForm } from "@tanstack/react-form";
+import { v7 as uuidv7 } from "uuid";
 import { useState } from "react";
+import * as z from "zod";
+import { getErrorMessage } from "@/lib/error";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { AlertCircleIcon, FlagIcon } from "lucide-react";
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
+import { AlertCircleIcon, SettingsIcon } from "lucide-react";
+import { FieldGroup, Field, FieldError, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
-import { useReadingSessionStore } from "@/store/reading-session";
-import { useAddReadingSessionMutation } from "@/lib/reading-sessions";
-import { v7 as uuidv7 } from "uuid";
 import { Alert, AlertTitle } from "./ui/alert";
-import * as z from "zod";
-import { revalidateLogic, useForm } from "@tanstack/react-form";
-import { getErrorMessage } from "@/lib/error";
 
-const finishReadingSessionSchema = z.object({
-  endPage: z.number().positive(),
+const setupYearlyGoalSchema = z.object({
+  target: z.number().int().positive(),
 });
 
-export function FinishReadingSession() {
+export function SetupYearlyGoal({
+  id,
+  current,
+}: {
+  id?: string;
+  current?: number;
+}) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const session = useReadingSessionStore((state) => state.session);
-  const finish = useReadingSessionStore((state) => state.finish);
-  const addReadingSession = useAddReadingSessionMutation(session?.book.id);
+  const upsertGoal = useUpsertGoalMutation();
+  const deleteGoal = useDeleteGoalMutation();
 
-  const startPage = session?.startPage ?? 0;
-  const totalPages = session?.book.totalPages;
-
-  const defaultValues: z.input<typeof finishReadingSessionSchema> = {
-    endPage: startPage,
+  const defaultValues: z.input<typeof setupYearlyGoalSchema> = {
+    target: current ?? 0,
   };
 
   const form = useForm({
     defaultValues,
-    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: finishReadingSessionSchema,
-      onDynamic: ({ value }) => {
-        if (!totalPages) {
-          return undefined;
-        }
-
-        if (value.endPage < startPage) {
-          return { endPage: "End page cannot be less than " + startPage };
-        }
-
-        if (value.endPage > totalPages) {
-          return { endPage: "End page cannot be greater than " + totalPages };
-        }
-      },
+      onSubmit: setupYearlyGoalSchema,
     },
     onSubmit: ({ value }) => {
-      if (!session) {
-        return;
-      }
-
       setErrorMessage("");
-
-      addReadingSession.mutate(
+      upsertGoal.mutate(
         {
           id: uuidv7(),
-          runId: session.runId,
-          startPage: session.startPage,
-          endPage: value.endPage,
-          startTime: session.startedAt,
-          endTime: session.lastPausedAt!,
-          readTime: Math.floor(session.readTime),
+          type: "yearly",
+          metric: "books",
+          target: value.target,
         },
         {
           onSuccess: () => {
             setOpen(false);
-            finish();
           },
           onError: (error) => {
             setErrorMessage(getErrorMessage(error));
@@ -89,22 +66,34 @@ export function FinishReadingSession() {
     },
   });
 
+  const handleDelete = () => {
+    deleteGoal.mutate(id!, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+      onError: (error) => {
+        setErrorMessage(getErrorMessage(error));
+        console.error(error);
+      },
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button>
-            <FlagIcon /> Finish
+          <Button variant="secondary" size="icon">
+            <SettingsIcon />
+            <span className="sr-only">Setup yearly reading goal</span>
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Finish reading session</DialogTitle>
-          <DialogDescription>Complete a reading session</DialogDescription>
+          <DialogTitle>Setup the yearly reading goal</DialogTitle>
         </DialogHeader>
         <form
-          id="finish-reading-form"
+          id="setup-yearly-goal"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -119,14 +108,14 @@ export function FinishReadingSession() {
             )}
 
             <form.Field
-              name="endPage"
+              name="target"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
 
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>End page</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Target</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -139,8 +128,7 @@ export function FinishReadingSession() {
                       aria-invalid={isInvalid}
                       required
                       autoComplete="off"
-                      min={startPage}
-                      max={totalPages}
+                      min={1}
                     />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
@@ -152,13 +140,23 @@ export function FinishReadingSession() {
           </FieldGroup>
         </form>
         <DialogFooter>
+          {id && (
+            <Button
+              variant="destructive"
+              className="sm:mr-auto"
+              disabled={deleteGoal.isPending}
+              onClick={handleDelete}
+            >
+              Delete goal
+            </Button>
+          )}
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
           <Button
-            disabled={addReadingSession.isPending}
-            form="finish-reading-form"
+            disabled={upsertGoal.isPending}
+            form="setup-yearly-goal"
             type="submit"
           >
-            Finish
+            Setup goal
           </Button>
         </DialogFooter>
       </DialogContent>

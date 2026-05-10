@@ -27,6 +27,7 @@ const makeBook = (id: string, title: string): Book => ({
   updatedAt: "2024-01-01",
   createdAt: "2024-01-01",
   lastUpdatedAt: "2024-01-01",
+  lastRunId: `${id}-run`,
 });
 
 describe("BooksList", () => {

@@ -20,22 +20,26 @@ import type { BookDetails } from "@/lib/books";
 import { useState } from "react";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { useAddReadingRunMutation, type ReadingRun } from "@/lib/reading-runs";
+import { getErrorMessage } from "@/lib/error";
 import { v7 as uuidv7 } from "uuid";
 import { useReadingSessionStore } from "@/store/reading-session";
 import { Alert, AlertTitle } from "./ui/alert";
 import * as z from "zod";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
+import clsx from "clsx";
 
 const startReadingSessionSchema = z.object({
   startPage: z.number().nonnegative(),
 });
 
 export function StartReadingSession({
+  icon = false,
   book,
   readingRun,
 }: {
+  icon?: boolean;
   book: BookDetails;
-  readingRun?: ReadingRun;
+  readingRun?: Pick<ReadingRun, "id" | "completedPages">;
 }) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -86,20 +90,8 @@ export function StartReadingSession({
             startedAt,
           });
         } catch (error) {
-          if (
-            error instanceof Error &&
-            error.cause &&
-            typeof error.cause === "object" &&
-            "message" in error.cause &&
-            typeof error.cause.message === "string"
-          ) {
-            setErrorMessage(error.cause.message);
-          } else {
-            setErrorMessage(
-              error instanceof Error ? error.message : String(error),
-            );
-            console.error(error);
-          }
+          setErrorMessage(getErrorMessage(error));
+          console.error(error);
           return;
         }
       }
@@ -133,9 +125,9 @@ export function StartReadingSession({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button disabled={!!session}>
+          <Button size={icon ? "icon" : undefined} disabled={!!session}>
             <ButtonIcon />
-            <span>{buttonLabel}</span>
+            <span className={clsx(icon && "sr-only")}>{buttonLabel}</span>
           </Button>
         }
       />

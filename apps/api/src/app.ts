@@ -58,7 +58,7 @@ app.route("/reading-sessions", readingSessions);
 app.route("/goals", goals);
 
 app.onError((err, c) => {
-  console.error(`${err}`);
+  console.error(err);
   const status = err instanceof HTTPException ? err.status : 500;
   return c.json({ message: err.message }, status);
 });

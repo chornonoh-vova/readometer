@@ -4,7 +4,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { fetchApi } from "./api";
-import { books, readingRuns } from "./query-keys";
+import { books, goals, readingRuns } from "./query-keys";
 
 export type ReadingRun = {
   id: string;
@@ -17,12 +17,10 @@ export type ReadingRun = {
   status: "active" | "completed" | "abandoned" | null;
 };
 
-export type NewReadingRun = {
-  id: string;
-  bookId: string;
-  completedPages: number;
-  startedAt: string;
-};
+export type NewReadingRun = Pick<
+  ReadingRun,
+  "id" | "bookId" | "completedPages" | "startedAt"
+>;
 
 async function fetchReadingRuns(bookId: string): Promise<ReadingRun[]> {
   const searchParams = new URLSearchParams({ bookId });
@@ -65,6 +63,9 @@ export function useAddReadingRunMutation() {
       });
       context.client.invalidateQueries({
         queryKey: readingRuns.byBook(bookId),
+      });
+      context.client.invalidateQueries({
+        queryKey: goals.list,
       });
     },
   });

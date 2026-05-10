@@ -38,7 +38,7 @@ function BookDetailsHeader({ book }: { book?: BookDetails }) {
         <Breadcrumb>
           <BreadcrumbList className="flex-nowrap">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/">Books</Link>} />
+              <BreadcrumbLink render={<Link to="/books">Books</Link>} />
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem className="min-w-0">

@@ -173,7 +173,7 @@ describe("StartReadingSession", () => {
   });
 
   it("uses the existing run without creating a new one when continuing", async () => {
-    mockStart.mockImplementation(() => { });
+    mockStart.mockImplementation(() => {});
 
     const user = userEvent.setup();
     render(<StartReadingSession book={book} readingRun={inProgressRun} />);

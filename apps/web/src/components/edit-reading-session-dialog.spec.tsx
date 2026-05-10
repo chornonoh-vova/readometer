@@ -112,7 +112,7 @@ describe("EditReadingSessionDialog", () => {
 
   it("shows server error message on mutation failure", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
-      onError?.({ message: "err", cause: { message: "Bad request" } }),
+      onError?.(new Error("err", { cause: { message: "Bad request" } })),
     );
 
     const user = userEvent.setup();

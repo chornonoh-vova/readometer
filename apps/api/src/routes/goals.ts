@@ -71,14 +71,6 @@ const progressSchema = z.object({
   tz: z.string(),
 });
 
-type GoalRow = {
-  id: string;
-  userId: string;
-  type: string;
-  metric: string;
-  target: number;
-};
-
 async function dailyActual(
   userId: string,
   metric: string,
@@ -128,11 +120,11 @@ goals.get("/progress", zValidator("query", progressSchema), async (c) => {
   const { date, tz } = c.req.valid("query");
   const canonicTZ = canonicalizeTz(tz);
 
-  const userGoals = (await db
+  const userGoals = await db
     .selectFrom("goal")
-    .select(["id", "userId", "type", "metric", "target"])
+    .select(["type", "metric", "target"])
     .where("userId", "=", userId)
-    .execute()) as GoalRow[];
+    .execute();
 
   const dailyGoal = userGoals.find((g) => g.type === "daily");
   const yearlyGoal = userGoals.find((g) => g.type === "yearly");
@@ -142,20 +134,14 @@ goals.get("/progress", zValidator("query", progressSchema), async (c) => {
     yearlyGoal ? yearlyBooksActual(userId, date, canonicTZ) : null,
   ]);
 
-  return c.json({
-    daily: dailyGoal
-      ? {
-          goal: { metric: dailyGoal.metric, target: dailyGoal.target },
-          actual: dailyActualValue,
-        }
-      : null,
-    yearly: yearlyGoal
-      ? {
-          goal: { metric: yearlyGoal.metric, target: yearlyGoal.target },
-          actual: yearlyActualValue,
-        }
-      : null,
-  });
+  const daily = dailyGoal
+    ? { goal: dailyGoal, actual: dailyActualValue }
+    : null;
+  const yearly = yearlyGoal
+    ? { goal: yearlyGoal, actual: yearlyActualValue }
+    : null;
+
+  return c.json({ daily, yearly });
 });
 
 const goalIdSchema = z.object({

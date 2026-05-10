@@ -32,6 +32,7 @@ const baseBook: Book = {
   createdAt: "2025-01-01T00:00:00Z",
   completedPages: 0,
   lastUpdatedAt: "2025-01-01T00:00:00Z",
+  lastRunId: "run-1",
 };
 
 beforeEach(() => {
@@ -106,7 +107,7 @@ describe("EditBookForm", () => {
 
   it("shows 'Failed to update' error message (not 'create') on server error", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
-      onError?.({ message: "err", cause: { message: "conflict" } }),
+      onError?.(new Error("err", { cause: { message: "conflict" } })),
     );
 
     const user = userEvent.setup();

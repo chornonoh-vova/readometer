@@ -10,7 +10,7 @@ export const zValidator = <
   target: Target,
   schema: T,
 ) =>
-  zv(target, schema, (result, c) => {
+  zv(target, schema, (result) => {
     if (result.success) return;
 
     const message = result.error.issues
@@ -18,9 +18,6 @@ export const zValidator = <
       .join("; ");
 
     throw new HTTPException(400, {
-      res: c.json({
-        code: "VALIDATION_ERROR",
-        message,
-      }),
+      message,
     });
   });

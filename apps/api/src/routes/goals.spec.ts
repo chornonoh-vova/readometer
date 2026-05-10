@@ -219,7 +219,11 @@ describe("/api/goals", () => {
 
       expect(response.status).toBe(200);
       const body = (await response.json()) as Progress;
-      expect(body.daily?.goal).toEqual({ metric: "minutes", target: 60 });
+      expect(body.daily?.goal).toEqual({
+        type: "daily",
+        metric: "minutes",
+        target: 60,
+      });
       // (1800 + 900) / 60 = 45
       expect(body.daily?.actual).toBe(45);
     });
@@ -311,7 +315,11 @@ describe("/api/goals", () => {
       );
 
       const body = (await response.json()) as Progress;
-      expect(body.yearly?.goal).toEqual({ metric: "books", target: 12 });
+      expect(body.yearly?.goal).toEqual({
+        type: "yearly",
+        metric: "books",
+        target: 12,
+      });
       expect(body.yearly?.actual).toBe(2);
     });
 

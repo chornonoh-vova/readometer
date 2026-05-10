@@ -19,6 +19,8 @@ import { Textarea } from "./ui/textarea";
 import { AlertCircleIcon } from "lucide-react";
 import { Input } from "./ui/input";
 import { NativeSelect, NativeSelectOption } from "./ui/native-select";
+import { getErrorMessage } from "@/lib/error";
+import { useNavigate } from "@tanstack/react-router";
 
 const languages = [
   { label: "Select a language", value: "" },
@@ -87,6 +89,7 @@ export function AddBookForm({
   className?: string;
   onClose: () => void;
 }) {
+  const navigate = useNavigate();
   const mutation = useAddBookMutation();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -117,29 +120,22 @@ export function AddBookForm({
       );
 
       setErrorMessage("");
+      const id = uuidv7();
 
       mutation.mutate(
         {
-          id: uuidv7(),
+          id,
           ...rest,
           publishDate,
         },
         {
           onSuccess: () => {
             onClose();
+            navigate({ to: "/books/$bookId", params: { bookId: id } });
           },
           onError: (error) => {
-            if (
-              error.cause &&
-              typeof error.cause === "object" &&
-              "message" in error.cause &&
-              typeof error.cause.message === "string"
-            ) {
-              setErrorMessage(error.cause.message);
-            } else {
-              setErrorMessage(error.message);
-              console.error(error);
-            }
+            setErrorMessage(getErrorMessage(error));
+            console.error(error);
           },
         },
       );

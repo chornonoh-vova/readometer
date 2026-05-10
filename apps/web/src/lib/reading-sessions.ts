@@ -4,7 +4,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { fetchApi } from "./api";
-import { books, readingRuns, readingSessions } from "./query-keys";
+import { books, goals, readingRuns, readingSessions } from "./query-keys";
 
 export type ReadingSession = {
   id: string;
@@ -18,19 +18,21 @@ export type ReadingSession = {
   readTime: number;
 };
 
-export type NewReadingSession = {
-  id: string;
-  runId: string;
-  startPage: number;
-  endPage: number;
-  startTime: string;
-  endTime: string;
-  readTime: number;
-};
+export type NewReadingSession = Pick<
+  ReadingSession,
+  | "id"
+  | "runId"
+  | "startPage"
+  | "endPage"
+  | "startTime"
+  | "endTime"
+  | "readTime"
+>;
 
-export type UpdatedReadingSession = {
-  startPage: number;
-  endPage: number;
+export type UpdatedReadingSession = Pick<
+  ReadingSession,
+  "startPage" | "endPage"
+> & {
   updateRun: boolean;
 };
 
@@ -82,6 +84,9 @@ export function useAddReadingSessionMutation(bookId: string | undefined) {
       context.client.invalidateQueries({
         queryKey: readingSessions.byRun(runId),
       });
+      context.client.invalidateQueries({
+        queryKey: goals.list,
+      });
     },
   });
 }
@@ -120,6 +125,9 @@ export function useEditReadingSessionMutation(
       context.client.invalidateQueries({
         queryKey: readingSessions.byRun(runId),
       });
+      context.client.invalidateQueries({
+        queryKey: goals.list,
+      });
     },
   });
 }
@@ -150,6 +158,9 @@ export function useDeleteReadingSessionMutation(
       });
       context.client.invalidateQueries({
         queryKey: readingSessions.byRun(runId),
+      });
+      context.client.invalidateQueries({
+        queryKey: goals.list,
       });
     },
   });

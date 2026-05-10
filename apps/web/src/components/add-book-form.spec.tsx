@@ -3,15 +3,21 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockMutate = vi.fn();
+const mockNavigate = vi.fn();
 
 vi.mock("@/lib/books", () => ({
   useAddBookMutation: () => ({ mutate: mockMutate, isPending: false }),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => mockNavigate,
 }));
 
 const { AddBookForm } = await import("./add-book-form");
 
 beforeEach(() => {
   mockMutate.mockClear();
+  mockNavigate.mockClear();
 });
 
 function renderForm(onClose = vi.fn()) {
@@ -90,12 +96,35 @@ describe("AddBookForm", () => {
     expect(mockOnClose).toHaveBeenCalledOnce();
   });
 
+  it("navigates to the book detail page after successful submit using the same id passed to mutate", async () => {
+    mockMutate.mockImplementation((_, { onSuccess }) => onSuccess?.());
+
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.type(
+      screen.getByRole("textbox", { name: "Book title" }),
+      "Foundation",
+    );
+    const totalPagesInput = screen.getByRole("spinbutton", {
+      name: "Total pages",
+    });
+    await user.clear(totalPagesInput);
+    await user.type(totalPagesInput, "255");
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    const submittedId = mockMutate.mock.calls[0]![0].id as string;
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: "/books/$bookId",
+      params: { bookId: submittedId },
+    });
+  });
+
   it("shows server error message when mutation fails", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
-      onError?.({
-        message: "Network error",
-        cause: { message: "Server down" },
-      }),
+      onError?.(
+        new Error("Network error", { cause: { message: "Server down" } }),
+      ),
     );
 
     const user = userEvent.setup();

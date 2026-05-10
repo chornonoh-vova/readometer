@@ -3,6 +3,11 @@ export const books = {
   details: (bookId: string) => [books.list, bookId],
 };
 
+export const goals = {
+  list: ["goals"],
+  progress: (date: string, tz: string) => ["goals", "progress", date, tz],
+};
+
 export const readingRuns = {
   list: ["reading-runs"],
   byBook: (bookId: string) => [readingRuns.list, bookId],

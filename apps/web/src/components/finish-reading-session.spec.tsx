@@ -140,7 +140,7 @@ describe("FinishReadingSession", () => {
 
   it("shows server error message on mutation failure", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
-      onError?.({ message: "err", cause: { message: "Page out of range" } }),
+      onError?.(new Error("err", { cause: { message: "Page out of range" } })),
     );
     const user = userEvent.setup();
     const { dialog } = await openDialogAndSetEndPage(user, "80");

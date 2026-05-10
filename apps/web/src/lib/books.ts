@@ -21,11 +21,15 @@ export type Book = {
   updatedAt: string;
   createdAt: string;
   completedPages: number;
+  lastRunId: string;
   lastUpdatedAt: string;
   status?: "active" | "completed" | "abandoned";
 };
 
-export type BookDetails = Omit<Book, "completedPages" | "lastUpdatedAt">;
+export type BookDetails = Omit<
+  Book,
+  "completedPages" | "lastRunId" | "lastUpdatedAt" | "status"
+>;
 
 export function progressPercentage(
   completedPages: number,
@@ -73,15 +77,17 @@ export function useBookDetailsSuspenseQuery(bookId: string) {
   return useSuspenseQuery(bookDetailsQueryOptions(bookId));
 }
 
-export type NewBook = {
-  id: string;
-  title: string;
-  description?: string;
-  author?: string;
-  totalPages: number;
-  publishDate?: string;
+export type NewBook = Pick<
+  Book,
+  | "id"
+  | "title"
+  | "description"
+  | "author"
+  | "totalPages"
+  | "publishDate"
+  | "language"
+> & {
   isbn?: string;
-  language?: string;
 };
 
 async function addBook(newBook: NewBook): Promise<Book> {
@@ -106,14 +112,11 @@ export function useAddBookMutation() {
   });
 }
 
-export type UpdatedBook = {
-  title: string;
-  description?: string;
-  author?: string;
-  totalPages: number;
-  publishDate?: string;
+export type UpdatedBook = Pick<
+  Book,
+  "title" | "description" | "author" | "totalPages" | "publishDate" | "language"
+> & {
   isbn?: string;
-  language?: string;
 };
 
 async function editBook(

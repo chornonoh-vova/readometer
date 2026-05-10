@@ -17,12 +17,12 @@ const badges = {
   "to-read": "To Read",
   "in-progress": (
     <>
-      <LoaderCircleIcon /> In Progress
+      <LoaderCircleIcon data-icon="inline-start" /> In Progress
     </>
   ),
   completed: (
     <>
-      <CircleCheckBigIcon /> Completed
+      <CircleCheckBigIcon data-icon="inline-start" /> Completed
     </>
   ),
 } as const;

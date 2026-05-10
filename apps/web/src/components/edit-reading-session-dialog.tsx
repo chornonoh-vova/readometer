@@ -19,6 +19,7 @@ import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { getErrorMessage } from "@/lib/error";
 
 const editReadingSessionFormSchema = z.object({
   startPage: z.number().nonnegative(),
@@ -86,17 +87,8 @@ export function EditReadingSessionDialog({
             onOpenChange(false);
           },
           onError: (error) => {
-            if (
-              error.cause &&
-              typeof error.cause === "object" &&
-              "message" in error.cause &&
-              typeof error.cause.message === "string"
-            ) {
-              setErrorMessage(error.cause.message);
-            } else {
-              setErrorMessage(error.message);
-              console.error(error);
-            }
+            setErrorMessage(getErrorMessage(error));
+            console.error(error);
           },
         },
       );

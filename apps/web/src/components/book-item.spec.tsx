@@ -24,6 +24,7 @@ const book: Book = {
   updatedAt: "2024-01-01",
   createdAt: "2024-01-01",
   lastUpdatedAt: "2024-01-01",
+  lastRunId: "run-1",
 };
 
 describe("BookItem", () => {
