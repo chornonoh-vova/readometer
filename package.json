@@ -9,10 +9,23 @@
     "fmt": "turbo run fmt",
     "test": "turbo run test"
   },
+  "catalog": {
+    "zod": "^4.4.3",
+    "better-auth": "^1.6.9",
+    "uuid": "^14.0.0",
+    "vitest": "^4.1.5",
+    "@vitest/coverage-v8": "^4.1.5",
+    "prettier": "3.8.3",
+    "typescript": "^6.0.3",
+    "eslint": "^10.3.0",
+    "@eslint/js": "10.0.1",
+    "globals": "^17.6.0",
+    "typescript-eslint": "^8.59.2"
+  },
   "devDependencies": {
-    "prettier": "^3.8.1",
+    "prettier": "catalog:",
     "turbo": "^2.9.9",
-    "typescript": "^6.0.2"
+    "typescript": "catalog:"
   },
   "engines": {
     "node": ">=18"
