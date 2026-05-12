@@ -172,6 +172,32 @@ describe("StartReadingSession", () => {
     );
   });
 
+  it("resets start page to updated completedPages when dialog is reopened", async () => {
+    const user = userEvent.setup();
+    const updatedRun = { ...inProgressRun, completedPages: 100 };
+    const { rerender } = render(
+      <StartReadingSession book={book} readingRun={inProgressRun} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /continue/i }));
+    const dialog1 = screen.getByRole("dialog");
+    const input1 = within(dialog1).getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
+    expect(input1.value).toBe("50");
+    await user.click(within(dialog1).getByRole("button", { name: /cancel/i }));
+
+    rerender(<StartReadingSession book={book} readingRun={updatedRun} />);
+
+    await user.click(screen.getByRole("button", { name: /continue/i }));
+    const dialog2 = screen.getByRole("dialog");
+    const input2 = within(dialog2).getByRole("spinbutton", {
+      name: "Start page",
+    }) as HTMLInputElement;
+    expect(input2.value).toBe("100");
+    expect(input2).toHaveAttribute("min", "100");
+  });
+
   it("uses the existing run without creating a new one when continuing", async () => {
     mockStart.mockImplementation(() => {});
 

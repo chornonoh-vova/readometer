@@ -89,8 +89,16 @@ export function FinishReadingSession() {
     },
   });
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      form.reset({ endPage: startPage });
+      setErrorMessage("");
+    }
+    setOpen(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button>

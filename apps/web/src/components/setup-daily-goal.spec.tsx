@@ -105,6 +105,36 @@ describe("SetupDailyGoal", () => {
     expect(mockUpsert.mock.calls[0]![0].id).toBeTypeOf("string");
   });
 
+  it("resets target and metric to updated props when dialog is reopened", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <SetupDailyGoal id="g1" current={45} metric="pages" />,
+    );
+
+    const dialog1 = await openDialog(user);
+    const target1 = within(dialog1).getByRole("spinbutton", {
+      name: "Target",
+    }) as HTMLInputElement;
+    const metric1 = within(dialog1).getByRole("combobox", {
+      name: "Measure in",
+    }) as HTMLSelectElement;
+    expect(target1.value).toBe("45");
+    expect(metric1.value).toBe("pages");
+    await user.click(within(dialog1).getByRole("button", { name: /cancel/i }));
+
+    rerender(<SetupDailyGoal id="g1" current={60} metric="minutes" />);
+
+    const dialog2 = await openDialog(user);
+    const target2 = within(dialog2).getByRole("spinbutton", {
+      name: "Target",
+    }) as HTMLInputElement;
+    const metric2 = within(dialog2).getByRole("combobox", {
+      name: "Measure in",
+    }) as HTMLSelectElement;
+    expect(target2.value).toBe("60");
+    expect(metric2.value).toBe("minutes");
+  });
+
   it("does not submit when target is 0 (zod refinement)", async () => {
     const user = userEvent.setup();
     render(<SetupDailyGoal />);

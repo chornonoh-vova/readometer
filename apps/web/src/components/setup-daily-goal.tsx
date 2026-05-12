@@ -93,8 +93,16 @@ export function SetupDailyGoal({
     });
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      form.reset({ target: current ?? 0, metric: metric ?? "minutes" });
+      setErrorMessage("");
+    }
+    setOpen(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button variant="secondary" size="icon">

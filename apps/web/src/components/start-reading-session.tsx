@@ -121,8 +121,16 @@ export function StartReadingSession({
     }
   }
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      form.reset({ startPage });
+      setErrorMessage("");
+    }
+    setOpen(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button size={icon ? "icon" : undefined} disabled={!!session}>

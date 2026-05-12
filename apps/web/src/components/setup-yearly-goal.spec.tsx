@@ -90,6 +90,26 @@ describe("SetupYearlyGoal", () => {
     expect(mockUpsert.mock.calls[0]![0].id).toBeTypeOf("string");
   });
 
+  it("resets target to updated current when dialog is reopened", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<SetupYearlyGoal id="g2" current={12} />);
+
+    const dialog1 = await openDialog(user);
+    const target1 = within(dialog1).getByRole("spinbutton", {
+      name: "Target",
+    }) as HTMLInputElement;
+    expect(target1.value).toBe("12");
+    await user.click(within(dialog1).getByRole("button", { name: /cancel/i }));
+
+    rerender(<SetupYearlyGoal id="g2" current={20} />);
+
+    const dialog2 = await openDialog(user);
+    const target2 = within(dialog2).getByRole("spinbutton", {
+      name: "Target",
+    }) as HTMLInputElement;
+    expect(target2.value).toBe("20");
+  });
+
   it("does not submit when target is 0", async () => {
     const user = userEvent.setup();
     render(<SetupYearlyGoal />);

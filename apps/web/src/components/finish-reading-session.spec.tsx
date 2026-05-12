@@ -138,6 +138,30 @@ describe("FinishReadingSession", () => {
     expect(mockFinish).toHaveBeenCalledOnce();
   });
 
+  it("resets end page to updated startPage when dialog is reopened", async () => {
+    const user = userEvent.setup();
+    render(<FinishReadingSession />);
+
+    await user.click(screen.getByRole("button", { name: /^finish$/i }));
+    const dialog1 = screen.getByRole("dialog");
+    const input1 = within(dialog1).getByRole("spinbutton", {
+      name: "End page",
+    }) as HTMLInputElement;
+    expect(input1.value).toBe("40");
+    await user.click(within(dialog1).getByRole("button", { name: /cancel/i }));
+
+    useReadingSessionStore.setState({
+      session: { ...pausedSession, startPage: 80 },
+    });
+
+    await user.click(screen.getByRole("button", { name: /^finish$/i }));
+    const dialog2 = screen.getByRole("dialog");
+    const input2 = within(dialog2).getByRole("spinbutton", {
+      name: "End page",
+    }) as HTMLInputElement;
+    expect(input2.value).toBe("80");
+  });
+
   it("shows server error message on mutation failure", async () => {
     mockMutate.mockImplementation((_, { onError }) =>
       onError?.(new Error("err", { cause: { message: "Page out of range" } })),
