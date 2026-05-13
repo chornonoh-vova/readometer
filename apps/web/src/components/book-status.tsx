@@ -1,4 +1,5 @@
-import { CircleCheckBigIcon, LoaderCircleIcon } from "lucide-react";
+import { BookIcon, CircleCheckBigIcon, LoaderCircleIcon } from "lucide-react";
+import { getBookStatus } from "@/lib/books";
 import { Badge } from "./ui/badge";
 
 const variants = {
@@ -14,7 +15,11 @@ const classes = {
 } as const;
 
 const badges = {
-  "to-read": "To Read",
+  "to-read": (
+    <>
+      <BookIcon data-icon="inline-start" /> To Read
+    </>
+  ),
   "in-progress": (
     <>
       <LoaderCircleIcon data-icon="inline-start" /> In Progress
@@ -34,15 +39,7 @@ export function BookStatus({
   completedPages: number;
   totalPages: number;
 }) {
-  let status: "to-read" | "completed" | "in-progress" = "to-read";
-
-  if (completedPages) {
-    if (completedPages === totalPages) {
-      status = "completed";
-    } else {
-      status = "in-progress";
-    }
-  }
+  const status = getBookStatus(completedPages, totalPages);
 
   return (
     <Badge variant={variants[status]} className={classes[status]}>

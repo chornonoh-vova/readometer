@@ -1,9 +1,23 @@
 import type { Book } from "@/lib/books";
 import { BooksEmpty } from "./books-empty";
+import { BooksSearchEmpty } from "./books-search-empty";
 import { BookItem } from "./book-item";
 
-export function BooksList({ books }: { books: Book[] }) {
+interface BooksListProps {
+  books: Book[];
+  hasFilters?: boolean;
+  onClearFilters?: () => void;
+}
+
+export function BooksList({
+  books,
+  hasFilters,
+  onClearFilters,
+}: BooksListProps) {
   if (books.length === 0) {
+    if (hasFilters) {
+      return <BooksSearchEmpty onClear={onClearFilters} />;
+    }
     return <BooksEmpty />;
   }
 

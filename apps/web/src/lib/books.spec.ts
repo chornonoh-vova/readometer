@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { progressPercentage } from "./books";
+import { getBookStatus, progressPercentage } from "./books";
+
+describe("getBookStatus", () => {
+  it.each([
+    [0, 100, "to-read"],
+    [0, 0, "to-read"],
+    [1, 100, "in-progress"],
+    [50, 100, "in-progress"],
+    [99, 100, "in-progress"],
+    [100, 100, "completed"],
+  ])("returns '%s' for %i/%i pages", (completed, total, expected) => {
+    expect(getBookStatus(completed, total)).toBe(expected);
+  });
+});
 
 describe("progressPercentage", () => {
   it.each([

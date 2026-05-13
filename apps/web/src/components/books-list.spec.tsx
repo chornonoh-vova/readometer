@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { Book } from "@/lib/books";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -51,5 +52,32 @@ describe("BooksList", () => {
   it("does not show the empty state when books are present", () => {
     render(<BooksList books={[makeBook("1", "Book A")]} />);
     expect(screen.queryByText("No books yet")).not.toBeInTheDocument();
+  });
+
+  it("shows the search-empty state when hasFilters is true and there are no books", () => {
+    render(<BooksList books={[]} hasFilters />);
+    expect(screen.getByText("No books found")).toBeInTheDocument();
+    expect(screen.queryByText("No books yet")).not.toBeInTheDocument();
+  });
+
+  it("still shows the default empty state when hasFilters is false and there are no books", () => {
+    render(<BooksList books={[]} hasFilters={false} />);
+    expect(screen.getByText("No books yet")).toBeInTheDocument();
+    expect(screen.queryByText("No books found")).not.toBeInTheDocument();
+  });
+
+  it("renders a clear filters button in the search-empty state", () => {
+    render(<BooksList books={[]} hasFilters />);
+    expect(
+      screen.getByRole("button", { name: "Clear filters" }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onClearFilters when the clear filters button is clicked", async () => {
+    const user = userEvent.setup();
+    const onClearFilters = vi.fn();
+    render(<BooksList books={[]} hasFilters onClearFilters={onClearFilters} />);
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(onClearFilters).toHaveBeenCalledOnce();
   });
 });

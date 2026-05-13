@@ -31,6 +31,17 @@ export type BookDetails = Omit<
   "completedPages" | "lastRunId" | "lastUpdatedAt" | "status"
 >;
 
+export type BooksStatusFilter = "all" | "to-read" | "in-progress" | "completed";
+
+export function getBookStatus(
+  completedPages: number,
+  totalPages: number,
+): "to-read" | "in-progress" | "completed" {
+  if (!completedPages) return "to-read";
+  if (completedPages === totalPages) return "completed";
+  return "in-progress";
+}
+
 export function progressPercentage(
   completedPages: number,
   totalPages: number,
