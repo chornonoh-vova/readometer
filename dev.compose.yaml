@@ -25,7 +25,7 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=${DATABASE_URL}
-    command: bun /app/dist/index.js migrate
+    command: migrate
   api:
     image: readometer-api:dev
     depends_on:

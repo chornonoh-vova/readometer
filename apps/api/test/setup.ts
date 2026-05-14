@@ -1,10 +1,12 @@
 import { afterEach, beforeEach } from "vitest";
 import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { installBunImagePolyfill } from "./shims/bun-image";
 import { db } from "../src/lib/database";
 import { truncateAll } from "./helpers/truncate";
 import { installAuthMock, setAuthenticatedUser } from "./mocks/auth";
 
+installBunImagePolyfill();
 installAuthMock();
 
 beforeEach(async () => {

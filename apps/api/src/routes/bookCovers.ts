@@ -5,7 +5,7 @@ import z from "zod";
 import { zValidator } from "../lib/validator";
 import { db } from "../lib/database";
 import { HTTPException } from "hono/http-exception";
-import sharp from "sharp";
+import { extractAverageColor, resizeToWebP } from "../lib/image";
 
 const bookCover = new Hono<AppEnv>();
 
@@ -49,25 +49,11 @@ bookCover.post("/:bookId/cover", zValidator("param", bookSchema), async (c) => {
     });
   }
 
-  const image = sharp(await file.arrayBuffer());
-  const stats = await image.stats();
-  const color = stats.dominant;
-
-  const coverColor =
-    "#" +
-    [color.r, color.g, color.b]
-      .map((p) => p.toString(16).padStart(2, "0"))
-      .join("");
-
-  await image
-    .resize({ width: 200, withoutEnlargement: true })
-    .webp({ quality: 85 })
-    .toFile(`${basePath}/covers/${coverId}-sm.webp`);
-
-  await image
-    .resize({ width: 400, withoutEnlargement: true })
-    .webp({ quality: 90 })
-    .toFile(`${basePath}/covers/${coverId}-md.webp`);
+  const [coverColor] = await Promise.all([
+    extractAverageColor(file),
+    resizeToWebP(file, 200, 85, `${basePath}/covers/${coverId}-sm.webp`),
+    resizeToWebP(file, 400, 90, `${basePath}/covers/${coverId}-md.webp`),
+  ]);
 
   await db
     .updateTable("book")

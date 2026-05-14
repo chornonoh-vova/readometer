@@ -1,23 +1,14 @@
 import { describe, it, expect } from "vitest";
-import sharp from "sharp";
+import { makeSolidPng } from "../../test/helpers/png";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { call } from "../../test/helpers/request";
 import { makeBook, makeUser } from "../../test/helpers/factories";
 import { db } from "../lib/database";
 
-async function makeImage(color = { r: 200, g: 100, b: 50 }): Promise<File> {
-  const buf = await sharp({
-    create: {
-      width: 64,
-      height: 64,
-      channels: 3,
-      background: color,
-    },
-  })
-    .png()
-    .toBuffer();
-  return new File([new Uint8Array(buf)], "cover.png", { type: "image/png" });
+function makeImage(color = { r: 200, g: 100, b: 50 }): File {
+  const buf = makeSolidPng(64, 64, color.r, color.g, color.b);
+  return new File([buf], "cover.png", { type: "image/png" });
 }
 
 function coversDir(): string {

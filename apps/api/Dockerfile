@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:1.3.14 AS base
 WORKDIR /app
 
 FROM base AS prepare
@@ -20,17 +20,13 @@ ENV TURBO_TOKEN=$TURBO_TOKEN
 
 RUN bun turbo build --filter=api
 
-FROM oven/bun:1 AS runner
-RUN apt-get update && apt-get install -y \
-  curl \
-  libvips \
-  --no-install-recommends \
+FROM oven/bun:1.3.14 AS runner
+RUN apt-get update && apt-get install -y curl --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY --from=builder /app/apps/api/dist ./dist
-RUN bun add sharp
 EXPOSE 3000/tcp
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
   CMD curl -sf http://localhost:3000/api/healthz || exit 1
-CMD ["bun", "dist/index.js"]
+ENTRYPOINT ["bun", "dist/index.js"]
