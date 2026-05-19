@@ -3,15 +3,15 @@ import {
   Item,
   ItemActions,
   ItemContent,
-  ItemDescription,
   ItemMedia,
   ItemTitle,
 } from "./ui/item";
-import { Button } from "./ui/button";
-import { progressPercentage, type Book } from "@/lib/books";
+import { buttonVariants } from "./ui/button";
+import { type Book } from "@/lib/books";
 import { Link } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { bookCover } from "@/lib/cover";
+import { BookProgress } from "./book-progress";
 
 export function ActiveBookItem({ book }: { book: Book }) {
   const cover = bookCover(book, "sm");
@@ -27,10 +27,11 @@ export function ActiveBookItem({ book }: { book: Book }) {
       )}
       <ItemContent className="min-w-0">
         <ItemTitle className="block w-full truncate">{book.title}</ItemTitle>
-        <ItemDescription>
-          {book.completedPages} / {book.totalPages} pages (
-          {progressPercentage(book.completedPages, book.totalPages)}%)
-        </ItemDescription>
+        <BookProgress
+          title={book.title}
+          completedPages={book.completedPages}
+          totalPages={book.totalPages}
+        />
       </ItemContent>
       <ItemActions>
         <StartReadingSession
@@ -41,15 +42,14 @@ export function ActiveBookItem({ book }: { book: Book }) {
             completedPages: book.completedPages,
           }}
         />
-        <Button
-          size="icon"
-          variant="secondary"
-          nativeButton={false}
-          render={<Link to="/books/$bookId" params={{ bookId: book.id }} />}
+        <Link
+          to="/books/$bookId"
+          params={{ bookId: book.id }}
+          className={buttonVariants({ variant: "secondary", size: "icon" })}
         >
           <ChevronRightIcon />
           <span className="sr-only">Go to {book.title}</span>
-        </Button>
+        </Link>
       </ItemActions>
     </Item>
   );

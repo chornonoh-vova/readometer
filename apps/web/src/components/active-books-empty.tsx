@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "./ui/empty";
-import { Button } from "./ui/button";
+import { buttonVariants } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 
 export function ActiveBooksEmpty() {
@@ -24,10 +24,10 @@ export function ActiveBooksEmpty() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="outline" render={<Link to="/books" />}>
+        <Link to="/books" className={buttonVariants({ variant: "outline" })}>
           View all books
           <ChevronRightIcon />
-        </Button>
+        </Link>
       </EmptyContent>
     </Empty>
   );

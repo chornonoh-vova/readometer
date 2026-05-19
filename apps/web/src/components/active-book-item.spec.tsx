@@ -57,9 +57,13 @@ describe("ActiveBookItem", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows pages progress and percentage", () => {
+  it("renders the book's page counts", () => {
     render(<ActiveBookItem book={book} />);
-    expect(screen.getByText(/80 \/ 320 pages \(25%\)/)).toBeInTheDocument();
+    expect(screen.getByText("80 / 320")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "25",
+    );
   });
 
   it("renders a link to the book detail page", () => {
