@@ -17,11 +17,11 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.7.6",
+    "@hono/zod-validator": "^0.8.0",
     "better-auth": "catalog:",
     "hono": "^4.12.18",
     "isbn": "workspace:*",
-    "kysely": "^0.28.17",
+    "kysely": "^0.29.0",
     "pg": "^8.20.0",
     "uuid": "catalog:",
     "zod": "catalog:"
