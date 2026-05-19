@@ -2,7 +2,7 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { mkdtempSync, rmSync, promises as fsPromises } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FileMigrationProvider, Migrator } from "kysely";
+import { FileMigrationProvider, Migrator } from "kysely/migration";
 
 export default async function globalSetup() {
   const container = await new PostgreSqlContainer("postgres:18.1").start();

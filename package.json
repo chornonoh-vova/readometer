@@ -10,7 +10,7 @@
     "test": "turbo run test",
     "dev:docker:build": "docker compose -f dev.compose.yaml build",
     "dev:docker:up": "docker compose -f dev.compose.yaml up -d",
-    "dev:docker:down": "dokcer compose -f dev.compose.yaml down"
+    "dev:docker:down": "docker compose -f dev.compose.yaml down"
   },
   "catalog": {
     "zod": "^4.4.3",
