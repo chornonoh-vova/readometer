@@ -31,7 +31,7 @@
     "eslint": "catalog:",
     "globals": "catalog:",
     "kysely-codegen": "^0.20.0",
-    "kysely-ctl": "^0.20.0",
+    "kysely-ctl": "^0.21.0",
     "prettier": "catalog:",
     "testcontainers": "^11.14.0",
     "typescript-eslint": "catalog:",
