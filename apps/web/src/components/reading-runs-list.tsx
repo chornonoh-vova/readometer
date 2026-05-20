@@ -1,14 +1,7 @@
 import type { ReadingRun } from "@/lib/reading-runs";
-import { CalendarIcon, ChevronsUpDownIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { BookStatus } from "./book-status";
 import { BookProgress } from "./book-progress";
-import { Separator } from "./ui/separator";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-import { Button } from "./ui/button";
 import { StartReadingSession } from "./start-reading-session";
 import type { BookDetails } from "@/lib/books";
 import { Suspense } from "react";
@@ -35,7 +28,9 @@ export function ReadingRunsList({
             <div className="flex gap-1.5 items-center justify-between">
               <h2 className="text-lg font-semibold">Reading #{num}</h2>
 
-              <StartReadingSession book={book} readingRun={readingRun} />
+              {idx === 0 && (
+                <StartReadingSession book={book} readingRun={readingRun} />
+              )}
             </div>
 
             <div className="flex gap-1.5 items-center text-sm">
@@ -63,36 +58,17 @@ export function ReadingRunsList({
               />
             </div>
 
-            <Separator className="mt-2" />
-
-            <Collapsible
-              defaultOpen={
-                idx === 0 || readingRun.completedPages < book.totalPages
-              }
-            >
-              <div className="flex items-center justify-between gap-4 mb-2">
-                <h3 className="text-sm font-semibold">Sessions</h3>
-                <CollapsibleTrigger
-                  render={
-                    <Button variant="ghost" size="icon">
-                      <ChevronsUpDownIcon />
-                      <span className="sr-only">
-                        Toggle sessions for run {num}
-                      </span>
-                    </Button>
-                  }
-                />
-              </div>
-              <CollapsibleContent>
-                <Suspense fallback={<ReadingSessionsLoading />}>
-                  <ReadingSessionsList
-                    runId={readingRun.id}
-                    bookId={readingRun.bookId}
-                    totalPages={book.totalPages}
-                  />
-                </Suspense>
-              </CollapsibleContent>
-            </Collapsible>
+            <Suspense fallback={<ReadingSessionsLoading />}>
+              <ReadingSessionsList
+                defaultOpen={
+                  idx === 0 || readingRun.completedPages < book.totalPages
+                }
+                num={num}
+                runId={readingRun.id}
+                bookId={readingRun.bookId}
+                totalPages={book.totalPages}
+              />
+            </Suspense>
           </li>
         );
       })}

@@ -33,6 +33,7 @@ const createReadingRunSchema = z.object({
   bookId: z.uuidv7(),
   completedPages: z.number().nonnegative(),
   startedAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime().optional(),
 });
 
 readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
@@ -47,7 +48,8 @@ readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
       bookId: request.bookId,
       completedPages: request.completedPages,
       startedAt: new Date(request.startedAt),
-      status: "active",
+      finishedAt: request.finishedAt ? new Date(request.finishedAt) : undefined,
+      status: request.finishedAt ? "completed" : "active",
       updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .returningAll();

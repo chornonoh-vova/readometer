@@ -119,6 +119,47 @@ describe("/api/reading-runs", () => {
 
       expect(response.status).toBe(201);
     });
+
+    it("creates a run with status='completed' and stores finishedAt when finishedAt is provided", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+
+      const response = await call("POST", "/api/reading-runs", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          bookId: book.id,
+          completedPages: 300,
+          startedAt: "2024-01-01T10:00:00.000Z",
+          finishedAt: "2024-01-15T20:00:00.000Z",
+        },
+      });
+
+      expect(response.status).toBe(201);
+      const body = (await response.json()) as {
+        status: string;
+        finishedAt: string | null;
+      };
+      expect(body.status).toBe("completed");
+      expect(body.finishedAt).not.toBeNull();
+    });
+
+    it("rejects a request where finishedAt is not a valid ISO datetime", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/reading-runs", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          bookId: uuidv7(),
+          completedPages: 10,
+          startedAt: new Date().toISOString(),
+          finishedAt: "not-a-date",
+        },
+      });
+
+      expect(response.status).toBe(400);
+    });
   });
 
   describe("PUT /api/reading-runs/:runId", () => {

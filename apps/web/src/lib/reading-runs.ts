@@ -19,7 +19,7 @@ export type ReadingRun = {
 
 export type NewReadingRun = Pick<
   ReadingRun,
-  "id" | "bookId" | "completedPages" | "startedAt"
+  "id" | "bookId" | "completedPages" | "startedAt" | "finishedAt"
 >;
 
 async function fetchReadingRuns(bookId: string): Promise<ReadingRun[]> {
