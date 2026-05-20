@@ -13,7 +13,7 @@ export type ReadingRun = {
   completedPages: number;
   startedAt: string;
   updatedAt: string;
-  finishedAt: string | null;
+  finishedAt?: string | null;
   status: "active" | "completed" | "abandoned" | null;
 };
 

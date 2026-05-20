@@ -88,7 +88,6 @@ export function StartReadingSession({
             bookId: book.id,
             completedPages: value.startPage,
             startedAt,
-            finishedAt: null,
           });
         } catch (error) {
           setErrorMessage(getErrorMessage(error));
