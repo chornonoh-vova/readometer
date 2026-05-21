@@ -17,7 +17,7 @@ export function ReadingRunsList({
   readingRuns: ReadingRun[];
 }) {
   return (
-    <ul>
+    <ul className="flex flex-col gap-2">
       {readingRuns.map((readingRun, idx) => {
         const num = readingRuns.length - idx;
         return (
@@ -35,13 +35,19 @@ export function ReadingRunsList({
 
             <div className="flex gap-1.5 items-center text-sm">
               <CalendarIcon className="size-4" />
-              Started: {formatDate(readingRun.startedAt)}
+              Started:{" "}
+              <time dateTime={readingRun.startedAt}>
+                {formatDate(readingRun.startedAt)}
+              </time>
             </div>
 
             {readingRun.finishedAt && (
               <div className="flex gap-1.5 items-center text-sm">
                 <CalendarIcon className="size-4" />
-                Finished: {formatDate(readingRun.finishedAt)}
+                Finished:{" "}
+                <time dateTime={readingRun.finishedAt}>
+                  {formatDate(readingRun.finishedAt)}
+                </time>
               </div>
             )}
 

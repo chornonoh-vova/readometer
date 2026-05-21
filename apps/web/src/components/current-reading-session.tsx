@@ -59,9 +59,9 @@ export function CurrentReadingSession() {
       <AnimatePresence>
         {session && (
           <motion.div
-            initial={{ y: "100%", opacity: 0, scale: 0.8 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
+            initial={{ transform: "translateY(100%) scale(0.8)", opacity: 0 }}
+            animate={{ transform: "translateY(0) scale(1)", opacity: 1 }}
+            exit={{ transform: "translateY(100%) scale(1)", opacity: 0 }}
             className="border border-primary rounded-lg px-3 py-4 shadow-md grid grid-cols-1 gap-2.5 bg-background"
           >
             <div className="flex items-center justify-between">

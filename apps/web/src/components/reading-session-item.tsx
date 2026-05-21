@@ -1,5 +1,5 @@
+import { memo, useState } from "react";
 import type { ReadingSession } from "@/lib/reading-sessions";
-import { useState } from "react";
 import { Item, ItemActions, ItemContent, ItemTitle } from "./ui/item";
 import {
   BookOpenIcon,
@@ -22,7 +22,7 @@ import { EditReadingSessionDialog } from "./edit-reading-session-dialog";
 import { DeleteReadingSessionAlert } from "./delete-reading-session-alert";
 import { ReadingTime } from "./reading-time";
 
-export function ReadingSessionItem({
+export const ReadingSessionItem = memo(function ReadingSessionItem({
   length,
   readingSession,
   bookId,
@@ -42,8 +42,16 @@ export function ReadingSessionItem({
         <ItemTitle>Session {readingSession.num}</ItemTitle>
         <div className="flex gap-2 items-center">
           <CalendarIcon className="size-3.5" />
-          {formatTime(readingSession.startTime)}
-          {readingSession.endTime && " - " + formatTime(readingSession.endTime)}
+          <time dateTime={readingSession.startTime}>
+            {formatTime(readingSession.startTime)}
+          </time>
+          {readingSession.endTime &&
+            " - " +
+            (
+              <time dateTime={readingSession.endTime}>
+                {formatTime(readingSession.endTime)}
+              </time>
+            )}
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           <div className="flex gap-2 items-center">
@@ -107,4 +115,4 @@ export function ReadingSessionItem({
       />
     </Item>
   );
-}
+});

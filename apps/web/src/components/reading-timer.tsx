@@ -7,9 +7,9 @@ function AnimatedDigit({ value }: { value: string }) {
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
+          initial={{ transform: "translateY(100%)", opacity: 0 }}
+          animate={{ transform: "translateY(0%)", opacity: 1 }}
+          exit={{ transform: "translateY(-100%)", opacity: 0 }}
           className="absolute inset-0 flex items-center justify-center"
         >
           {value}

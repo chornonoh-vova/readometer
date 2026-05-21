@@ -44,6 +44,10 @@
   --activity-default-2: oklch(0.7257 0.1643 149.45);
   --activity-default-3: oklch(0.6343 0.162 148.39);
   --activity-default-4: oklch(0.4391 0.1179 148.07);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .dark {
@@ -140,6 +144,15 @@
     @apply border-border outline-ring/50;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   body {
     @apply font-sans bg-background text-foreground;
     padding-top: env(safe-area-inset-top, 0);
@@ -152,7 +165,8 @@
     @apply font-sans;
   }
 
-  input[type="date"] {
+  input[type="date"],
+  input[type="datetime-local"] {
     -webkit-appearance: none;
     appearance: none;
     box-sizing: border-box;

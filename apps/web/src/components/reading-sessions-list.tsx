@@ -1,6 +1,6 @@
 import { useReadingSessionsSuspenseQuery } from "@/lib/reading-sessions";
 import { formatDate } from "@/lib/format";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { ReadingSessionItem } from "./reading-session-item";
 import {
   Collapsible,
@@ -25,12 +25,16 @@ export function ReadingSessionsList({
 }) {
   const { data: readingSessions } = useReadingSessionsSuspenseQuery(runId);
 
-  const groupedSessions = Object.groupBy(
-    readingSessions.map((readingSession, idx) => ({
-      ...readingSession,
-      num: readingSessions.length - idx,
-    })),
-    ({ startTime }) => formatDate(startTime),
+  const groupedSessions = useMemo(
+    () =>
+      Object.groupBy(
+        readingSessions.map((readingSession, idx) => ({
+          ...readingSession,
+          num: readingSessions.length - idx,
+        })),
+        ({ startTime }) => formatDate(startTime),
+      ),
+    [readingSessions],
   );
 
   if (Object.entries(groupedSessions).length === 0) {

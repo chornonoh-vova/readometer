@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Book } from "@/lib/books";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
 import { Link } from "@tanstack/react-router";
@@ -5,7 +6,7 @@ import { BookStatus } from "./book-status";
 import { BookProgress } from "./book-progress";
 import { BookItemCover } from "./book-item-cover";
 
-export function BookItem({ book }: { book: Book }) {
+export const BookItem = memo(function BookItem({ book }: { book: Book }) {
   return (
     <Item
       size="sm"
@@ -34,4 +35,4 @@ export function BookItem({ book }: { book: Book }) {
       </ItemContent>
     </Item>
   );
-}
+});

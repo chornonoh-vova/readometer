@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { CurrentReadingSession } from "@/components/current-reading-session";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { MotionConfig } from "motion/react";
 
 export const Route = createFileRoute("/_auth/_app")({
   component: AppLayout,
@@ -9,12 +10,14 @@ export const Route = createFileRoute("/_auth/_app")({
 
 function AppLayout() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="pb-32">
-        <Outlet />
-        <CurrentReadingSession />
-      </SidebarInset>
-    </SidebarProvider>
+    <MotionConfig reducedMotion="user">
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="pb-32">
+          <Outlet />
+          <CurrentReadingSession />
+        </SidebarInset>
+      </SidebarProvider>
+    </MotionConfig>
   );
 }

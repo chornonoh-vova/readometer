@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { StartReadingSession } from "./start-reading-session";
 import {
   Item,
@@ -13,7 +14,11 @@ import { ChevronRightIcon } from "lucide-react";
 import { bookCover } from "@/lib/cover";
 import { BookProgress } from "./book-progress";
 
-export function ActiveBookItem({ book }: { book: Book }) {
+export const ActiveBookItem = memo(function ActiveBookItem({
+  book,
+}: {
+  book: Book;
+}) {
   const cover = bookCover(book, "sm");
   return (
     <Item variant="outline" size="sm">
@@ -53,4 +58,4 @@ export function ActiveBookItem({ book }: { book: Book }) {
       </ItemActions>
     </Item>
   );
-}
+});
