@@ -60,9 +60,22 @@ function BookLoading() {
     <>
       <BookDetailsHeader />
       <div className="px-4 flex flex-col gap-2">
-        <Skeleton className="h-14 w-full" />
-        <Skeleton className="h-7 w-3/4" />
-        <Skeleton className="h-64 w-full rounded-none md:rounded-md border-y md:border" />
+        <div className="flex gap-4 justify-between items-center">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-8 w-8 rounded" />
+        </div>
+        <div className="flex flex-row items-start gap-2">
+          <Skeleton className="w-20 h-32 flex-shrink-0 rounded-sm" />
+          <div className="flex-1 flex flex-col gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-2/5" />
+          </div>
+        </div>
+        <Skeleton className="h-24 w-full rounded-md border" />
+        <Skeleton className="h-24 w-full rounded-md border" />
       </div>
     </>
   );
