@@ -1,4 +1,4 @@
-import { formatReadingTime } from "@/lib/format";
+import { formatReadingDuration, formatReadingTime } from "@/lib/format";
 import { AnimatePresence, motion } from "motion/react";
 
 function AnimatedDigit({ value }: { value: string }) {
@@ -21,8 +21,12 @@ function AnimatedDigit({ value }: { value: string }) {
 
 export function ReadingTimer({ time }: { time: number }) {
   const readingTime = formatReadingTime(time);
+  const readingDuration = formatReadingDuration(time);
   return (
-    <p className="bg-muted rounded-sm inline-flex items-center text-sm tabular-nums px-1">
+    <time
+      dateTime={readingDuration}
+      className="bg-muted rounded-sm inline-flex items-center text-sm tabular-nums px-1"
+    >
       {readingTime
         .split("")
         .map((char, i) =>
@@ -32,6 +36,6 @@ export function ReadingTimer({ time }: { time: number }) {
             <AnimatedDigit key={i} value={char} />
           ),
         )}
-    </p>
+    </time>
   );
 }

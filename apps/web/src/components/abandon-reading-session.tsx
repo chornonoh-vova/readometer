@@ -39,16 +39,16 @@ export function AbandonReadingSession() {
           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
             <Trash2Icon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Abandon current session?</AlertDialogTitle>
+          <AlertDialogTitle>Discard this session?</AlertDialogTitle>
           <AlertDialogDescription>
-            This session will be removed permanently, and any progress that
-            you've made will not be saved.
+            Your progress in this session won&apos;t be saved. The timer and
+            page position will be lost.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={onAbandonConfirm}>
-            Abandon
+            Discard session
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

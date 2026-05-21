@@ -9,9 +9,8 @@ export function AddBookDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const title = "Add a new book";
-  const description =
-    "Please enter the information to add a new book to your library";
+  const title = "Add a book";
+  const description = "Fill in what you know — you can always edit it later";
 
   return (
     <ResponsiveDrawerDialog
@@ -26,7 +25,7 @@ export function AddBookDialog({
       }
       action={
         <Button type="submit" form="add-book-form" className="flex-1">
-          Create
+          Add book
         </Button>
       }
     >

@@ -84,9 +84,9 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
     >
       <Card className={cn("flex flex-col gap-6", className)} {...props}>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Login to your account</CardTitle>
+          <CardTitle className="text-xl">Welcome back</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Sign in to pick up where you left off
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -186,7 +186,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
                 {loading ? (
                   <>
                     <Spinner />
-                    Loading...
+                    Signing in...
                   </>
                 ) : (
                   "Sign in"
@@ -194,7 +194,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
               </Button>
 
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <Link to="/register">Register</Link>
+                New here? <Link to="/register">Create an account</Link>
               </FieldDescription>
             </Field>
           </FieldGroup>

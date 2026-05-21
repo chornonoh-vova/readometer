@@ -63,7 +63,7 @@ describe("LoginForm", () => {
 
   it("renders a link to the register page", () => {
     render(<LoginForm redirect="/" />);
-    const link = screen.getByRole("link", { name: /register/i });
+    const link = screen.getByRole("link", { name: /create an account/i });
     expect(link).toHaveAttribute("href", "/register");
   });
 

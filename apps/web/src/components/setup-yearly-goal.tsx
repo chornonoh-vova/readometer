@@ -92,13 +92,13 @@ export function SetupYearlyGoal({
         render={
           <Button variant="secondary" size="icon">
             <SettingsIcon />
-            <span className="sr-only">Setup yearly reading goal</span>
+            <span className="sr-only">Set up yearly reading goal</span>
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Setup the yearly reading goal</DialogTitle>
+          <DialogTitle>Set your yearly reading goal</DialogTitle>
         </DialogHeader>
         <form
           id="setup-yearly-goal"
@@ -155,7 +155,7 @@ export function SetupYearlyGoal({
               disabled={deleteGoal.isPending}
               onClick={handleDelete}
             >
-              Delete goal
+              Remove goal
             </Button>
           )}
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
@@ -164,7 +164,7 @@ export function SetupYearlyGoal({
             form="setup-yearly-goal"
             type="submit"
           >
-            Setup goal
+            Save goal
           </Button>
         </DialogFooter>
       </DialogContent>

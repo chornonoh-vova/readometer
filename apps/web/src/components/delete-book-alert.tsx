@@ -43,16 +43,16 @@ export function DeleteBookAlert({
           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
             <Trash2Icon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Delete book "{title}"?</AlertDialogTitle>
+          <AlertDialogTitle>Delete "{title}"?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete this book, sessions, and stats related
-            to it.
+            All reading sessions and stats for this book will be permanently
+            deleted. This cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={handleDelete}>
-            Delete
+            Yes, delete book
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

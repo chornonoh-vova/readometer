@@ -196,7 +196,7 @@ export function AddBookForm({
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Total pages</FieldLabel>
                 <FieldDescription>
-                  Number of pages for this book
+                  How many pages does this edition have?
                 </FieldDescription>
                 <Input
                   id={field.name}
@@ -226,7 +226,9 @@ export function AddBookForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Book author</FieldLabel>
-                <FieldDescription>Full name of the author</FieldDescription>
+                <FieldDescription>
+                  First and last name, as it appears on the cover
+                </FieldDescription>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -254,7 +256,9 @@ export function AddBookForm({
               <Field orientation="responsive" data-invalid={isInvalid}>
                 <FieldContent>
                   <FieldLabel htmlFor={field.name}>Book language</FieldLabel>
-                  <FieldDescription>Language of the book</FieldDescription>
+                  <FieldDescription>
+                    The language you&apos;re reading it in
+                  </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </FieldContent>
                 <NativeSelect
@@ -278,8 +282,7 @@ export function AddBookForm({
         <Field>
           <FieldLabel>Publish date</FieldLabel>
           <FieldDescription>
-            Date, when the book was published. Year is required if month or day
-            is set.
+            Year is required if you enter a month or day.
           </FieldDescription>
           <div className="grid grid-cols-3 gap-2">
             <form.Field
@@ -400,7 +403,7 @@ export function AddBookForm({
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>ISBN</FieldLabel>
                 <FieldDescription>
-                  ISBN-10 or ISBN-13 code for a book
+                  The ISBN printed on the back cover (10 or 13 digits)
                 </FieldDescription>
                 <Input
                   id={field.name}
@@ -428,7 +431,8 @@ export function AddBookForm({
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Description</FieldLabel>
                 <FieldDescription>
-                  Detailed book description or synopsis
+                  Your notes, a synopsis, or anything useful to remember about
+                  this book
                 </FieldDescription>
                 <Textarea
                   id={field.name}

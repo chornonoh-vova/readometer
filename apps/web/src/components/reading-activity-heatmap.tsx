@@ -1,6 +1,10 @@
 import type { ReadingActivity } from "@/lib/reading-activity";
 import { cn } from "@/lib/utils";
-import { formatDate, formatReadingTime } from "@/lib/format";
+import {
+  formatDate,
+  formatReadingDuration,
+  formatReadingTime,
+} from "@/lib/format";
 import {
   getActivityMap,
   getCalendarPosition,
@@ -62,7 +66,9 @@ function Day({
 
   const bucket = display === "time" ? entry.timeBucket : entry.pagesBucket;
   const pages = entry.totalReadPages;
-  const time = formatReadingTime(entry.totalReadTime);
+  const rawTime = entry.totalReadTime;
+  const duration = formatReadingDuration(rawTime);
+  const time = formatReadingTime(rawTime);
 
   return (
     <Popover>
@@ -75,7 +81,9 @@ function Day({
       <PopoverContent>
         <PopoverHeader>Reading activity at {id}</PopoverHeader>
         <PopoverDescription render={<ul />}>
-          <li>Read time: {time}</li>
+          <li>
+            Read time: <time dateTime={duration}>{time}</time>
+          </li>
           <li>Pages read: {pages}</li>
         </PopoverDescription>
       </PopoverContent>

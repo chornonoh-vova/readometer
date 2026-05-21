@@ -12,9 +12,8 @@ export function EditBookDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const title = "Edit your book";
-  const description =
-    "Please enter updated information to change book in your library";
+  const title = "Edit book";
+  const description = "Update the details for this book";
 
   return (
     <ResponsiveDrawerDialog
@@ -29,7 +28,7 @@ export function EditBookDialog({
       }
       action={
         <Button type="submit" form="edit-book-form" className="flex-1">
-          Update
+          Save changes
         </Button>
       }
     >

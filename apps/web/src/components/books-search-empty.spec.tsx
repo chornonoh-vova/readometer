@@ -6,20 +6,22 @@ import { BooksSearchEmpty } from "./books-search-empty";
 describe("BooksSearchEmpty", () => {
   it("renders the no books found heading", () => {
     render(<BooksSearchEmpty />);
-    expect(screen.getByText("No books found")).toBeInTheDocument();
+    expect(screen.getByText("No results")).toBeInTheDocument();
   });
 
   it("renders the descriptive message", () => {
     render(<BooksSearchEmpty />);
     expect(
-      screen.getByText("Try adjusting your search or filters"),
+      screen.getByText(
+        "Nothing matched your search. Try different keywords or clear your filters.",
+      ),
     ).toBeInTheDocument();
   });
 
   it("renders the clear filters button", () => {
     render(<BooksSearchEmpty />);
     expect(
-      screen.getByRole("button", { name: "Clear filters" }),
+      screen.getByRole("button", { name: "Clear all filters" }),
     ).toBeInTheDocument();
   });
 
@@ -27,7 +29,7 @@ describe("BooksSearchEmpty", () => {
     const user = userEvent.setup();
     const onClear = vi.fn();
     render(<BooksSearchEmpty onClear={onClear} />);
-    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await user.click(screen.getByRole("button", { name: "Clear all filters" }));
     expect(onClear).toHaveBeenCalledOnce();
   });
 });

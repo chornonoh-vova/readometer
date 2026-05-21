@@ -107,13 +107,13 @@ export function SetupDailyGoal({
         render={
           <Button variant="secondary" size="icon">
             <SettingsIcon />
-            <span className="sr-only">Setup daily reading goal</span>
+            <span className="sr-only">Set up daily reading goal</span>
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Setup the daily reading goal</DialogTitle>
+          <DialogTitle>Set your daily reading goal</DialogTitle>
         </DialogHeader>
         <form
           id="setup-daily-goal"
@@ -207,7 +207,7 @@ export function SetupDailyGoal({
               disabled={deleteGoal.isPending}
               onClick={handleDelete}
             >
-              Delete goal
+              Remove goal
             </Button>
           )}
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
@@ -216,7 +216,7 @@ export function SetupDailyGoal({
             form="setup-daily-goal"
             type="submit"
           >
-            Setup goal
+            Save goal
           </Button>
         </DialogFooter>
       </DialogContent>

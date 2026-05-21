@@ -9,7 +9,7 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
-import { formatReadingTime, formatTime } from "@/lib/format";
+import { formatTime } from "@/lib/format";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
 import { Button } from "./ui/button";
 import { EditReadingSessionDialog } from "./edit-reading-session-dialog";
 import { DeleteReadingSessionAlert } from "./delete-reading-session-alert";
+import { ReadingTime } from "./reading-time";
 
 export function ReadingSessionItem({
   length,
@@ -38,7 +39,7 @@ export function ReadingSessionItem({
   return (
     <Item className="min-h-24" variant="outline" render={<li />}>
       <ItemContent>
-        <ItemTitle>Session #{readingSession.num}</ItemTitle>
+        <ItemTitle>Session {readingSession.num}</ItemTitle>
         <div className="flex gap-2 items-center">
           <CalendarIcon className="size-3.5" />
           {formatTime(readingSession.startTime)}
@@ -48,13 +49,13 @@ export function ReadingSessionItem({
           <div className="flex gap-2 items-center">
             <BookOpenIcon className="size-3.5" />
             <span>
-              Pages {readingSession.startPage}-{readingSession.endPage} (
-              {readingSession.readPages} pages)
+              Pages {readingSession.startPage}–{readingSession.endPage} ·{" "}
+              {readingSession.readPages} pages
             </span>
           </div>
           <div className="flex gap-2 items-center">
             <ClockIcon className="size-3.5" />
-            {formatReadingTime(readingSession.readTime)}
+            <ReadingTime value={readingSession.readTime} />
           </div>
         </div>
       </ItemContent>

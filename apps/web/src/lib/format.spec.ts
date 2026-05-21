@@ -2,9 +2,51 @@ import { describe, it, expect } from "vitest";
 import {
   buildPartialDate,
   formatPartialDate,
+  formatReadingDuration,
   formatReadingTime,
   splitPartialDate,
 } from "./format";
+
+describe("formatReadingDuration", () => {
+  const groupedCases = {
+    "seconds only": [
+      { input: 0, expected: "PT0H0M0S" },
+      { input: 5, expected: "PT0H0M5S" },
+      { input: 45, expected: "PT0H0M45S" },
+    ],
+
+    "minutes and seconds": [
+      { input: 60, expected: "PT0H1M0S" },
+      { input: 61, expected: "PT0H1M1S" },
+      { input: 65, expected: "PT0H1M5S" },
+      { input: 125, expected: "PT0H2M5S" },
+      { input: 3599, expected: "PT0H59M59S" },
+    ],
+
+    "boundary transitions": [
+      { input: 59, expected: "PT0H0M59S" },
+      { input: 60, expected: "PT0H1M0S" },
+      { input: 61, expected: "PT0H1M1S" },
+    ],
+
+    "hours, minutes and seconds": [
+      { input: 3600, expected: "PT1H0M0S" },
+      { input: 3605, expected: "PT1H0M5S" },
+      { input: 3665, expected: "PT1H1M5S" },
+      { input: 7325, expected: "PT2H2M5S" },
+    ],
+  };
+
+  Object.entries(groupedCases).forEach(([group, cases]) => {
+    describe(`format: ${group}`, () => {
+      cases.forEach(({ input, expected }) => {
+        it(`formats ${input}s -> ${expected}`, () => {
+          expect(formatReadingDuration(input)).toBe(expected);
+        });
+      });
+    });
+  });
+});
 
 describe("formatReadingTime", () => {
   const groupedCases = {

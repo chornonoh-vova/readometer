@@ -106,9 +106,9 @@ export function EditReadingSessionDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit reading session</DialogTitle>
+          <DialogTitle>Edit session</DialogTitle>
           <DialogDescription>
-            Please enter updated information for this reading session
+            Correct the start or end page for this session.
           </DialogDescription>
         </DialogHeader>
         <form

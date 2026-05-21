@@ -17,15 +17,15 @@ export function ActiveBooksEmpty() {
         <EmptyMedia variant="icon">
           <BookMarkedIcon />
         </EmptyMedia>
-        <EmptyTitle>No active books</EmptyTitle>
+        <EmptyTitle>Nothing in progress</EmptyTitle>
         <EmptyDescription>
-          You haven't started reading any books yet. You can add a new book or
-          you can look at all of your books.
+          Pick up a book from your library to start a reading session, or add a
+          new one.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Link to="/books" className={buttonVariants({ variant: "outline" })}>
-          View all books
+          Go to your library
           <ChevronRightIcon />
         </Link>
       </EmptyContent>

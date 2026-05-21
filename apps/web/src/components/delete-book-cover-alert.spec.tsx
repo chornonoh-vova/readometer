@@ -16,7 +16,7 @@ describe("DeleteBookCoverAlert", () => {
       <DeleteBookCoverAlert bookId="b1" open={true} onOpenChange={vi.fn()} />,
     );
     expect(
-      screen.getByRole("heading", { name: "Delete book cover for this book?" }),
+      screen.getByRole("heading", { name: "Remove cover image?" }),
     ).toBeInTheDocument();
   });
 
@@ -24,7 +24,7 @@ describe("DeleteBookCoverAlert", () => {
     render(
       <DeleteBookCoverAlert bookId="b1" open={true} onOpenChange={vi.fn()} />,
     );
-    expect(screen.getByText(/permanently delete/i)).toBeInTheDocument();
+    expect(screen.getByText(/removed permanently/i)).toBeInTheDocument();
   });
 
   it("calls mutate when Delete is clicked", async () => {
@@ -32,7 +32,7 @@ describe("DeleteBookCoverAlert", () => {
     render(
       <DeleteBookCoverAlert bookId="b1" open={true} onOpenChange={vi.fn()} />,
     );
-    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /remove cover/i }));
     expect(mockMutate).toHaveBeenCalled();
   });
 
@@ -42,7 +42,7 @@ describe("DeleteBookCoverAlert", () => {
     );
     expect(
       screen.queryByRole("heading", {
-        name: "Delete book cover for this book?",
+        name: "Remove cover image?",
       }),
     ).not.toBeInTheDocument();
   });

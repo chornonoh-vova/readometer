@@ -81,7 +81,7 @@ describe("FinishReadingSession", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Finish reading session" }),
+      screen.getByRole("heading", { name: "Log your progress" }),
     ).toBeInTheDocument();
   });
 

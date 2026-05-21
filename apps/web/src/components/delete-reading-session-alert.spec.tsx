@@ -26,7 +26,7 @@ describe("DeleteReadingSessionAlert", () => {
       />,
     );
     expect(
-      screen.getByRole("heading", { name: "Delete this session?" }),
+      screen.getByRole("heading", { name: "Delete this reading session?" }),
     ).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe("DeleteReadingSessionAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /delete session/i }));
     expect(mockMutate).toHaveBeenCalled();
   });
 
@@ -69,7 +69,7 @@ describe("DeleteReadingSessionAlert", () => {
       />,
     );
     expect(
-      screen.queryByRole("heading", { name: "Delete this session?" }),
+      screen.queryByRole("heading", { name: "Delete this reading session?" }),
     ).not.toBeInTheDocument();
   });
 });

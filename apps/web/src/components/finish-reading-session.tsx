@@ -108,8 +108,8 @@ export function FinishReadingSession() {
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Finish reading session</DialogTitle>
-          <DialogDescription>Complete a reading session</DialogDescription>
+          <DialogTitle>Log your progress</DialogTitle>
+          <DialogDescription>What page did you finish on?</DialogDescription>
         </DialogHeader>
         <form
           id="finish-reading-form"

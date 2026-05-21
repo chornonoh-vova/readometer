@@ -12,20 +12,20 @@ const { ActiveBooksEmpty } = await import("./active-books-empty");
 describe("ActiveBooksEmpty", () => {
   it("renders the no active books title", () => {
     render(<ActiveBooksEmpty />);
-    expect(screen.getByText("No active books")).toBeInTheDocument();
+    expect(screen.getByText("Nothing in progress")).toBeInTheDocument();
   });
 
   it("renders the descriptive message", () => {
     render(<ActiveBooksEmpty />);
     expect(
-      screen.getByText(/You haven't started reading any books yet/),
+      screen.getByText(/Pick up a book from your library/),
     ).toBeInTheDocument();
   });
 
   it("renders a link to the books page", () => {
     render(<ActiveBooksEmpty />);
     expect(
-      screen.getByRole("link", { name: /View all books/ }),
+      screen.getByRole("link", { name: /Go to your library/ }),
     ).toHaveAttribute("href", "/books");
   });
 });

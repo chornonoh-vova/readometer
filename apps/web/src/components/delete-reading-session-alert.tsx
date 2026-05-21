@@ -45,15 +45,16 @@ export function DeleteReadingSessionAlert({
           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
             <Trash2Icon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Delete this session?</AlertDialogTitle>
+          <AlertDialogTitle>Delete this reading session?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete this session.
+            The reading time and page range logged for this session will be
+            permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={handleDelete}>
-            Delete
+            Delete session
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -17,7 +17,7 @@ describe("AbandonReadingSession", () => {
     render(<AbandonReadingSession />);
     await user.click(screen.getByRole("button", { name: /abandon/i }));
     expect(
-      screen.getByRole("heading", { name: "Abandon current session?" }),
+      screen.getByRole("heading", { name: "Discard this session?" }),
     ).toBeInTheDocument();
   });
 
@@ -26,7 +26,7 @@ describe("AbandonReadingSession", () => {
     render(<AbandonReadingSession />);
     await user.click(screen.getByRole("button", { name: /abandon/i }));
     expect(
-      screen.getByText(/progress that you've made will not be saved/i),
+      screen.getByText(/progress in this session won.*t be saved/i),
     ).toBeInTheDocument();
   });
 
@@ -39,7 +39,9 @@ describe("AbandonReadingSession", () => {
     await user.click(screen.getByRole("button", { name: /abandon/i }));
 
     const dialog = screen.getByRole("alertdialog");
-    await user.click(within(dialog).getByRole("button", { name: /abandon/i }));
+    await user.click(
+      within(dialog).getByRole("button", { name: /discard session/i }),
+    );
 
     expect(mockCancel).toHaveBeenCalledOnce();
   });

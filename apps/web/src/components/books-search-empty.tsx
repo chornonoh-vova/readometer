@@ -16,14 +16,15 @@ export function BooksSearchEmpty({ onClear }: { onClear?: () => void }) {
         <EmptyMedia variant="icon">
           <SearchXIcon />
         </EmptyMedia>
-        <EmptyTitle>No books found</EmptyTitle>
+        <EmptyTitle>No results</EmptyTitle>
         <EmptyDescription>
-          Try adjusting your search or filters
+          Nothing matched your search. Try different keywords or clear your
+          filters.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" onClick={onClear}>
-          Clear filters
+          Clear all filters
         </Button>
       </EmptyContent>
     </Empty>

@@ -24,7 +24,7 @@ function renderComponent(bookId = "book-1", totalPages = 300) {
 }
 
 async function openDialog(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /mark completed/i }));
+  await user.click(screen.getByRole("button", { name: /already read this/i }));
 }
 
 function fillDates(
@@ -40,10 +40,10 @@ function fillDates(
 }
 
 describe("AddHistoricReadingRun", () => {
-  it('renders a "Mark completed" button', () => {
+  it('renders a "Already read this" button', () => {
     renderComponent();
     expect(
-      screen.getByRole("button", { name: /mark completed/i }),
+      screen.getByRole("button", { name: /already read this/i }),
     ).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe("AddHistoricReadingRun", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Add historic reading run" }),
+      screen.getByRole("heading", { name: "Log a past read" }),
     ).toBeInTheDocument();
   });
 

@@ -19,7 +19,7 @@ beforeEach(() => {
 
 async function openDialog(user: ReturnType<typeof userEvent.setup>) {
   await user.click(
-    screen.getByRole("button", { name: "Setup yearly reading goal" }),
+    screen.getByRole("button", { name: "Set up yearly reading goal" }),
   );
   return screen.getByRole("dialog");
 }
@@ -28,18 +28,18 @@ describe("SetupYearlyGoal", () => {
   it("renders a settings trigger with an accessible label", () => {
     render(<SetupYearlyGoal />);
     expect(
-      screen.getByRole("button", { name: "Setup yearly reading goal" }),
+      screen.getByRole("button", { name: "Set up yearly reading goal" }),
     ).toBeInTheDocument();
   });
 
-  it("opens the dialog with title 'Setup the yearly reading goal'", async () => {
+  it("opens the dialog with title 'Set your yearly reading goal'", async () => {
     const user = userEvent.setup();
     render(<SetupYearlyGoal />);
 
     const dialog = await openDialog(user);
     expect(
       within(dialog).getByRole("heading", {
-        name: "Setup the yearly reading goal",
+        name: "Set your yearly reading goal",
       }),
     ).toBeInTheDocument();
   });
@@ -75,9 +75,7 @@ describe("SetupYearlyGoal", () => {
     await user.clear(target);
     await user.type(target, "20");
 
-    await user.click(
-      within(dialog).getByRole("button", { name: "Setup goal" }),
-    );
+    await user.click(within(dialog).getByRole("button", { name: "Save goal" }));
 
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -115,9 +113,7 @@ describe("SetupYearlyGoal", () => {
     render(<SetupYearlyGoal />);
     const dialog = await openDialog(user);
 
-    await user.click(
-      within(dialog).getByRole("button", { name: "Setup goal" }),
-    );
+    await user.click(within(dialog).getByRole("button", { name: "Save goal" }));
 
     expect(mockUpsert).not.toHaveBeenCalled();
   });
@@ -128,7 +124,7 @@ describe("SetupYearlyGoal", () => {
     const dialog = await openDialog(user);
 
     expect(
-      within(dialog).queryByRole("button", { name: "Delete goal" }),
+      within(dialog).queryByRole("button", { name: "Remove goal" }),
     ).not.toBeInTheDocument();
   });
 
@@ -138,7 +134,7 @@ describe("SetupYearlyGoal", () => {
     const dialog = await openDialog(user);
 
     await user.click(
-      within(dialog).getByRole("button", { name: "Delete goal" }),
+      within(dialog).getByRole("button", { name: "Remove goal" }),
     );
 
     expect(mockDelete).toHaveBeenCalledWith("g2", expect.any(Object));
@@ -157,9 +153,7 @@ describe("SetupYearlyGoal", () => {
     await user.clear(target);
     await user.type(target, "5");
 
-    await user.click(
-      within(dialog).getByRole("button", { name: "Setup goal" }),
-    );
+    await user.click(within(dialog).getByRole("button", { name: "Save goal" }));
 
     expect(screen.getByText(/target must be > 0/)).toBeInTheDocument();
   });

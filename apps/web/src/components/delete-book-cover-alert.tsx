@@ -38,15 +38,15 @@ export function DeleteBookCoverAlert({
           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
             <Trash2Icon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Delete book cover for this book?</AlertDialogTitle>
+          <AlertDialogTitle>Remove cover image?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete book cover for this book.
+            The cover image will be removed permanently.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={handleDelete}>
-            Delete
+            Remove cover
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

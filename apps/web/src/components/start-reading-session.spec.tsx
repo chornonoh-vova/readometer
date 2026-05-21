@@ -105,7 +105,7 @@ describe("StartReadingSession", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Start reading session" }),
+      screen.getByRole("heading", { name: "Start a session" }),
     ).toBeInTheDocument();
   });
 

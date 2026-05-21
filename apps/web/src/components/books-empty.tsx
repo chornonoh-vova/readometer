@@ -16,10 +16,9 @@ export function BooksEmpty() {
         <EmptyMedia variant="icon">
           <BookPlusIcon />
         </EmptyMedia>
-        <EmptyTitle>No books yet</EmptyTitle>
+        <EmptyTitle>Your library is empty</EmptyTitle>
         <EmptyDescription>
-          You haven't added any books yet. Get started by adding your first
-          book.
+          Add your first book to start tracking your reading.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

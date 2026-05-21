@@ -43,14 +43,22 @@ export function splitPartialDate(value: string | undefined) {
   return { year, month, day };
 }
 
-export function formatReadingTime(readingTime: number) {
+function formatReadingParts(readingTime: number) {
   const hours = Math.floor(readingTime / 3600);
-  const minutes = Math.floor((readingTime % 3600) / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = Math.floor(readingTime % 60)
-    .toString()
-    .padStart(2, "0");
+  const minutes = Math.floor((readingTime % 3600) / 60);
+  const seconds = Math.floor(readingTime % 60);
 
-  return [hours, minutes, seconds].filter(Boolean).join(":");
+  return [hours, minutes, seconds];
+}
+
+export function formatReadingDuration(readingTime: number) {
+  const [hours, minutes, seconds] = formatReadingParts(readingTime);
+  return `PT${hours}H${minutes}M${seconds}S`;
+}
+
+export function formatReadingTime(readingTime: number) {
+  const [hours, minutes, seconds] = formatReadingParts(readingTime);
+  const minutesPadded = minutes.toString().padStart(2, "0");
+  const secondsPadded = seconds.toString().padStart(2, "0");
+  return [hours, minutesPadded, secondsPadded].filter(Boolean).join(":");
 }

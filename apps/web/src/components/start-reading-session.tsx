@@ -141,9 +141,12 @@ export function StartReadingSession({
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Start reading session</DialogTitle>
-          <DialogDescription>Start a new reading session</DialogDescription>
+          <DialogTitle>Start a session</DialogTitle>
+          <DialogDescription>
+            Which page are you starting from?
+          </DialogDescription>
         </DialogHeader>
+
         <form
           id="start-reading-form"
           onSubmit={(e) => {

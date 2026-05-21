@@ -79,9 +79,9 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
     >
       <Card className={cn("flex flex-col gap-6", className)} {...props}>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Register a new account</CardTitle>
+          <CardTitle className="text-xl">Create your account</CardTitle>
           <CardDescription>
-            Enter your name and email below to create a new account
+            Takes less than a minute to get started
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -188,7 +188,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
                 {loading ? (
                   <>
                     <Spinner />
-                    Loading...
+                    Creating account...
                   </>
                 ) : (
                   "Sign up"
@@ -196,7 +196,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
               </Button>
 
               <FieldDescription className="text-center">
-                Already have an account? <Link to="/login">Login</Link>
+                Already have an account? <Link to="/login">Sign in</Link>
               </FieldDescription>
             </Field>
           </FieldGroup>

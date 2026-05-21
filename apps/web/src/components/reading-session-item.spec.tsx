@@ -37,7 +37,7 @@ describe("ReadingSessionItem", () => {
         totalPages={300}
       />,
     );
-    expect(screen.getByText("Session #3")).toBeInTheDocument();
+    expect(screen.getByText("Session 3")).toBeInTheDocument();
   });
 
   it("shows the page range and read page count", () => {
@@ -49,7 +49,7 @@ describe("ReadingSessionItem", () => {
         totalPages={300}
       />,
     );
-    expect(screen.getByText(/Pages 50-75 \(25 pages\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Pages 50.75 . 25 pages/)).toBeInTheDocument();
   });
 
   it("shows the formatted read time", () => {

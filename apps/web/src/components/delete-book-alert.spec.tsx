@@ -21,7 +21,7 @@ describe("DeleteBookAlert", () => {
       />,
     );
     expect(
-      screen.getByRole("heading", { name: /Delete book "Dune"\?/ }),
+      screen.getByRole("heading", { name: /Delete "Dune"\?/ }),
     ).toBeInTheDocument();
   });
 
@@ -47,7 +47,7 @@ describe("DeleteBookAlert", () => {
         onOpenChange={vi.fn()}
       />,
     );
-    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /yes, delete book/i }));
     expect(mockMutate).toHaveBeenCalledWith("book-42", expect.any(Object));
   });
 
@@ -61,7 +61,7 @@ describe("DeleteBookAlert", () => {
       />,
     );
     expect(
-      screen.queryByRole("heading", { name: /Delete book/ }),
+      screen.queryByRole("heading", { name: /Delete "/ }),
     ).not.toBeInTheDocument();
   });
 });

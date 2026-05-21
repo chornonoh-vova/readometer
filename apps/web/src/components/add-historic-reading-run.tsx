@@ -79,15 +79,15 @@ export function AddHistoricReadingRun({
         render={
           <Button variant="secondary">
             <CircleCheckBigIcon />
-            Mark completed
+            Already read this
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add historic reading run</DialogTitle>
+          <DialogTitle>Log a past read</DialogTitle>
           <DialogDescription>
-            Specify the dates in the past when you've read this book
+            When did you read it? Add the start and finish dates.
           </DialogDescription>
         </DialogHeader>
         <form

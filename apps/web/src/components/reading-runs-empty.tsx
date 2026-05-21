@@ -18,9 +18,10 @@ export function ReadingRunsEmpty({ book }: { book: BookDetails }) {
         <EmptyMedia variant="icon">
           <BookOpenCheckIcon />
         </EmptyMedia>
-        <EmptyTitle>No reading sessions yet</EmptyTitle>
+        <EmptyTitle>Ready to start reading?</EmptyTitle>
         <EmptyDescription>
-          You haven't started reading this book yet
+          Start a session to track your progress, or log a read you've already
+          finished.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
