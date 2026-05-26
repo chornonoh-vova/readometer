@@ -45,13 +45,13 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
-    "@tanstack/eslint-plugin-query": "^5.100.10",
-    "@tanstack/router-plugin": "^1.167.35",
+    "@tanstack/eslint-plugin-query": "^5.100.13",
+    "@tanstack/router-plugin": "^1.168.6",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^25.6.2",
-    "@types/react": "^19.2.14",
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-react": "^6.0.2",
@@ -65,7 +65,7 @@
     "shadcn": "^4.7.0",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "^8.0.13",
+    "vite": "^8.0.14",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "catalog:"
   }
