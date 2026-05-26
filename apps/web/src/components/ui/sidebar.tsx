@@ -514,7 +514,9 @@ function SidebarMenuButton({
     props: mergeProps<"button">(
       {
         className: cn(sidebarMenuButtonVariants({ variant, size }), className),
-        onClick: () => { if (isMobile) setOpenMobile(false); },
+        onClick: () => {
+          if (isMobile) setOpenMobile(false);
+        },
       },
       props,
     ),
