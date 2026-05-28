@@ -6,8 +6,8 @@ import { StartReadingSession } from "./start-reading-session";
 import type { BookDetails } from "@/lib/books";
 import { Suspense } from "react";
 import { ReadingSessionsList } from "./reading-sessions-list";
-import { formatDate } from "@/lib/format";
 import { ReadingSessionsLoading } from "./reading-sessions-loading";
+import { ReadingDate } from "./reading-date";
 
 export function ReadingRunsList({
   book,
@@ -35,19 +35,13 @@ export function ReadingRunsList({
 
             <div className="flex gap-1.5 items-center text-sm">
               <CalendarIcon className="size-4" />
-              Started:{" "}
-              <time dateTime={readingRun.startedAt}>
-                {formatDate(readingRun.startedAt)}
-              </time>
+              Started: <ReadingDate value={readingRun.startedAt} />
             </div>
 
             {readingRun.finishedAt && (
               <div className="flex gap-1.5 items-center text-sm">
                 <CalendarIcon className="size-4" />
-                Finished:{" "}
-                <time dateTime={readingRun.finishedAt}>
-                  {formatDate(readingRun.finishedAt)}
-                </time>
+                Finished: <ReadingDate value={readingRun.finishedAt} />
               </div>
             )}
 

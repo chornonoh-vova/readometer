@@ -9,7 +9,6 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
-import { formatTime } from "@/lib/format";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,16 +41,13 @@ export const ReadingSessionItem = memo(function ReadingSessionItem({
         <ItemTitle>Session {readingSession.num}</ItemTitle>
         <div className="flex gap-2 items-center">
           <CalendarIcon className="size-3.5" />
-          <time dateTime={readingSession.startTime}>
-            {formatTime(readingSession.startTime)}
-          </time>
-          {readingSession.endTime &&
-            " - " +
-            (
-              <time dateTime={readingSession.endTime}>
-                {formatTime(readingSession.endTime)}
-              </time>
-            )}
+          <ReadingTime value={readingSession.startTime} />
+          {readingSession.endTime && (
+            <>
+              {"-"}
+              <ReadingTime value={readingSession.endTime} />
+            </>
+          )}
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           <div className="flex gap-2 items-center">

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { ReadingSession } from "@/lib/reading-sessions";
+import { formatTime } from "@/lib/format";
 
 vi.mock("./edit-reading-session-dialog", () => ({
   EditReadingSessionDialog: ({ open }: { open: boolean }) =>
@@ -76,5 +77,56 @@ describe("ReadingSessionItem", () => {
     expect(
       screen.getByRole("button", { name: "Open session #3 menu" }),
     ).toBeInTheDocument();
+  });
+
+  it("renders start time as text and dateTime attribute", () => {
+    const { container } = render(
+      <ReadingSessionItem
+        length={3}
+        readingSession={session}
+        bookId="b1"
+        totalPages={300}
+      />,
+    );
+    expect(screen.getByText(formatTime(session.startTime))).toBeInTheDocument();
+    expect(
+      container.querySelector(`time[dateTime="${session.startTime}"]`),
+    ).toBeInTheDocument();
+  });
+
+  it("renders end time as text and dateTime attribute when present", () => {
+    const { container } = render(
+      <ReadingSessionItem
+        length={3}
+        readingSession={session}
+        bookId="b1"
+        totalPages={300}
+      />,
+    );
+    expect(screen.getByText(formatTime(session.endTime!))).toBeInTheDocument();
+    expect(
+      container.querySelector(`time[dateTime="${session.endTime}"]`),
+    ).toBeInTheDocument();
+  });
+
+  it("does not render end time when endTime is null", () => {
+    const sessionWithoutEnd: ReadingSession & { num: number } = {
+      ...session,
+      endTime: null,
+    };
+    const { container } = render(
+      <ReadingSessionItem
+        length={3}
+        readingSession={sessionWithoutEnd}
+        bookId="b1"
+        totalPages={300}
+      />,
+    );
+    expect(
+      container.querySelector(`time[dateTime="${session.startTime}"]`),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(`time[dateTime="${session.endTime}"]`),
+    ).not.toBeInTheDocument();
   });
 });

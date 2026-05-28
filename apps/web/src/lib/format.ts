@@ -62,3 +62,13 @@ export function formatReadingTime(readingTime: number) {
   const secondsPadded = seconds.toString().padStart(2, "0");
   return [hours, minutesPadded, secondsPadded].filter(Boolean).join(":");
 }
+
+export function formatReadingValue(readingTime: number): [string, string] {
+  const [hours, minutes, seconds] = formatReadingParts(readingTime);
+  const minutesPadded = minutes.toString().padStart(2, "0");
+  const secondsPadded = seconds.toString().padStart(2, "0");
+  return [
+    `PT${hours}H${minutes}M${seconds}S`,
+    [hours, minutesPadded, secondsPadded].filter(Boolean).join(":"),
+  ];
+}
