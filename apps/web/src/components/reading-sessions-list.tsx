@@ -9,15 +9,15 @@ import {
 } from "./ui/collapsible";
 import { Button } from "./ui/button";
 import { ChevronsUpDownIcon } from "lucide-react";
+import { ReadingTime } from "./reading-time";
+import { sumBy } from "@/lib/utils";
 
 export function ReadingSessionsList({
-  defaultOpen,
   num,
   runId,
   bookId,
   totalPages,
 }: {
-  defaultOpen: boolean;
   num: number;
   runId: string;
   bookId: string;
@@ -25,24 +25,27 @@ export function ReadingSessionsList({
 }) {
   const { data: readingSessions } = useReadingSessionsSuspenseQuery(runId);
 
-  const groupedSessions = useMemo(
-    () =>
-      Object.groupBy(
-        readingSessions.map((readingSession, idx) => ({
-          ...readingSession,
-          num: readingSessions.length - idx,
-        })),
-        ({ startTime }) => formatDate(startTime),
-      ),
-    [readingSessions],
-  );
+  const groupedSessions = useMemo(() => {
+    const grouped = Object.groupBy(
+      readingSessions.map((readingSession, idx) => ({
+        ...readingSession,
+        num: readingSessions.length - idx,
+      })),
+      ({ startTime }) => formatDate(startTime),
+    );
+    return Object.entries(grouped).map(([day, sessions = []]) => ({
+      day,
+      sessions,
+      dayReadTime: sumBy(sessions, (s) => s.readTime),
+    }));
+  }, [readingSessions]);
 
-  if (Object.entries(groupedSessions).length === 0) {
+  if (groupedSessions.length === 0) {
     return null;
   }
 
   return (
-    <Collapsible defaultOpen={defaultOpen}>
+    <Collapsible>
       <div className="flex items-center justify-between gap-4 mb-2">
         <h3 className="text-sm font-semibold">Sessions</h3>
         <CollapsibleTrigger
@@ -56,11 +59,14 @@ export function ReadingSessionsList({
       </div>
       <CollapsibleContent>
         <div className="flex flex-col gap-2">
-          {Object.entries(groupedSessions).map(([day, sessions]) => (
+          {groupedSessions.map(({ day, sessions, dayReadTime }) => (
             <Fragment key={day}>
-              <h4 className="text-sm">{day}</h4>
+              <h4 className="text-sm inline-flex justify-between">
+                <span>{day}</span>
+                <ReadingTime value={dayReadTime} />
+              </h4>
               <ul className="flex flex-col gap-1">
-                {sessions?.map((readingSession) => (
+                {sessions.map((readingSession) => (
                   <ReadingSessionItem
                     key={readingSession.id}
                     length={readingSessions.length}

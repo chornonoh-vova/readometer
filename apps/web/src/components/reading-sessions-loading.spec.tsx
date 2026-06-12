@@ -3,8 +3,9 @@ import { render } from "@testing-library/react";
 import { ReadingSessionsLoading } from "./reading-sessions-loading";
 
 describe("ReadingSessionsLoading", () => {
-  it("renders five skeleton placeholders", () => {
+  it("renders a collapsed header row with heading and toggle placeholders", () => {
     const { container } = render(<ReadingSessionsLoading />);
-    expect(container.firstElementChild?.children).toHaveLength(5);
+    const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+    expect(skeletons).toHaveLength(2);
   });
 });

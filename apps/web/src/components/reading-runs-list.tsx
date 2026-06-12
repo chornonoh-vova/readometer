@@ -7,7 +7,9 @@ import type { BookDetails } from "@/lib/books";
 import { Suspense } from "react";
 import { ReadingSessionsList } from "./reading-sessions-list";
 import { ReadingSessionsLoading } from "./reading-sessions-loading";
+import { ReadingRunStatsLoading } from "./reading-run-stats-loading";
 import { ReadingDate } from "./reading-date";
+import { ReadingRunStats } from "./reading-run-stats";
 
 export function ReadingRunsList({
   book,
@@ -58,11 +60,16 @@ export function ReadingRunsList({
               />
             </div>
 
-            <Suspense fallback={<ReadingSessionsLoading />}>
+            <Suspense
+              fallback={
+                <>
+                  <ReadingRunStatsLoading />
+                  <ReadingSessionsLoading />
+                </>
+              }
+            >
+              <ReadingRunStats runId={readingRun.id} />
               <ReadingSessionsList
-                defaultOpen={
-                  idx === 0 || readingRun.completedPages < book.totalPages
-                }
                 num={num}
                 runId={readingRun.id}
                 bookId={readingRun.bookId}

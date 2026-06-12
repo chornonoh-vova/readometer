@@ -2,10 +2,9 @@ import { Skeleton } from "./ui/skeleton";
 
 export function ReadingSessionsLoading() {
   return (
-    <div className="flex flex-col gap-1">
-      {Array.from({ length: 5 }, (_, i) => i).map((i) => (
-        <Skeleton key={i} className="h-24 border rounded-lg" />
-      ))}
+    <div className="flex items-center justify-between gap-4 mb-2">
+      <Skeleton className="h-5 w-16" />
+      <Skeleton className="size-9" />
     </div>
   );
 }
