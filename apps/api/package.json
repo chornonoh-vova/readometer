@@ -37,7 +37,7 @@
     "kysely-codegen": "^0.20.0",
     "kysely-ctl": "^0.21.0",
     "prettier": "catalog:",
-    "testcontainers": "^11.14.0",
+    "testcontainers": "^12.0.1",
     "typescript-eslint": "catalog:",
     "vitest": "catalog:"
   }
