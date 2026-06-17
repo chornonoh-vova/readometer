@@ -28,7 +28,7 @@ import type { User } from "better-auth";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "@tanstack/react-router";
-import { useTheme } from "./theme-provider";
+import { useThemeStore } from "@/store/theme";
 
 function UserContent({
   user,
@@ -56,12 +56,12 @@ function UserContent({
 }
 
 export function NavUser() {
-  const { theme, setTheme } = useTheme();
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const logout = async () => {
-    console.log("logout");
     await authClient.signOut();
     router.navigate({ to: "/login" });
   };

@@ -10,7 +10,9 @@ export function useBookFilters(books: Book[]) {
     let result = books;
     if (statusFilter !== "all") {
       result = result.filter(
-        (b) => getBookStatus(b.completedPages, b.totalPages, b.abandoned) === statusFilter,
+        (b) =>
+          getBookStatus(b.completedPages, b.totalPages, b.abandoned) ===
+          statusFilter,
       );
     }
     if (trimmedSearch) {
