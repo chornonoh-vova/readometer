@@ -41,7 +41,6 @@ const inProgressRun: ReadingRun = {
   startedAt: "2025-01-01T00:00:00Z",
   updatedAt: "2025-01-01T00:00:00Z",
   finishedAt: null,
-  status: null,
 };
 
 const completedRun: ReadingRun = {

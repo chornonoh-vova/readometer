@@ -71,7 +71,7 @@ describe("/api/reading-sessions", () => {
       expect(sessionRow.userId).toBe(user.id);
     });
 
-    it("auto-finishes the run (status='completed', finishedAt set) when endPage reaches totalPages", async () => {
+    it("auto-finishes the run (finishedAt set) when endPage reaches totalPages", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 120 });
       const run = await makeRun({
@@ -103,7 +103,80 @@ describe("/api/reading-sessions", () => {
         .executeTakeFirstOrThrow();
       expect(runRow.completedPages).toBe(120);
       expect(runRow.finishedAt).not.toBeNull();
-      expect(runRow.status).toBe("completed");
+    });
+
+    it("clears the abandoned flag when a new session is logged on an abandoned run, even if the book is not yet complete", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 100 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 30,
+        abandoned: true,
+        finishedAt: new Date("2024-01-01"),
+      });
+
+      const now = new Date();
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          runId: run.id,
+          startPage: 30,
+          endPage: 60,
+          startTime: now.toISOString(),
+          endTime: new Date(now.getTime() + 60_000).toISOString(),
+          readTime: 60,
+        },
+      });
+
+      expect(response.status).toBe(201);
+
+      const runRow = await db
+        .selectFrom("readingRun")
+        .selectAll()
+        .where("id", "=", run.id)
+        .executeTakeFirstOrThrow();
+      expect(runRow.abandoned).toBe(false);
+      expect(runRow.completedPages).toBe(60);
+      expect(runRow.finishedAt).toBeNull();
+    });
+
+    it("clears the abandoned flag when a new session completes a previously-abandoned run", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 100 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 50,
+        abandoned: true,
+        finishedAt: new Date("2024-01-01"),
+      });
+
+      const now = new Date();
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          runId: run.id,
+          startPage: 50,
+          endPage: 100,
+          startTime: now.toISOString(),
+          endTime: new Date(now.getTime() + 60_000).toISOString(),
+          readTime: 60,
+        },
+      });
+
+      expect(response.status).toBe(201);
+
+      const runRow = await db
+        .selectFrom("readingRun")
+        .selectAll()
+        .where("id", "=", run.id)
+        .executeTakeFirstOrThrow();
+      expect(runRow.abandoned).toBe(false);
+      expect(runRow.completedPages).toBe(100);
+      expect(runRow.finishedAt).not.toBeNull();
     });
 
     it("rejects endPage beyond totalPages with 400", async () => {
@@ -337,7 +410,44 @@ describe("/api/reading-sessions", () => {
       expect(runRow.completedPages).toBe(50);
     });
 
-    it("clears finishedAt and resets status to 'active' when endPage is edited below totalPages", async () => {
+    it("clears the abandoned flag when endPage is edited on an abandoned run", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 100 });
+      const run = await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        completedPages: 50,
+        abandoned: true,
+        finishedAt: new Date("2024-01-15"),
+      });
+      const session = await makeSession({
+        userId: user.id,
+        runId: run.id,
+        startPage: 20,
+        endPage: 50,
+      });
+
+      const response = await call(
+        "PUT",
+        `/api/reading-sessions/${session.id}`,
+        {
+          as: user,
+          body: { endPage: 40, updateRun: true },
+        },
+      );
+
+      expect(response.status).toBe(200);
+
+      const runRow = await db
+        .selectFrom("readingRun")
+        .selectAll()
+        .where("id", "=", run.id)
+        .executeTakeFirstOrThrow();
+      expect(runRow.abandoned).toBe(false);
+      expect(runRow.finishedAt).toBeNull();
+    });
+
+    it("clears finishedAt when endPage is edited below totalPages", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id, totalPages: 100 });
       const run = await makeRun({
@@ -345,7 +455,6 @@ describe("/api/reading-sessions", () => {
         bookId: book.id,
         completedPages: 100,
         finishedAt: new Date(),
-        status: "completed",
       });
       const session = await makeSession({
         userId: user.id,
@@ -372,7 +481,6 @@ describe("/api/reading-sessions", () => {
         .executeTakeFirstOrThrow();
       expect(runRow.completedPages).toBe(90);
       expect(runRow.finishedAt).toBeNull();
-      expect(runRow.status).toBe("active");
     });
 
     it("recalculates readPages when both startPage and endPage are updated", async () => {

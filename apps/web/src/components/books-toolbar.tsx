@@ -92,6 +92,10 @@ export function BooksToolbar({
                     <BookIcon />
                     To Read
                   </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="abandoned">
+                    <XIcon />
+                    Abandoned
+                  </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="in-progress">
                     <LoaderCircleIcon />
                     In Progress

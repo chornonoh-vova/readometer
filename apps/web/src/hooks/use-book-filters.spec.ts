@@ -8,6 +8,7 @@ const makeBook = (
   title: string,
   completedPages = 0,
   author?: string,
+  abandoned = false,
 ): Book => ({
   id,
   userId: "u1",
@@ -15,6 +16,7 @@ const makeBook = (
   author,
   totalPages: 100,
   completedPages,
+  abandoned,
   updatedAt: "2024-01-01",
   createdAt: "2024-01-01",
   lastUpdatedAt: "2024-01-01",
@@ -26,12 +28,13 @@ const books: Book[] = [
   makeBook("2", "Dune", 50, "Frank Herbert"),
   makeBook("3", "1984", 100, "George Orwell"),
   makeBook("4", "Brave New World", 0, "Aldous Huxley"),
+  makeBook("5", "Fahrenheit 451", 30, "Ray Bradbury", true),
 ];
 
 describe("useBookFilters", () => {
   it("returns all books with no filters applied", () => {
     const { result } = renderHook(() => useBookFilters(books));
-    expect(result.current.filteredBooks).toHaveLength(4);
+    expect(result.current.filteredBooks).toHaveLength(5);
   });
 
   it("hasFilters is false by default", () => {
@@ -97,6 +100,20 @@ describe("useBookFilters", () => {
       expect(result.current.filteredBooks[0].title).toBe("Dune");
     });
 
+    it("filters to only abandoned books when set to 'abandoned'", () => {
+      const { result } = renderHook(() => useBookFilters(books));
+      act(() => result.current.setStatusFilter("abandoned"));
+      expect(result.current.filteredBooks).toHaveLength(1);
+      expect(result.current.filteredBooks[0].title).toBe("Fahrenheit 451");
+    });
+
+    it("does not include abandoned books in the 'in-progress' results", () => {
+      const { result } = renderHook(() => useBookFilters(books));
+      act(() => result.current.setStatusFilter("in-progress"));
+      const titles = result.current.filteredBooks.map((b) => b.title);
+      expect(titles).not.toContain("Fahrenheit 451");
+    });
+
     it("filters to only completed books when set to 'completed'", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setStatusFilter("completed"));
@@ -108,7 +125,7 @@ describe("useBookFilters", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setStatusFilter("in-progress"));
       act(() => result.current.setStatusFilter("all"));
-      expect(result.current.filteredBooks).toHaveLength(4);
+      expect(result.current.filteredBooks).toHaveLength(5);
     });
 
     it("sets hasFilters to true when statusFilter is not 'all'", () => {
@@ -159,7 +176,7 @@ describe("useBookFilters", () => {
         result.current.setStatusFilter("completed");
       });
       act(() => result.current.clearFilters());
-      expect(result.current.filteredBooks).toHaveLength(4);
+      expect(result.current.filteredBooks).toHaveLength(5);
       expect(result.current.hasFilters).toBe(false);
     });
   });

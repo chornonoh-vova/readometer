@@ -23,22 +23,29 @@ export type Book = {
   completedPages: number;
   lastRunId: string;
   lastUpdatedAt: string;
-  status?: "active" | "completed" | "abandoned";
+  abandoned?: boolean;
 };
 
 export type BookDetails = Omit<
   Book,
-  "completedPages" | "lastRunId" | "lastUpdatedAt" | "status"
+  "completedPages" | "lastRunId" | "lastUpdatedAt"
 >;
 
-export type BooksStatusFilter = "all" | "to-read" | "in-progress" | "completed";
+export type BooksStatusFilter =
+  | "all"
+  | "to-read"
+  | "abandoned"
+  | "in-progress"
+  | "completed";
 
 export function getBookStatus(
   completedPages: number,
   totalPages: number,
-): "to-read" | "in-progress" | "completed" {
+  abandoned?: boolean,
+): "to-read" | "abandoned" | "in-progress" | "completed" {
   if (!completedPages) return "to-read";
-  if (completedPages === totalPages) return "completed";
+  if (abandoned) return "abandoned";
+  if (completedPages >= totalPages) return "completed";
   return "in-progress";
 }
 
@@ -69,7 +76,15 @@ export function booksQueryOptions() {
 export function activeBooksQueryOptions() {
   return queryOptions({
     ...booksQueryOptions(),
-    select: (books) => books.filter((book) => book.status === "active"),
+    select: (books) =>
+      books.filter(
+        (book) =>
+          getBookStatus(
+            book.completedPages,
+            book.totalPages,
+            book.abandoned,
+          ) === "in-progress",
+      ),
   });
 }
 

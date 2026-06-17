@@ -25,6 +25,7 @@ export const BookItem = memo(function BookItem({ book }: { book: Book }) {
         <BookStatus
           completedPages={book.completedPages}
           totalPages={book.totalPages}
+          abandoned={book.abandoned}
         />
 
         <BookProgress

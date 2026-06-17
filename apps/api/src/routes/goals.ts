@@ -106,10 +106,12 @@ async function yearlyBooksActual(
   const row = await db
     .selectFrom("readingRun")
     .select(({ fn }) => [fn.countAll<number>().as("total")])
-    .where("userId", "=", userId)
-    .where("status", "=", "completed")
-    .where("finishedAt", ">=", yearStart)
-    .where("finishedAt", "<", yearEnd)
+    .innerJoin("book", "book.id", "readingRun.bookId")
+    .where("book.userId", "=", userId)
+    .whereRef("readingRun.completedPages", ">=", "book.totalPages")
+    .where("readingRun.abandoned", "=", false)
+    .where("readingRun.finishedAt", ">=", yearStart)
+    .where("readingRun.finishedAt", "<", yearEnd)
     .executeTakeFirst();
 
   return Number(row?.total ?? 0);

@@ -267,7 +267,7 @@ describe("/api/goals", () => {
 
     it("counts only completed reading runs in the year for yearly books goal", async () => {
       const user = await makeUser();
-      const book = await makeBook({ userId: user.id });
+      const book = await makeBook({ userId: user.id, totalPages: 123 });
 
       await call("POST", "/api/goals", {
         as: user,
@@ -278,33 +278,34 @@ describe("/api/goals", () => {
       await makeRun({
         userId: user.id,
         bookId: book.id,
-        status: "completed",
+        completedPages: 123,
         finishedAt: new Date("2026-02-01T00:00:00Z"),
       });
       await makeRun({
         userId: user.id,
         bookId: book.id,
-        status: "completed",
+        completedPages: 123,
         finishedAt: new Date("2026-08-15T00:00:00Z"),
       });
       // Abandoned in 2026 — does not count
       await makeRun({
         userId: user.id,
         bookId: book.id,
-        status: "abandoned",
+        abandoned: true,
+        completedPages: 100,
         finishedAt: new Date("2026-04-01T00:00:00Z"),
       });
       // Active — does not count
       await makeRun({
         userId: user.id,
         bookId: book.id,
-        status: "active",
+        completedPages: 100,
       });
       // Completed in prior year — does not count
       await makeRun({
         userId: user.id,
         bookId: book.id,
-        status: "completed",
+        completedPages: 123,
         finishedAt: new Date("2025-12-15T00:00:00Z"),
       });
 
@@ -321,6 +322,34 @@ describe("/api/goals", () => {
         target: 12,
       });
       expect(body.yearly?.actual).toBe(2);
+    });
+
+    it("does not count an abandoned run even if completedPages equals totalPages", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id, totalPages: 100 });
+
+      await call("POST", "/api/goals", {
+        as: user,
+        body: { id: uuidv7(), type: "yearly", metric: "books", target: 10 },
+      });
+
+      // Abandoned run that happened to reach the last page — must NOT count
+      await makeRun({
+        userId: user.id,
+        bookId: book.id,
+        abandoned: true,
+        completedPages: 100,
+        finishedAt: new Date("2026-03-01T00:00:00Z"),
+      });
+
+      const response = await call(
+        "GET",
+        "/api/goals/progress?date=2026-06-17&tz=UTC",
+        { as: user },
+      );
+
+      const body = (await response.json()) as Progress;
+      expect(body.yearly?.actual).toBe(0);
     });
 
     it("scopes progress aggregations to the caller", async () => {

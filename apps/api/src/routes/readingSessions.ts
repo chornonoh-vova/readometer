@@ -72,8 +72,8 @@ readingSessions.post(
           .set({
             completedPages: request.endPage,
             updatedAt: sql`CURRENT_TIMESTAMP`,
-            finishedAt: completed ? sql`CURRENT_TIMESTAMP` : undefined,
-            status: completed ? "completed" : undefined,
+            finishedAt: completed ? sql`CURRENT_TIMESTAMP` : null,
+            abandoned: false,
           })
           .where("id", "=", request.runId)
           .where("userId", "=", userId)
@@ -157,7 +157,7 @@ readingSessions.put(
               completedPages: request.endPage,
               updatedAt: sql`CURRENT_TIMESTAMP`,
               finishedAt: completed ? sql`CURRENT_TIMESTAMP` : null,
-              status: completed ? "completed" : "active",
+              abandoned: false,
             })
             .where("id", "=", runId)
             .where("userId", "=", userId)

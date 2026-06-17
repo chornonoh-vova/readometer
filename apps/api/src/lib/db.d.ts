@@ -55,12 +55,12 @@ export interface Goal {
 }
 
 export interface ReadingRun {
+  abandoned: Generated<boolean>;
   bookId: string;
   completedPages: number;
   finishedAt: Timestamp | null;
   id: string;
   startedAt: Generated<Timestamp>;
-  status: Generated<string>;
   updatedAt: Generated<Timestamp>;
   userId: string;
 }

@@ -14,7 +14,7 @@ export type ReadingRun = {
   startedAt: string;
   updatedAt: string;
   finishedAt?: string | null;
-  status: "active" | "completed" | "abandoned" | null;
+  abandoned?: boolean;
 };
 
 export type NewReadingRun = Pick<

@@ -51,6 +51,7 @@ export function ReadingRunsList({
               <BookStatus
                 completedPages={readingRun.completedPages}
                 totalPages={book.totalPages}
+                abandoned={readingRun.abandoned}
               />
               <BookProgress
                 title={`${book.title}, reading #${num}`}

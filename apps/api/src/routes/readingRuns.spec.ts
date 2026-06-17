@@ -57,7 +57,7 @@ describe("/api/reading-runs", () => {
   });
 
   describe("POST /api/reading-runs", () => {
-    it("creates a run for the caller's book with status='active'", async () => {
+    it("creates a run for the caller's book", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
 
@@ -76,11 +76,9 @@ describe("/api/reading-runs", () => {
       const body = (await response.json()) as {
         id: string;
         userId: string;
-        status: string;
       };
       expect(body.id).toBe(id);
       expect(body.userId).toBe(user.id);
-      expect(body.status).toBe("active");
     });
 
     it("accepts zero completedPages (starting a run from the beginning)", async () => {
@@ -120,7 +118,7 @@ describe("/api/reading-runs", () => {
       expect(response.status).toBe(201);
     });
 
-    it("creates a run with status='completed' and stores finishedAt when finishedAt is provided", async () => {
+    it("creates a run with finishedAt when finishedAt is provided", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
 
@@ -137,10 +135,8 @@ describe("/api/reading-runs", () => {
 
       expect(response.status).toBe(201);
       const body = (await response.json()) as {
-        status: string;
         finishedAt: string | null;
       };
-      expect(body.status).toBe("completed");
       expect(body.finishedAt).not.toBeNull();
     });
 
@@ -187,7 +183,7 @@ describe("/api/reading-runs", () => {
       expect(body.finishedAt).not.toBeNull();
     });
 
-    it("sets status='abandoned' and finishedAt when abandoning a run", async () => {
+    it("sets abandoned=true and finishedAt when abandoning a run", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
       const run = await makeRun({
@@ -198,19 +194,19 @@ describe("/api/reading-runs", () => {
 
       const response = await call("PUT", `/api/reading-runs/${run.id}`, {
         as: user,
-        body: { status: "abandoned" },
+        body: { abandoned: true },
       });
 
       expect(response.status).toBe(200);
       const body = (await response.json()) as {
-        status: string;
+        abandoned?: boolean;
         finishedAt: string | null;
       };
-      expect(body.status).toBe("abandoned");
+      expect(body.abandoned).toBeTruthy();
       expect(body.finishedAt).not.toBeNull();
     });
 
-    it("sets status='completed' and finishedAt when marking complete without an explicit finishedAt", async () => {
+    it("does not stamp finishedAt when setting abandoned=false", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
       const run = await makeRun({
@@ -221,40 +217,40 @@ describe("/api/reading-runs", () => {
 
       const response = await call("PUT", `/api/reading-runs/${run.id}`, {
         as: user,
-        body: { status: "completed" },
+        body: { abandoned: false },
       });
 
       expect(response.status).toBe(200);
       const body = (await response.json()) as {
-        status: string;
+        abandoned: boolean;
         finishedAt: string | null;
       };
-      expect(body.status).toBe("completed");
-      expect(body.finishedAt).not.toBeNull();
+      expect(body.abandoned).toBe(false);
+      expect(body.finishedAt).toBeNull();
     });
 
-    it("clears finishedAt when reverting status to 'active'", async () => {
+    it("clears finishedAt when un-abandoning a run (abandoned=false)", async () => {
       const user = await makeUser();
       const book = await makeBook({ userId: user.id });
       const run = await makeRun({
         userId: user.id,
         bookId: book.id,
         completedPages: 10,
-        status: "abandoned",
-        finishedAt: new Date(),
+        abandoned: true,
+        finishedAt: new Date("2024-01-15"),
       });
 
       const response = await call("PUT", `/api/reading-runs/${run.id}`, {
         as: user,
-        body: { status: "active" },
+        body: { abandoned: false },
       });
 
       expect(response.status).toBe(200);
       const body = (await response.json()) as {
-        status: string;
+        abandoned: boolean;
         finishedAt: string | null;
       };
-      expect(body.status).toBe("active");
+      expect(body.abandoned).toBe(false);
       expect(body.finishedAt).toBeNull();
     });
 

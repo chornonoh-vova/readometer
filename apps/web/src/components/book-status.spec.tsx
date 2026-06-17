@@ -22,4 +22,14 @@ describe("BookStatus", () => {
     render(<BookStatus completedPages={0} totalPages={0} />);
     expect(screen.getByText("To Read")).toBeInTheDocument();
   });
+
+  it("shows Abandoned when abandoned is true and some pages are completed", () => {
+    render(<BookStatus completedPages={50} totalPages={300} abandoned={true} />);
+    expect(screen.getByText("Abandoned")).toBeInTheDocument();
+  });
+
+  it("shows In Progress (not Abandoned) when abandoned is false", () => {
+    render(<BookStatus completedPages={50} totalPages={300} abandoned={false} />);
+    expect(screen.getByText("In Progress")).toBeInTheDocument();
+  });
 });
