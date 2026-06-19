@@ -14,6 +14,8 @@ export default async function globalSetup() {
   process.env.BETTER_AUTH_URL = "http://localhost:3000";
   process.env.TRUSTED_ORIGINS = "http://localhost:3000";
   process.env.TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA";
+  process.env.GOOGLE_CLIENT_ID = "test-google-client-id";
+  process.env.GOOGLE_CLIENT_SECRET = "test-google-client-secret";
   process.env.NODE_ENV = "test";
   process.env.TZ = "UTC";
 

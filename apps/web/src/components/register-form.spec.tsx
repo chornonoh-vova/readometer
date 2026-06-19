@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 const mockNavigate = vi.fn();
 const mockSignUpEmail = vi.fn();
+const mockSignInSocial = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ navigate: mockNavigate }),
@@ -13,7 +14,14 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/lib/auth-client", () => ({
-  authClient: { signUp: { email: mockSignUpEmail } },
+  authClient: {
+    signUp: { email: mockSignUpEmail },
+    signIn: { social: mockSignInSocial },
+  },
+}));
+
+vi.mock("@/assets/icons/google.svg?react", () => ({
+  default: () => null,
 }));
 
 vi.mock("@marsidev/react-turnstile", () => ({
@@ -29,6 +37,7 @@ const { RegisterForm } = await import("./register-form");
 beforeEach(() => {
   mockNavigate.mockClear();
   mockSignUpEmail.mockClear();
+  mockSignInSocial.mockClear();
 });
 
 async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
@@ -38,7 +47,7 @@ async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
     "alice@example.com",
   );
   await user.type(screen.getByLabelText("Password"), "securepassword");
-  await user.click(screen.getByRole("button", { name: /sign up/i }));
+  await user.click(screen.getByRole("button", { name: "Sign up" }));
 }
 
 describe("RegisterForm", () => {
@@ -51,9 +60,7 @@ describe("RegisterForm", () => {
 
   it("renders the Sign up submit button", () => {
     render(<RegisterForm />);
-    expect(
-      screen.getByRole("button", { name: /sign up/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign up" })).toBeInTheDocument();
   });
 
   it("renders a link to the login page", () => {
@@ -112,7 +119,7 @@ describe("RegisterForm", () => {
       "alice@example.com",
     );
     await user.type(screen.getByLabelText("Password"), "short");
-    await user.click(screen.getByRole("button", { name: /sign up/i }));
+    await user.click(screen.getByRole("button", { name: "Sign up" }));
 
     expect(mockSignUpEmail).not.toHaveBeenCalled();
   });
@@ -126,8 +133,30 @@ describe("RegisterForm", () => {
       "alice@example.com",
     );
     await user.type(screen.getByLabelText("Password"), "password123");
-    await user.click(screen.getByRole("button", { name: /sign up/i }));
+    await user.click(screen.getByRole("button", { name: "Sign up" }));
 
     expect(mockSignUpEmail).not.toHaveBeenCalled();
+  });
+
+  it("renders a Sign up with Google button", () => {
+    render(<RegisterForm />);
+    expect(
+      screen.getByRole("button", { name: /sign up with google/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls authClient.signIn.social with google provider and callbackURL /", async () => {
+    mockSignInSocial.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<RegisterForm />);
+
+    await user.click(
+      screen.getByRole("button", { name: /sign up with google/i }),
+    );
+
+    expect(mockSignInSocial).toHaveBeenCalledWith({
+      provider: "google",
+      callbackURL: "/",
+    });
   });
 });

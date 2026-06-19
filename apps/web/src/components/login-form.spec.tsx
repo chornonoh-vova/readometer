@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 const mockNavigate = vi.fn();
 const mockSignInEmail = vi.fn();
+const mockSignInSocial = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ navigate: mockNavigate }),
@@ -13,7 +14,11 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/lib/auth-client", () => ({
-  authClient: { signIn: { email: mockSignInEmail } },
+  authClient: { signIn: { email: mockSignInEmail, social: mockSignInSocial } },
+}));
+
+vi.mock("@/assets/icons/google.svg?react", () => ({
+  default: () => null,
 }));
 
 vi.mock("@marsidev/react-turnstile", () => ({
@@ -29,6 +34,7 @@ const { LoginForm } = await import("./login-form");
 beforeEach(() => {
   mockNavigate.mockClear();
   mockSignInEmail.mockClear();
+  mockSignInSocial.mockClear();
 });
 
 async function fillAndSubmit(
@@ -37,7 +43,7 @@ async function fillAndSubmit(
 ) {
   await user.type(screen.getByRole("textbox", { name: "Email" }), email);
   await user.type(screen.getByLabelText("Password"), password);
-  await user.click(screen.getByRole("button", { name: /sign in/i }));
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
 }
 
 describe("LoginForm", () => {
@@ -56,9 +62,7 @@ describe("LoginForm", () => {
 
   it("renders the Sign in submit button", () => {
     render(<LoginForm redirect="/" />);
-    expect(
-      screen.getByRole("button", { name: /sign in/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
   it("renders a link to the register page", () => {
@@ -115,7 +119,7 @@ describe("LoginForm", () => {
       "not-an-email",
     );
     await user.type(screen.getByLabelText("Password"), "password123");
-    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(mockSignInEmail).not.toHaveBeenCalled();
   });
@@ -129,8 +133,30 @@ describe("LoginForm", () => {
       "user@example.com",
     );
     await user.type(screen.getByLabelText("Password"), "short");
-    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(mockSignInEmail).not.toHaveBeenCalled();
+  });
+
+  it("renders a Sign in with Google button", () => {
+    render(<LoginForm redirect="/" />);
+    expect(
+      screen.getByRole("button", { name: /sign in with google/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls authClient.signIn.social with google provider and redirect as callbackURL", async () => {
+    mockSignInSocial.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/dashboard" />);
+
+    await user.click(
+      screen.getByRole("button", { name: /sign in with google/i }),
+    );
+
+    expect(mockSignInSocial).toHaveBeenCalledWith({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
   });
 });

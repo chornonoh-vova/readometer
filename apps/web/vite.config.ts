@@ -1,6 +1,7 @@
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import svgr from "vite-plugin-svgr";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
@@ -14,6 +15,7 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
+    svgr(),
     VitePWA({
       registerType: "autoUpdate",
       devOptions: {

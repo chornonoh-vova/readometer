@@ -6,7 +6,16 @@ export const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") ?? [
   process.env.BETTER_AUTH_URL!,
 ];
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+if (!googleClientId || !googleClientSecret) {
+  throw new Error("Google auth credentials are missing");
+}
+
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
+
   plugins: [
     captcha({
       provider: "cloudflare-turnstile",
@@ -14,14 +23,19 @@ export const auth = betterAuth({
     }),
   ],
 
-  basePath: "/auth",
-
   database: pool,
 
   trustedOrigins,
 
   emailAndPassword: {
     enabled: true,
+  },
+
+  socialProviders: {
+    google: {
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    },
   },
 
   advanced: {

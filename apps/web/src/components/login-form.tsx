@@ -13,6 +13,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,9 @@ import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Spinner } from "./ui/spinner";
+
+import GoogleIcon from "@/assets/icons/google.svg?react";
+import { signInWithGoogle } from "@/lib/google-sign-in";
 
 const loginFormSchema = z.object({
   email: z.email(),
@@ -75,6 +79,9 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
     },
   });
 
+  const handleGoogleSignIn = () =>
+    signInWithGoogle(redirect, setErrorMessage, setLoading);
+
   return (
     <form
       onSubmit={(e) => {
@@ -97,6 +104,19 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
                 <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             )}
+
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full"
+              disabled={loading}
+              onClick={handleGoogleSignIn}
+            >
+              <GoogleIcon />
+              Sign in with Google
+            </Button>
+
+            <FieldSeparator>Or continue with</FieldSeparator>
 
             <form.Field
               name="email"

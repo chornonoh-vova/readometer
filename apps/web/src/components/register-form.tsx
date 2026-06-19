@@ -15,6 +15,7 @@ import {
   FieldGroup,
   FieldDescription,
   FieldError,
+  FieldSeparator,
 } from "./ui/field";
 import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
@@ -24,6 +25,9 @@ import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Spinner } from "./ui/spinner";
+
+import GoogleIcon from "@/assets/icons/google.svg?react";
+import { signInWithGoogle } from "@/lib/google-sign-in";
 
 const registerFormSchema = z.object({
   name: z.string().nonempty(),
@@ -70,6 +74,9 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
     },
   });
 
+  const handleGoogleSignUp = () =>
+    signInWithGoogle("/", setErrorMessage, setLoading);
+
   return (
     <form
       onSubmit={(e) => {
@@ -92,6 +99,19 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
                 <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             )}
+
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full"
+              disabled={loading}
+              onClick={handleGoogleSignUp}
+            >
+              <GoogleIcon />
+              Sign up with Google
+            </Button>
+
+            <FieldSeparator>Or continue with</FieldSeparator>
 
             <form.Field
               name="name"

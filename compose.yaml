@@ -20,6 +20,8 @@ services:
       - TRUSTED_ORIGINS=https://readometer.app
       - DATABASE_URL=${DATABASE_URL}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - STORAGE_PATH=/storage
     volumes:
       - storage_data:/storage
