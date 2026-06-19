@@ -2,7 +2,6 @@ import { authClient } from "./auth-client";
 import { getErrorMessage } from "./error";
 
 export async function signInWithGoogle(
-  callbackURL: string,
   setErrorMessage: (msg: string) => void,
   setLoading: (loading: boolean) => void,
 ) {
@@ -11,7 +10,6 @@ export async function signInWithGoogle(
   try {
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL,
     });
     if (error) {
       setErrorMessage(

@@ -145,7 +145,7 @@ describe("LoginForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls authClient.signIn.social with google provider and redirect as callbackURL", async () => {
+  it("calls authClient.signIn.social with google provider", async () => {
     mockSignInSocial.mockResolvedValue({ error: null });
     const user = userEvent.setup();
     render(<LoginForm redirect="/dashboard" />);
@@ -156,7 +156,6 @@ describe("LoginForm", () => {
 
     expect(mockSignInSocial).toHaveBeenCalledWith({
       provider: "google",
-      callbackURL: "/dashboard",
     });
   });
 });

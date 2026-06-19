@@ -145,7 +145,7 @@ describe("RegisterForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls authClient.signIn.social with google provider and callbackURL /", async () => {
+  it("calls authClient.signIn.social with google provider", async () => {
     mockSignInSocial.mockResolvedValue({ error: null });
     const user = userEvent.setup();
     render(<RegisterForm />);
@@ -156,7 +156,6 @@ describe("RegisterForm", () => {
 
     expect(mockSignInSocial).toHaveBeenCalledWith({
       provider: "google",
-      callbackURL: "/",
     });
   });
 });

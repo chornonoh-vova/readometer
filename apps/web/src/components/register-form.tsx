@@ -75,7 +75,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
   });
 
   const handleGoogleSignUp = () =>
-    signInWithGoogle("/", setErrorMessage, setLoading);
+    signInWithGoogle(setErrorMessage, setLoading);
 
   return (
     <form

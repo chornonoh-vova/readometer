@@ -80,7 +80,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   });
 
   const handleGoogleSignIn = () =>
-    signInWithGoogle(redirect, setErrorMessage, setLoading);
+    signInWithGoogle(setErrorMessage, setLoading);
 
   return (
     <form
