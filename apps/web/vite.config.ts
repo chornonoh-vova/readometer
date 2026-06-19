@@ -21,6 +21,9 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      workbox: {
+        navigateFallbackDenylist: [/^\/api\//],
+      },
       manifest: {
         name: "Readometer",
         short_name: "Readometer",
