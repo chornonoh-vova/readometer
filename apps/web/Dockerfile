@@ -21,7 +21,7 @@ ENV TURBO_TOKEN=$TURBO_TOKEN
 RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
   bun turbo build --filter=web
 
-FROM nginx:1.31.1 AS runner
+FROM nginx:1.31.2 AS runner
 COPY --from=builder /app/apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80/tcp
