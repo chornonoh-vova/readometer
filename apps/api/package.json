@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
-    "@testcontainers/postgresql": "^12.0.1",
+    "@testcontainers/postgresql": "^12.0.3",
     "@types/bun": "^1.3.14",
     "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "catalog:",
