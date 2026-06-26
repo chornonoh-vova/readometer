@@ -1,6 +1,7 @@
 import { ActiveBooksList } from "@/components/active-books-list";
 import { GoalsList } from "@/components/goals-list";
 import { AddBook } from "@/components/add-book";
+import { InstallPrompt } from "@/components/install-prompt";
 import { PageHeader, PageHeaderName } from "@/components/page-header";
 import { BookItemSkeleton } from "@/components/books-list-loading";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,6 +60,7 @@ function Home() {
   return (
     <>
       <HomeHeader />
+      <InstallPrompt />
       <ActiveBooksList books={activeBooks} />
       <GoalsList goals={goals} goalsProgress={goalsProgress} />
     </>

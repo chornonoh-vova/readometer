@@ -9,10 +9,17 @@ import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "./components/theme-provider";
 import { TooltipProvider } from "./components/ui/tooltip";
 
-const queryClient = new QueryClient();
+const ONE_MINUTE_MS = 60_000;
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: ONE_MINUTE_MS },
+  },
+});
 
 const router = createRouter({
   routeTree,
+  scrollRestoration: true,
   context: {
     queryClient,
   },

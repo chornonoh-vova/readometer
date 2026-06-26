@@ -29,6 +29,20 @@ export default defineConfig({
         short_name: "Readometer",
         description: "Readometer app",
         theme_color: "#dc7702",
+        categories: ["books", "lifestyle", "productivity"],
+        display_override: ["window-controls-overlay", "standalone"],
+        shortcuts: [
+          {
+            name: "My Books",
+            url: "/books",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Activity",
+            url: "/activity",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+        ],
         icons: [
           {
             src: "pwa-64x64.png",
