@@ -97,7 +97,10 @@ describe("useInstallPrompt", () => {
     const spy = vi.spyOn(window, "removeEventListener");
     const { unmount } = renderHook(() => useInstallPrompt());
     unmount();
-    expect(spy).toHaveBeenCalledWith("beforeinstallprompt", expect.any(Function));
+    expect(spy).toHaveBeenCalledWith(
+      "beforeinstallprompt",
+      expect.any(Function),
+    );
     expect(spy).toHaveBeenCalledWith("appinstalled", expect.any(Function));
     spy.mockRestore();
   });

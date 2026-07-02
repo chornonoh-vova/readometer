@@ -1,10 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockNavigate = vi.fn();
 const mockSignInEmail = vi.fn();
 const mockSignInSocial = vi.fn();
+const mockGetLastUsedLoginMethod = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ navigate: mockNavigate }),
@@ -14,7 +15,10 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/lib/auth-client", () => ({
-  authClient: { signIn: { email: mockSignInEmail, social: mockSignInSocial } },
+  authClient: {
+    signIn: { email: mockSignInEmail, social: mockSignInSocial },
+    getLastUsedLoginMethod: mockGetLastUsedLoginMethod,
+  },
 }));
 
 vi.mock("@/assets/icons/google.svg?react", () => ({
@@ -35,6 +39,8 @@ beforeEach(() => {
   mockNavigate.mockClear();
   mockSignInEmail.mockClear();
   mockSignInSocial.mockClear();
+  mockGetLastUsedLoginMethod.mockReset();
+  mockGetLastUsedLoginMethod.mockReturnValue(null);
 });
 
 async function fillAndSubmit(
@@ -43,7 +49,7 @@ async function fillAndSubmit(
 ) {
   await user.type(screen.getByRole("textbox", { name: "Email" }), email);
   await user.type(screen.getByLabelText("Password"), password);
-  await user.click(screen.getByRole("button", { name: "Sign in" }));
+  await user.click(screen.getByRole("button", { name: "Sign in with email" }));
 }
 
 describe("LoginForm", () => {
@@ -62,7 +68,9 @@ describe("LoginForm", () => {
 
   it("renders the Sign in submit button", () => {
     render(<LoginForm redirect="/" />);
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Sign in with email" }),
+    ).toBeInTheDocument();
   });
 
   it("renders a link to the register page", () => {
@@ -119,7 +127,9 @@ describe("LoginForm", () => {
       "not-an-email",
     );
     await user.type(screen.getByLabelText("Password"), "password123");
-    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await user.click(
+      screen.getByRole("button", { name: "Sign in with email" }),
+    );
 
     expect(mockSignInEmail).not.toHaveBeenCalled();
   });
@@ -133,7 +143,9 @@ describe("LoginForm", () => {
       "user@example.com",
     );
     await user.type(screen.getByLabelText("Password"), "short");
-    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await user.click(
+      screen.getByRole("button", { name: "Sign in with email" }),
+    );
 
     expect(mockSignInEmail).not.toHaveBeenCalled();
   });
@@ -158,4 +170,38 @@ describe("LoginForm", () => {
       provider: "google",
     });
   });
+
+  it("does not render a Last used badge when no login method is stored", () => {
+    mockGetLastUsedLoginMethod.mockReturnValue(null);
+    render(<LoginForm redirect="/" />);
+
+    expect(screen.queryByText("Last used")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      method: "google",
+      lastUsedName: /sign in with google/i,
+      otherName: "Sign in with email",
+    },
+    {
+      method: "email",
+      lastUsedName: /sign in with email/i,
+      otherName: /sign in with google/i,
+    },
+  ])(
+    "renders a Last used badge on the $method button when $method was the last method",
+    ({ method, lastUsedName, otherName }) => {
+      mockGetLastUsedLoginMethod.mockReturnValue(method);
+      render(<LoginForm redirect="/" />);
+
+      const lastUsedButton = screen.getByRole("button", {
+        name: lastUsedName,
+      });
+      expect(within(lastUsedButton).getByText("Last used")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: otherName }),
+      ).not.toHaveTextContent("Last used");
+    },
+  );
 });

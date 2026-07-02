@@ -19,7 +19,12 @@ export function InstallPrompt() {
         <Button size="sm" onClick={install}>
           Install
         </Button>
-        <Button size="icon" variant="ghost" onClick={dismiss} aria-label="Dismiss">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={dismiss}
+          aria-label="Dismiss"
+        >
           <XIcon className="size-4" />
         </Button>
       </div>

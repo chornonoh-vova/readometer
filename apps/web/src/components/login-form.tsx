@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useState, type ComponentProps } from "react";
+import { useMemo, useState, type ComponentProps } from "react";
 import {
   Card,
   CardContent,
@@ -29,6 +29,7 @@ import { Spinner } from "./ui/spinner";
 
 import GoogleIcon from "@/assets/icons/google.svg?react";
 import { signInWithGoogle } from "@/lib/google-sign-in";
+import { Badge } from "./ui/badge";
 
 const loginFormSchema = z.object({
   email: z.email(),
@@ -40,11 +41,18 @@ export type LoginFormProps = {
   redirect: string;
 } & ComponentProps<"div">;
 
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+function LastUsedBadge({ show }: { show: boolean }) {
+  return show ? <Badge className="ml-2">Last used</Badge> : null;
+}
+
 export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   const router = useRouter();
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const lastMethod = useMemo(() => authClient.getLastUsedLoginMethod(), []);
 
   const defaultValues: z.input<typeof loginFormSchema> = {
     email: "",
@@ -114,6 +122,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
             >
               <GoogleIcon />
               Sign in with Google
+              <LastUsedBadge show={lastMethod === "google"} />
             </Button>
 
             <FieldSeparator>Or continue with</FieldSeparator>
@@ -196,10 +205,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
               }}
             />
 
-            <Turnstile
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-              onSuccess={setToken}
-            />
+            <Turnstile siteKey={turnstileSiteKey} onSuccess={setToken} />
 
             <Field>
               <Button type="submit" disabled={loading}>
@@ -209,7 +215,10 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
                     Signing in...
                   </>
                 ) : (
-                  "Sign in"
+                  <>
+                    Sign in with email
+                    <LastUsedBadge show={lastMethod === "email"} />
+                  </>
                 )}
               </Button>
 

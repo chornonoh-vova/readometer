@@ -5,7 +5,9 @@ import { InstallPrompt } from "./install-prompt";
 import * as useInstallPromptModule from "@/hooks/use-install-prompt";
 
 const mockHook = (
-  overrides: Partial<ReturnType<typeof useInstallPromptModule.useInstallPrompt>>,
+  overrides: Partial<
+    ReturnType<typeof useInstallPromptModule.useInstallPrompt>
+  >,
 ) => {
   vi.spyOn(useInstallPromptModule, "useInstallPrompt").mockReturnValue({
     canInstall: false,
