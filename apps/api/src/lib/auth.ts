@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { pool } from "./database.ts";
 import { captcha, lastLoginMethod } from "better-auth/plugins";
+import { redisStorage } from "@better-auth/redis-storage";
+import { redisClient } from "./redis.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -38,6 +40,11 @@ export const auth = betterAuth({
 
   database: pool,
 
+  secondaryStorage: redisStorage({
+    client: redisClient,
+    keyPrefix: "readometer-auth:",
+  }),
+
   trustedOrigins,
 
   session: {
@@ -48,6 +55,13 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 10, // 10 minutes
     },
+  },
+
+  rateLimit: {
+    enabled: true,
+    storage: "secondary-storage",
+    window: 60,
+    max: 100,
   },
 
   emailAndPassword: {
