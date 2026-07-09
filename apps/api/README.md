@@ -87,6 +87,8 @@ See `sample.env` for a working development configuration.
 | `BETTER_AUTH_URL`      | yes      | Public URL of the deployment                         |
 | `TRUSTED_ORIGINS`      | no       | Comma-separated CORS allowlist (defaults to above)   |
 | `TURNSTILE_SECRET_KEY` | yes      | Cloudflare Turnstile secret                          |
+| `GOOGLE_CLIENT_ID`     | yes      | Google OAuth client ID                               |
+| `GOOGLE_CLIENT_SECRET` | yes      | Google OAuth client secret                           |
 | `STORAGE_PATH`         | yes      | Directory for cover images (`sm`/`md` WebP variants) |
 
 ## Docker

@@ -96,6 +96,8 @@ Root `.env` (consumed by `dev.compose.yaml` / `compose.yaml`):
 | `DATABASE_URL`         | Postgres connection string                  |
 | `TURNSTILE_SITE_KEY`   | Cloudflare Turnstile site key (web build)   |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret (API)           |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID (API)                |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (API)            |
 
 See `apps/api/sample.env` and `apps/web/sample.env` for per-app variables.
 

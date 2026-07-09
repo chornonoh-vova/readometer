@@ -105,6 +105,8 @@ BETTER_AUTH_SECRET=<secret>
 BETTER_AUTH_URL=http://localhost:3000
 TRUSTED_ORIGINS=http://localhost:5173
 TURNSTILE_SECRET_KEY=<key>
+GOOGLE_CLIENT_ID=<client-id>
+GOOGLE_CLIENT_SECRET=<client-secret>
 STORAGE_PATH=storage
 PORT=3000
 ```

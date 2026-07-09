@@ -44,7 +44,11 @@ export type LoginFormProps = {
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 function LastUsedBadge({ show }: { show: boolean }) {
-  return show ? <Badge className="ml-2">Last used</Badge> : null;
+  return show ? (
+    <Badge className="absolute -top-2 -right-2" variant="secondary">
+      Last used
+    </Badge>
+  ) : null;
 }
 
 export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
@@ -116,7 +120,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
             <Button
               variant="outline"
               type="button"
-              className="w-full"
+              className="w-full relative"
               disabled={loading}
               onClick={handleGoogleSignIn}
             >
@@ -208,7 +212,7 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
             <Turnstile siteKey={turnstileSiteKey} onSuccess={setToken} />
 
             <Field>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="relative">
                 {loading ? (
                   <>
                     <Spinner />
