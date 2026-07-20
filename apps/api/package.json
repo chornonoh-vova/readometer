@@ -20,7 +20,7 @@
     "@better-auth/redis-storage": "^1.6.23",
     "@hono/zod-validator": "^0.8.0",
     "better-auth": "catalog:",
-    "hono": "^4.12.28",
+    "hono": "^4.12.30",
     "ioredis": "^5.11.1",
     "isbn": "workspace:*",
     "kysely": "^0.29.3",
