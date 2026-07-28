@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "isbn",
+  "name": "notification-events",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

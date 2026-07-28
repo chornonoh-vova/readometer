@@ -51,14 +51,14 @@ isbnSchema.safeParse("9780306406157").success;
 
 ## API
 
-| Export                  | Signature                                   | Notes                                              |
-| ----------------------- | ------------------------------------------- | -------------------------------------------------- |
-| `stripIsbn`             | `(input: string) => string`                 | Removes spaces/hyphens and uppercases the input.   |
-| `isValidIsbn10`         | `(isbn10: string) => boolean`               | Checks the mod-11 check digit (accepts `X`).       |
-| `isValidIsbn13`         | `(isbn13: string) => boolean`               | Checks the mod-10 weighted check digit.            |
-| `isbn10ToIsbn13`        | `(isbn10: string) => string`                | Prefixes `978` and recomputes the check digit.     |
-| `normalizeIsbnToIsbn13` | `(input?: string \| null) => string \| null`| Strips, validates, and upgrades ISBN-10 → ISBN-13. |
-| `isbnSchema`            | `z.ZodString`                               | Refinement: empty or a valid ISBN-10/13.           |
+| Export                  | Signature                                    | Notes                                              |
+| ----------------------- | -------------------------------------------- | -------------------------------------------------- |
+| `stripIsbn`             | `(input: string) => string`                  | Removes spaces/hyphens and uppercases the input.   |
+| `isValidIsbn10`         | `(isbn10: string) => boolean`                | Checks the mod-11 check digit (accepts `X`).       |
+| `isValidIsbn13`         | `(isbn13: string) => boolean`                | Checks the mod-10 weighted check digit.            |
+| `isbn10ToIsbn13`        | `(isbn10: string) => string`                 | Prefixes `978` and recomputes the check digit.     |
+| `normalizeIsbnToIsbn13` | `(input?: string \| null) => string \| null` | Strips, validates, and upgrades ISBN-10 → ISBN-13. |
+| `isbnSchema`            | `z.ZodString`                                | Refinement: empty or a valid ISBN-10/13.           |
 
 ## Scripts
 

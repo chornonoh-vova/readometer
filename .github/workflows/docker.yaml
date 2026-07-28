@@ -29,6 +29,9 @@ jobs:
           - context: .
             file: apps/web/Dockerfile
             image: chornonoh-vova/readometer-web
+          - context: .
+            file: apps/notifications/Dockerfile
+            image: chornonoh-vova/readometer-notifications
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.0

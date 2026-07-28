@@ -2,16 +2,20 @@ import { afterEach, beforeEach } from "vitest";
 import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import "./mocks/redis";
+import "./mocks/ioredis";
+import "./mocks/bullmq";
 import { installBunImagePolyfill } from "./shims/bun-image";
 import { db } from "../src/lib/database";
 import { truncateAll } from "./helpers/truncate";
 import { installAuthMock, setAuthenticatedUser } from "./mocks/auth";
+import { queueAddMock } from "./mocks/bullmq";
 
 installBunImagePolyfill();
 installAuthMock();
 
 beforeEach(async () => {
   setAuthenticatedUser(null);
+  queueAddMock.mockClear();
   await truncateAll(db);
 });
 

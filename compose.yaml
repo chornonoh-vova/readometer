@@ -30,6 +30,23 @@ services:
       - STORAGE_PATH=/storage
     volumes:
       - storage_data:/storage
+  notifications:
+    image: ghcr.io/chornonoh-vova/readometer-notifications:latest
+    restart: unless-stopped
+    depends_on:
+      dragonfly:
+        condition: service_healthy
+    networks:
+      - database
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - MAIL_FROM=${MAIL_FROM}
   web:
     image: ghcr.io/chornonoh-vova/readometer-web:latest
     restart: unless-stopped
@@ -47,6 +64,8 @@ services:
       - database
     environment:
       - DFLY_requirepass=${REDIS_PASSWORD}
+      - DFLY_cluster_mode=emulated
+      - DFLY_lock_on_hashtags=true
     volumes:
       - dragonfly_data:/data
 

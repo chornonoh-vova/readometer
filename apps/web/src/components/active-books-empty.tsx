@@ -24,7 +24,7 @@ export function ActiveBooksEmpty() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Link to="/books" className={buttonVariants({ variant: "outline" })}>
+        <Link to="/books" className={buttonVariants({ variant: "secondary" })}>
           Go to your library
           <ChevronRightIcon />
         </Link>

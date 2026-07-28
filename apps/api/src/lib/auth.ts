@@ -3,6 +3,7 @@ import { pool } from "./database.ts";
 import { captcha, lastLoginMethod } from "better-auth/plugins";
 import { redisStorage } from "@better-auth/redis-storage";
 import { redisClient } from "./redis.ts";
+import { publishNotification } from "./notifications.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -66,6 +67,40 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await publishNotification({
+        type: "password-reset-requested",
+        data: {
+          userId: user.id,
+          name: user.name ?? null,
+          resetUrl: url,
+        },
+        channels: {
+          email: {
+            to: user.email,
+          },
+        },
+      });
+    },
+  },
+
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await publishNotification({
+        type: "verification-email-requested",
+        data: {
+          userId: user.id,
+          name: user.name ?? null,
+          verificationUrl: url,
+        },
+        channels: {
+          email: {
+            to: user.email,
+          },
+        },
+      });
+    },
   },
 
   socialProviders: {

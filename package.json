@@ -4,17 +4,22 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:local": "bun run dev:deps:up && bun run dev && bun run dev:deps:down",
+    "dev:docker": "bun run dev:docker:build && bun run dev:docker:up && bun run dev:docker:down",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "fmt": "turbo run fmt",
     "test": "turbo run test",
     "dev:docker:build": "docker compose -f dev.compose.yaml build",
-    "dev:docker:up": "docker compose -f dev.compose.yaml up -d",
-    "dev:docker:down": "docker compose -f dev.compose.yaml down"
+    "dev:docker:up": "docker compose -f dev.compose.yaml up",
+    "dev:docker:down": "docker compose -f dev.compose.yaml down",
+    "dev:deps:up": "docker compose -f deps.compose.yaml up -d",
+    "dev:deps:down": "docker compose -f deps.compose.yaml down"
   },
   "catalog": {
     "zod": "^4.4.3",
     "better-auth": "^1.6.9",
+    "@better-auth/redis-storage": "^1.6.9",
     "uuid": "^14.0.0",
     "vitest": "^4.1.5",
     "@vitest/coverage-v8": "^4.1.5",
@@ -23,7 +28,14 @@
     "eslint": "^10.3.0",
     "@eslint/js": "10.0.1",
     "globals": "^17.6.0",
-    "typescript-eslint": "^8.59.2"
+    "typescript-eslint": "^8.59.2",
+    "bullmq": "^5.79.3",
+    "ioredis": "5.10.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-email": "6.7.0",
+    "@react-email/ui": "6.7.0",
+    "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
     "prettier": "catalog:",
