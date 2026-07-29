@@ -1,0 +1,28 @@
+{
+  "private": true,
+  "name": "eslint-config",
+  "type": "module",
+  "exports": {
+    "./base": "./src/base.ts",
+    "./node": "./src/node.ts",
+    "./react": "./src/react.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "fmt": "prettier . --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@eslint/js": "catalog:",
+    "@tanstack/eslint-plugin-query": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "globals": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "devDependencies": {
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

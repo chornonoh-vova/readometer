@@ -45,6 +45,24 @@ notifications all run under Bun/Vite directly from source. `packages/notificatio
 payloads cross a process boundary via Redis serialization, so its schema is `.parse()`d on
 both enqueue and dequeue.
 
+## Shared ESLint config (`packages/eslint-config`)
+
+Every workspace's `eslint.config.ts` is a one-line re-export of a preset from here —
+`eslint-config/base` (the two libraries), `eslint-config/node` (api, notifications), or
+`eslint-config/react` (web). Rule changes belong in this package, not in a consumer.
+
+- **This package is the only workspace that declares the ESLint plugins.** Consumers
+  declare just `eslint` (for the binary) plus `eslint-config: "workspace:*"`. Adding a
+  plugin to a consumer risks a `Cannot redefine plugin` startup failure, because flat
+  config identity-checks plugin instances and Bun's isolated linker can resolve the same
+  plugin to two different store entries.
+- Global ignores (`dist`, `dev-dist`, `coverage`, `.turbo`) live in `base` and resolve
+  against each _consumer's_ directory, so they stay correctly scoped.
+- `eslint-plugin-react` is pinned at `^7.37.5`, which declares `eslint ^9.7` while the repo
+  runs ESLint 10 — `bun install` prints one expected unmet-peer warning. It works today;
+  `@eslint-react/eslint-plugin` is the fallback if a future ESLint bump breaks it.
+- `lint` scripts run with `--max-warnings=0`, so a warning fails CI.
+
 ## Environment Variables
 
 Each app has a committed `sample.env` listing its variables — copy it to `.env`. What the

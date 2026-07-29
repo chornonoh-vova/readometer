@@ -1,31 +1,9 @@
-import js from "@eslint/js";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import query from "@tanstack/eslint-plugin-query";
-import tseslint from "typescript-eslint";
+import react from "eslint-config/react";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "dev-dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-      query.configs["flat/recommended"],
-    ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      ["react-refresh/only-export-components"]: "off",
-    },
-  },
+  // Both are web-specific generated output: vite-plugin-pwa's dev build, and
+  // TanStack Router's generated route tree (tracked, so not covered by git).
+  globalIgnores(["dev-dist", "src/routeTree.gen.ts"]),
+  ...react,
 ]);

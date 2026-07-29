@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
+    "lint": "eslint . --max-warnings=0",
     "fmt": "prettier . --write",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
@@ -15,6 +16,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "eslint": "catalog:",
+    "eslint-config": "workspace:*",
     "prettier": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

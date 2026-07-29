@@ -20,8 +20,8 @@ export function ReadingRunsEmpty({ book }: { book: BookDetails }) {
         </EmptyMedia>
         <EmptyTitle>Ready to start reading?</EmptyTitle>
         <EmptyDescription>
-          Start a session to track your progress, or log a read you've already
-          finished.
+          Start a session to track your progress, or log a read you&apos;ve
+          already finished.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

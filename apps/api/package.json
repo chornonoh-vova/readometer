@@ -8,7 +8,7 @@
     "db:migrate": "kysely migrate",
     "db:generate": "kysely-codegen --out-file ./src/lib/db.d.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "fmt": "prettier . --write",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -29,18 +29,16 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:",
     "@testcontainers/postgresql": "^12.0.4",
     "@types/bun": "^1.3.14",
     "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
-    "globals": "catalog:",
+    "eslint-config": "workspace:*",
     "kysely-codegen": "^0.20.0",
     "kysely-ctl": "^0.21.0",
     "prettier": "catalog:",
     "testcontainers": "^12.0.1",
-    "typescript-eslint": "catalog:",
     "vitest": "catalog:"
   }
 }

@@ -8,7 +8,7 @@
     "preview:dev": "email dev --dir ./src/templates --port 3002",
     "service:dev": "bun --watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "fmt": "prettier . --write",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,7 +25,6 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:",
     "@react-email/ui": "catalog:",
     "@testcontainers/redis": "^12.0.4",
     "@types/bun": "^1.3.14",
@@ -34,10 +33,9 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
-    "globals": "catalog:",
+    "eslint-config": "workspace:*",
     "prettier": "catalog:",
     "testcontainers": "^12.0.1",
-    "typescript-eslint": "catalog:",
     "vitest": "catalog:"
   }
 }
