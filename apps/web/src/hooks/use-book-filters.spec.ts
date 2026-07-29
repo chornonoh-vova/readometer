@@ -47,14 +47,14 @@ describe("useBookFilters", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setSearch("gatsby"));
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("The Great Gatsby");
+      expect(result.current.filteredBooks[0]?.title).toBe("The Great Gatsby");
     });
 
     it("filters by author (case-insensitive)", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setSearch("frank"));
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("Dune");
+      expect(result.current.filteredBooks[0]?.title).toBe("Dune");
     });
 
     it("trims leading and trailing whitespace", () => {
@@ -97,14 +97,14 @@ describe("useBookFilters", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setStatusFilter("in-progress"));
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("Dune");
+      expect(result.current.filteredBooks[0]?.title).toBe("Dune");
     });
 
     it("filters to only abandoned books when set to 'abandoned'", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setStatusFilter("abandoned"));
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("Fahrenheit 451");
+      expect(result.current.filteredBooks[0]?.title).toBe("Fahrenheit 451");
     });
 
     it("does not include abandoned books in the 'in-progress' results", () => {
@@ -118,7 +118,7 @@ describe("useBookFilters", () => {
       const { result } = renderHook(() => useBookFilters(books));
       act(() => result.current.setStatusFilter("completed"));
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("1984");
+      expect(result.current.filteredBooks[0]?.title).toBe("1984");
     });
 
     it("returns all books when set to 'all'", () => {
@@ -143,7 +143,7 @@ describe("useBookFilters", () => {
         result.current.setSearch("gatsby");
       });
       expect(result.current.filteredBooks).toHaveLength(1);
-      expect(result.current.filteredBooks[0].title).toBe("The Great Gatsby");
+      expect(result.current.filteredBooks[0]?.title).toBe("The Great Gatsby");
     });
 
     it("returns empty when combined filters match nothing", () => {

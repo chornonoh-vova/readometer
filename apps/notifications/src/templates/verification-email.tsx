@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Button, Heading, Text } from "react-email";
 import { EmailLayout } from "./email-layout";
 

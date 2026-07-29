@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "typescript-config",
+  "scripts": {
+    "fmt": "prettier . --write"
+  },
+  "devDependencies": {
+    "prettier": "catalog:"
+  }
+}

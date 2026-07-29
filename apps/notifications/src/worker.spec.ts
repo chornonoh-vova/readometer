@@ -76,7 +76,11 @@ describe("worker", () => {
   it("fails the job when the payload does not match the event schema", async () => {
     const jobId = "worker-spec-job-2";
     const result = waitForJobResult(jobId);
-    await queue.add("verification-email-requested", { not: "valid" }, { jobId });
+    await queue.add(
+      "verification-email-requested",
+      { not: "valid" },
+      { jobId },
+    );
 
     expect(await result).toBe("failed");
     expect(handleVerificationEmailRequestedMock).not.toHaveBeenCalledWith(

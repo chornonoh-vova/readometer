@@ -56,8 +56,8 @@ describe("activeBooksQueryOptions", () => {
     const { select } = activeBooksQueryOptions();
     const result = select!(allBooks);
     expect(result).toHaveLength(1);
-    expect(result[0].completedPages).toBe(50);
-    expect(result[0].abandoned).toBe(false);
+    expect(result[0]?.completedPages).toBe(50);
+    expect(result[0]?.abandoned).toBe(false);
   });
 });
 

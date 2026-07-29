@@ -43,7 +43,7 @@ export function splitPartialDate(value: string | undefined) {
   return { year, month, day };
 }
 
-function formatReadingParts(readingTime: number) {
+function formatReadingParts(readingTime: number): [number, number, number] {
   const hours = Math.floor(readingTime / 3600);
   const minutes = Math.floor((readingTime % 3600) / 60);
   const seconds = Math.floor(readingTime % 60);

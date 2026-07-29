@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  notificationEventSchema,
-  NOTIFICATIONS_QUEUE_NAME,
-} from "./index.ts";
+import { notificationEventSchema, NOTIFICATIONS_QUEUE_NAME } from "./index.ts";
 
 const baseFields = {
   eventId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -50,9 +47,7 @@ describe("notificationEventSchema", () => {
   });
 
   it("accepts a valid password-reset-requested event", () => {
-    const result = notificationEventSchema.safeParse(
-      passwordResetRequested(),
-    );
+    const result = notificationEventSchema.safeParse(passwordResetRequested());
     expect(result.success).toBe(true);
   });
 

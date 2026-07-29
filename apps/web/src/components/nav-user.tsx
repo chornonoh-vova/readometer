@@ -37,7 +37,7 @@ function UserContent({
 }: { user?: User } & ComponentProps<"div">) {
   const userFallback = user?.name
     .split(" ")
-    .map((part) => part[0].toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .join("")
     .substring(0, 2);
 

@@ -44,9 +44,12 @@ updates:
     commit-message:
       prefix: "chore(ci)"
 
-  # ── Docker: apps/api ──────────────────────────────────────────────────────
+  # ── Docker: apps ──────────────────────────────────────────────────────────
   - package-ecosystem: "docker"
-    directory: "/apps/api"
+    directories:
+      - "/apps/api"
+      - "/apps/web"
+      - "/apps/notifications"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -60,9 +63,9 @@ updates:
     commit-message:
       prefix: "chore(docker)"
 
-  # ── Docker: apps/web ──────────────────────────────────────────────────────
-  - package-ecosystem: "docker"
-    directory: "/apps/web"
+  # ── Docker Compose ─────────────────────────────────────────────────────────
+  - package-ecosystem: "docker-compose"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -70,8 +73,8 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      docker-web:
+      docker-api:
         patterns:
           - "*"
     commit-message:
-      prefix: "chore(docker)"
+      prefix: "chore(compose)"

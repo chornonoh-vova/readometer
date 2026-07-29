@@ -36,15 +36,16 @@ export function computeRunStats(readingSessions: ReadingSession[]): RunStats {
   let longestStreak = 0;
   let currentStreak = 0;
 
-  for (let i = 0; i < uniqueDays.length; i++) {
+  let previousDate: Date | undefined;
+
+  for (const day of uniqueDays) {
+    const date = new Date(day);
     const isConsecutive =
-      i > 0 &&
-      differenceInCalendarDays(
-        new Date(uniqueDays[i]),
-        new Date(uniqueDays[i - 1]),
-      ) === 1;
+      previousDate !== undefined &&
+      differenceInCalendarDays(date, previousDate) === 1;
     currentStreak = isConsecutive ? currentStreak + 1 : 1;
     longestStreak = Math.max(longestStreak, currentStreak);
+    previousDate = date;
   }
 
   return {

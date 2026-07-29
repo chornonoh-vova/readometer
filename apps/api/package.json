@@ -39,6 +39,8 @@
     "kysely-ctl": "^0.21.0",
     "prettier": "catalog:",
     "testcontainers": "^12.0.1",
+    "typescript": "catalog:",
+    "typescript-config": "workspace:*",
     "vitest": "catalog:"
   }
 }

@@ -39,11 +39,11 @@ export function BookDetailsCover({
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
       return;
     }
-
-    const file = event.target.files[0];
 
     toast.promise(() => uploadBookCover(book.id, file), {
       loading: "Uploading cover...",
