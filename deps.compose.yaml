@@ -1,6 +1,6 @@
 services:
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.27.1
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.39.0
     ulimits:
       memlock: -1
     healthcheck:
@@ -20,7 +20,7 @@ services:
     volumes:
       - dragonfly_data:/data
   postgres:
-    image: postgres:18.1
+    image: postgres:18.4
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d readometer"]
       interval: 10s
@@ -38,7 +38,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
   mailpit:
-    image: axllent/mailpit:v1.30.4
+    image: axllent/mailpit:v1.30.6
     networks:
       - database
     ports:

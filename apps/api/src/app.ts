@@ -77,6 +77,8 @@ export function start() {
   });
 
   console.log(`Listening on ${server.url}`);
+
+  return server;
 }
 
 export default app;

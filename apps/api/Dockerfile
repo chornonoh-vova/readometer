@@ -17,7 +17,7 @@ COPY --from=prepare /app/out/full/ .
 
 EXPOSE 3000/tcp
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
-  CMD bun run healthcheck
+  CMD bun src/healthcheck.ts
 
 WORKDIR /app/apps/api
-CMD ["bun", "run", "start"]
+CMD ["bun", "src/index.ts"]

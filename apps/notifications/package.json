@@ -4,10 +4,8 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "start": "bun src/index.ts",
-    "healthcheck": "bun src/healthcheck.ts",
-    "dev": "bun run --parallel email:dev service:dev",
-    "email:dev": "email dev --dir ./src/templates --port 3002",
+    "dev": "bun run --parallel preview:dev service:dev",
+    "preview:dev": "email dev --dir ./src/templates --port 3002",
     "service:dev": "bun --watch src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

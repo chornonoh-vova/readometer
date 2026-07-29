@@ -6,7 +6,9 @@ import {
 } from "notification-events";
 import { handlers } from "./handlers/index.ts";
 
-const redisClient = new Redis(process.env.REDIS_URL!, {
+// exported so shutdown can close it: BullMQ treats an injected connection as
+// shared and never closes it itself
+export const redisClient = new Redis(process.env.REDIS_URL!, {
   maxRetriesPerRequest: null,
 });
 
