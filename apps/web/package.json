@@ -58,7 +58,7 @@
     "eslint-config": "workspace:*",
     "jsdom": "^29.1.1",
     "prettier": "catalog:",
-    "shadcn": "^4.13.1",
+    "shadcn": "^4.14.0",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",
     "vite": "^8.1.5",
