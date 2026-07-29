@@ -27,6 +27,9 @@ out/
 build
 dist
 
+# Incremental type-check caches (declared as turbo outputs)
+*.tsbuildinfo
+
 
 # Debug
 npm-debug.log*

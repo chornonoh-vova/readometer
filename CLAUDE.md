@@ -69,19 +69,28 @@ Every `tsconfig.json` is an `extends` plus, at most, its own `types`/`paths`/`in
 `typescript-config/base.json` everywhere, except `.../react.json` (web's app project), which is
 `base` with `DOM` libs added. Compiler-option changes belong in this package, not in a consumer.
 
-- **Relative paths must stay in the consumer.** TypeScript resolves `include`, `exclude`,
-  `paths`, and `tsBuildInfoFile` against the file that _declares_ them, so anything hoisted
-  into a preset would resolve against `packages/typescript-config/`. Only
-  environment-describing options (`lib` and the strictness flags) live in the presets.
+- **Relative paths must stay in the consumer.** TypeScript resolves `include`, `exclude`, and
+  `paths` against the file that _declares_ them, so anything hoisted into a preset would
+  resolve against `packages/typescript-config/`. Only environment-describing options (`lib`
+  and the strictness flags) live in the presets.
 - **`types` stays in the consumer too**, even though it is not a path: `extends` _replaces_
   arrays rather than merging them, so a preset that set `types: ["bun"]` could not be extended
   by `apps/notifications`, which needs `["bun", "nodemailer"]`. Each consumer names its own.
 - Consumers `extends` the `.json` file path (`typescript-config/base.json`), not a bare
   subpath. The package intentionally has no `exports` map, so `extends` resolves as a plain
   file lookup through the workspace symlink.
-- There is exactly one dialect: everything targets `ESNext` with `module: "Preserve"` and
-  `moduleResolution: "bundler"`. `apps/web` used to sit on the stock Vite template
-  (`target: ES2024`, no `noUncheckedIndexedAccess`) and no longer does.
+- There is exactly one dialect: everything targets `ESNext` with `module: "Preserve"`, which
+  is what implies `moduleResolution: "bundler"` — that option is deliberately not restated.
+  `apps/web` used to sit on the stock Vite template (`target: ES2024`, no
+  `noUncheckedIndexedAccess`) and no longer does.
+- **`incremental` is on**, and no consumer sets `tsBuildInfoFile`: each writes
+  `<config>.tsbuildinfo` beside its own tsconfig, which is gitignored and declared as an
+  `outputs` glob on the `typecheck` and `build` tasks in `turbo.json`. Declaring it is what
+  makes the cache round-trip — a `FULL TURBO` hit restores the caches, so the next run that
+  _does_ miss starts warm. Locally a re-check drops from ~4.7s to ~2.6s; in CI, `build`'s
+  `tsc -b` runs right after `typecheck` and drops from ~3.5s to ~0.1s. It must stay gitignored:
+  turbo hashes untracked files, so an un-ignored buildinfo would change the input hash on every
+  run and miss the cache forever.
 - `noUnusedLocals`/`noUnusedParameters` are **on**, so `tsc` overlaps
   `@typescript-eslint/no-unused-vars` — an unused local fails both `typecheck` and `lint`.
 - `erasableSyntaxOnly` is on repo-wide, so `enum`, `namespace`, and constructor parameter

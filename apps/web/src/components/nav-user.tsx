@@ -27,6 +27,7 @@ import {
 import type { User } from "better-auth";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
+import { formatInitials } from "@/lib/format";
 import { useRouter } from "@tanstack/react-router";
 import { useThemeStore } from "@/store/theme";
 
@@ -35,11 +36,7 @@ function UserContent({
   className,
   ...props
 }: { user?: User } & ComponentProps<"div">) {
-  const userFallback = user?.name
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("")
-    .substring(0, 2);
+  const userFallback = user && formatInitials(user.name);
 
   return (
     <div className={cn("flex items-center gap-2", className)} {...props}>

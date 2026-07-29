@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildPartialDate,
+  formatInitials,
   formatPartialDate,
   formatReadingDuration,
   formatReadingTime,
@@ -153,5 +154,19 @@ describe("splitPartialDate", () => {
 describe("formatPartialDate", () => {
   it.each(["2020", "2020-04", "2020-04-15"])("renders %s as-is", (value) => {
     expect(formatPartialDate(value)).toBe(value);
+  });
+});
+
+describe("formatInitials", () => {
+  it.each([
+    { input: "Ada Lovelace", expected: "AL" },
+    { input: "ada lovelace", expected: "AL" },
+    { input: "Ada", expected: "A" },
+    { input: "Ada Byron King Lovelace", expected: "AB" },
+    { input: "  Ada   Lovelace  ", expected: "AL" },
+    { input: "", expected: "" },
+    { input: "   ", expected: "" },
+  ])("renders $input as $expected", ({ input, expected }) => {
+    expect(formatInitials(input)).toBe(expected);
   });
 });

@@ -64,11 +64,18 @@ export function formatReadingTime(readingTime: number) {
 }
 
 export function formatReadingValue(readingTime: number): [string, string] {
-  const [hours, minutes, seconds] = formatReadingParts(readingTime);
-  const minutesPadded = minutes.toString().padStart(2, "0");
-  const secondsPadded = seconds.toString().padStart(2, "0");
-  return [
-    `PT${hours}H${minutes}M${seconds}S`,
-    [hours, minutesPadded, secondsPadded].filter(Boolean).join(":"),
-  ];
+  return [formatReadingDuration(readingTime), formatReadingTime(readingTime)];
+}
+
+/**
+ * Up to two uppercased leading letters, for an avatar fallback. Splits on runs
+ * of whitespace so repeated or leading spaces don't contribute empty initials.
+ */
+export function formatInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("")
+    .substring(0, 2);
 }

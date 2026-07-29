@@ -8,11 +8,14 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
 
-    // Bundler mode
-    "moduleResolution": "bundler",
+    // Bundler mode — `module: "Preserve"` already implies `moduleResolution: "bundler"`
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
+
+    // Cache type-check results next to each consumer's tsconfig as
+    // `<config>.tsbuildinfo` — gitignored, and declared as a turbo output.
+    "incremental": true,
 
     // Best practices
     "strict": true,
