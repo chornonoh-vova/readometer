@@ -1,13 +1,11 @@
 import type { Book } from "@/lib/books";
 import { ActiveBooksEmpty } from "./active-books-empty";
-import { ActiveBookItem } from "./active-book-item";
+import { BookItem } from "./book-item";
 import { Link } from "@tanstack/react-router";
 import { buttonVariants } from "./ui/button";
 import { ChevronRightIcon } from "lucide-react";
-import { motion } from "motion/react";
-import { itemVariants, listVariants } from "@/lib/animations";
-
-const list = listVariants();
+import { StartReadingSession } from "./start-reading-session";
+import { SectionHeader } from "./section-header";
 
 export function ActiveBooksList({ books }: { books: Book[] }) {
   if (books.length === 0) {
@@ -18,23 +16,45 @@ export function ActiveBooksList({ books }: { books: Book[] }) {
     );
   }
 
+  const mostRecentBook = books[0]!;
+  const otherBooks = books.slice(1);
+
+  const viewAllBooks = (
+    <Link to="/books" className={buttonVariants({ variant: "link" })}>
+      View all books
+      <ChevronRightIcon />
+    </Link>
+  );
+
   return (
-    <motion.div
-      className="p-2 w-full grid grid-cols-1 gap-4"
-      variants={list}
-      initial="hidden"
-      animate="show"
-    >
-      <h2 className="text-md">Continue reading</h2>
-      {books.map((book) => (
-        <motion.div key={book.id} variants={itemVariants}>
-          <ActiveBookItem book={book} />
-        </motion.div>
-      ))}
-      <Link to="/books" className={buttonVariants({ variant: "secondary" })}>
-        View all books
-        <ChevronRightIcon />
-      </Link>
-    </motion.div>
+    <section className="p-2 w-full flex flex-col gap-4">
+      <SectionHeader title="Most recent book">
+        <StartReadingSession
+          book={mostRecentBook}
+          readingRun={{
+            id: mostRecentBook.lastRunId,
+            completedPages: mostRecentBook.completedPages,
+          }}
+        />
+      </SectionHeader>
+
+      <BookItem book={mostRecentBook} />
+
+      {otherBooks.length === 0 ? (
+        <SectionHeader>{viewAllBooks}</SectionHeader>
+      ) : (
+        <>
+          <SectionHeader title="Also reading">{viewAllBooks}</SectionHeader>
+
+          <ul className="flex flex-row overflow-x-auto gap-2">
+            {otherBooks.map((book) => (
+              <li key={book.id} className="w-32 shrink-0">
+                <BookItem variant="compact" book={book} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
   );
 }

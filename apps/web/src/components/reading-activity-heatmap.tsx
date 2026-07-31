@@ -13,8 +13,6 @@ import {
 } from "@/lib/heatmap";
 import { getDaysInMonth } from "date-fns";
 import { memo, useMemo } from "react";
-import { motion } from "motion/react";
-import { itemVariants, listVariants } from "@/lib/animations";
 import {
   Popover,
   PopoverContent,
@@ -26,8 +24,6 @@ import {
   useReadingActivityStore,
   type DisplayBy,
 } from "@/store/reading-activity";
-
-const list = listVariants(0.04);
 
 const bgClass = [
   "bg-activity-default-0",
@@ -153,24 +149,18 @@ export function ReadingActivityHeatmap({
 
   return (
     <div className="w-full grid grid-cols-1 gap-4 p-2">
-      <motion.section
-        className="flex flex-wrap items-center justify-center gap-2.5"
-        variants={list}
-        initial="hidden"
-        animate="show"
-      >
+      <section className="flex flex-wrap items-center justify-center gap-2.5">
         {Array.from({ length: 12 }, (_, month) => (
-          <motion.div key={month} variants={itemVariants}>
-            <Month
-              year={year}
-              month={month}
-              activity={activity}
-              display={displayBy}
-              weekStart={weekStart}
-            />
-          </motion.div>
+          <Month
+            key={month}
+            year={year}
+            month={month}
+            activity={activity}
+            display={displayBy}
+            weekStart={weekStart}
+          />
         ))}
-      </motion.section>
+      </section>
     </div>
   );
 }

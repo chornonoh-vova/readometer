@@ -6,6 +6,7 @@ import {
   formatReadingDuration,
   formatReadingTime,
   splitPartialDate,
+  timeOfDayEmoji,
 } from "./format";
 
 describe("formatReadingDuration", () => {
@@ -154,6 +155,48 @@ describe("splitPartialDate", () => {
 describe("formatPartialDate", () => {
   it.each(["2020", "2020-04", "2020-04-15"])("renders %s as-is", (value) => {
     expect(formatPartialDate(value)).toBe(value);
+  });
+});
+
+describe("timeOfDayEmoji", () => {
+  const at = (hour: number, minute = 0) =>
+    new Date(2024, 0, 15, hour, minute, 0);
+
+  it.each([
+    { hour: 0, expected: "🌙" },
+    { hour: 4, expected: "🌙" },
+    { hour: 5, expected: "🌅" },
+    { hour: 11, expected: "🌅" },
+    { hour: 12, expected: "☀️" },
+    { hour: 16, expected: "☀️" },
+    { hour: 17, expected: "🌆" },
+    { hour: 21, expected: "🌆" },
+    { hour: 22, expected: "🌙" },
+    { hour: 23, expected: "🌙" },
+  ])("returns $expected at $hour:00", ({ hour, expected }) => {
+    expect(timeOfDayEmoji(at(hour))).toBe(expected);
+  });
+
+  it.each([
+    { hour: 4, minute: 59, expected: "🌙" },
+    { hour: 5, minute: 0, expected: "🌅" },
+    { hour: 11, minute: 59, expected: "🌅" },
+    { hour: 12, minute: 0, expected: "☀️" },
+    { hour: 16, minute: 59, expected: "☀️" },
+    { hour: 17, minute: 0, expected: "🌆" },
+    { hour: 21, minute: 59, expected: "🌆" },
+    { hour: 22, minute: 0, expected: "🌙" },
+  ])(
+    "returns $expected at the $hour:$minute boundary",
+    ({ hour, minute, expected }) => {
+      expect(timeOfDayEmoji(at(hour, minute))).toBe(expected);
+    },
+  );
+
+  it("covers every hour of the day", () => {
+    for (let hour = 0; hour < 24; hour++) {
+      expect(timeOfDayEmoji(at(hour))).toMatch(/^(🌙|🌅|☀️|🌆)$/u);
+    }
   });
 });
 

@@ -23,6 +23,18 @@ describe("BookItemCover", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
+  it("merges a caller-supplied className onto the media element", () => {
+    const { container } = render(
+      <BookItemCover
+        book={{ title: "Foo", coverId: "abc", coverColor: undefined }}
+        className="w-full"
+      />,
+    );
+    const media = container.firstElementChild as HTMLElement;
+    expect(media).toHaveClass("w-full");
+    expect(media).not.toHaveClass("w-24");
+  });
+
   it("applies coverColor as inline background", () => {
     const { container } = render(
       <BookItemCover

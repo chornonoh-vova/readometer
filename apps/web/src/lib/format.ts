@@ -68,6 +68,27 @@ export function formatReadingValue(readingTime: number): [string, string] {
 }
 
 /**
+ * Decorative time-of-day emoji. The greeting itself stays constant ("Happy
+ * reading") because English has no night greeting that isn't a farewell — the
+ * emoji carries the hour instead, and it is rendered `aria-hidden`.
+ */
+export function timeOfDayEmoji(date: Date): string {
+  const hour = date.getHours();
+
+  if (hour < 5) {
+    return "🌙";
+  } else if (hour < 12) {
+    return "🌅";
+  } else if (hour < 17) {
+    return "☀️";
+  } else if (hour < 22) {
+    return "🌆";
+  } else {
+    return "🌙";
+  }
+}
+
+/**
  * Up to two uppercased leading letters, for an avatar fallback. Splits on runs
  * of whitespace so repeated or leading spaces don't contribute empty initials.
  */

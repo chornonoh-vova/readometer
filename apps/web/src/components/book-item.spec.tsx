@@ -57,3 +57,35 @@ describe("BookItem", () => {
     expect(screen.getByText("In Progress")).toBeInTheDocument();
   });
 });
+
+describe("BookItem compact variant", () => {
+  it("renders the book title", () => {
+    render(<BookItem book={book} variant="compact" />);
+    expect(
+      screen.getByText("The Pragmatic Programmer", {
+        selector: '[data-slot="item-title"]',
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("links to the book detail page", () => {
+    render(<BookItem book={book} variant="compact" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/books/b1");
+  });
+
+  it("renders the cover", () => {
+    render(<BookItem book={{ ...book, coverId: "cov-1" }} variant="compact" />);
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      "/api/covers/cov-1-sm.webp",
+    );
+  });
+
+  it("omits the author, status and progress", () => {
+    render(<BookItem book={book} variant="compact" />);
+    expect(screen.queryByText("David Thomas")).not.toBeInTheDocument();
+    expect(screen.queryByText("In Progress")).not.toBeInTheDocument();
+    expect(screen.queryByText("160 / 320")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+});

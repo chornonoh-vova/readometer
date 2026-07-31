@@ -4,11 +4,7 @@ import { YearlyGoalItem } from "./yearly-goal-item";
 import { buttonVariants } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import { itemVariants, listVariants } from "@/lib/animations";
-
-const list = listVariants();
+import { SectionHeader } from "./section-header";
 
 export function GoalsList({
   goals,
@@ -21,30 +17,16 @@ export function GoalsList({
   const yearlyGoal = goals.find((g) => g.type === "yearly");
 
   return (
-    <motion.section
-      className="p-2 w-full grid grid-cols-1 gap-4"
-      variants={list}
-      initial="hidden"
-      animate="show"
-    >
-      <motion.h2 className="text-md" variants={itemVariants}>
-        Goals
-      </motion.h2>
-      <motion.div variants={itemVariants}>
-        <DailyGoalItem goal={dailyGoal} progress={goalsProgress.daily} />
-      </motion.div>
-      <motion.div variants={itemVariants}>
-        <YearlyGoalItem goal={yearlyGoal} progress={goalsProgress.yearly} />
-      </motion.div>
-      <motion.div variants={itemVariants}>
-        <Link
-          to="/activity"
-          className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
-        >
+    <section className="p-2 w-full flex flex-col gap-4">
+      <SectionHeader title="My goals">
+        <Link to="/activity" className={buttonVariants({ variant: "link" })}>
           View all activity
           <ChevronRightIcon />
         </Link>
-      </motion.div>
-    </motion.section>
+      </SectionHeader>
+
+      <DailyGoalItem goal={dailyGoal} progress={goalsProgress.daily} />
+      <YearlyGoalItem goal={yearlyGoal} progress={goalsProgress.yearly} />
+    </section>
   );
 }

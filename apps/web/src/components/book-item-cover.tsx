@@ -6,16 +6,22 @@ import { bookCover } from "@/lib/cover";
 
 export function BookItemCover({
   book,
+  square = false,
+  className,
 }: {
   book: Pick<Book, "title" | "coverId" | "coverColor">;
+  square?: boolean;
+  className?: string;
 }) {
   const cover = bookCover(book, "sm");
 
   return (
     <ItemMedia
       className={cn(
-        "aspect-2/3 w-20 rounded-sm overflow-hidden",
+        square ? "aspect-square" : "aspect-2/3",
+        "w-24 rounded-sm overflow-hidden",
         !cover && "border border-primary border-dashed",
+        className,
       )}
       style={{
         backgroundColor: book.coverColor,
