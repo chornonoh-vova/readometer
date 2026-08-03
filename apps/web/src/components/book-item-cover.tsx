@@ -18,8 +18,8 @@ export function BookItemCover({
   return (
     <ItemMedia
       className={cn(
-        square ? "aspect-square" : "aspect-2/3",
-        "w-24 rounded-sm overflow-hidden",
+        square ? "aspect-square w-24" : "aspect-2/3 w-20",
+        "rounded-sm overflow-hidden",
         !cover && "border border-primary border-dashed",
         className,
       )}
