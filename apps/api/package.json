@@ -18,7 +18,7 @@
     "@hono/zod-validator": "^0.9.0",
     "better-auth": "catalog:",
     "bullmq": "catalog:",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "ioredis": "catalog:",
     "isbn": "workspace:*",
     "kysely": "^0.29.4",
