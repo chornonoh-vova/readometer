@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:3.7.9
+    image: traefik:v3.7.10
     networks:
       - proxy
     command:
