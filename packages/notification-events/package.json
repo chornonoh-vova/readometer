@@ -6,7 +6,6 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "fmt": "prettier . --write",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -16,7 +15,6 @@
   "devDependencies": {
     "eslint": "catalog:",
     "eslint-config": "workspace:*",
-    "prettier": "catalog:",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",
     "vitest": "catalog:"

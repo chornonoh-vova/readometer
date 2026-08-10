@@ -66,8 +66,9 @@ bun run db:migrate   # kysely migrate (via kysely-ctl)
 bun run db:generate  # regenerate src/lib/db.d.ts from the live DB
 bun run typecheck    # tsc --noEmit
 bun run lint         # eslint .
-bun run fmt          # prettier --write .
 ```
+
+Formatting is repo-wide, not per-app — run `bun run fmt` from the repo root.
 
 Migrations live in `src/migrations/` and are registered in
 `src/migrations/index.ts`. They are embedded in the build and applied by

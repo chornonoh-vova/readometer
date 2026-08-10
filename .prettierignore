@@ -1,0 +1,5 @@
+# Prettier already honors the root .gitignore; these are the gaps it leaves —
+# nested .gitignores and the global one are not read.
+dev-dist
+apps/web/src/routeTree.gen.ts
+.claude/settings.local.json

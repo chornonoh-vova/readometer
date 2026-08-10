@@ -7,9 +7,20 @@ Readometer is a reading tracker and activity visualizer — a Turborepo monorepo
 
 ## Commands
 
-The standard turbo tasks (`build`, `dev`, `lint`, `typecheck`, `test`, `fmt`) are in the
+The standard turbo tasks (`build`, `dev`, `lint`, `typecheck`, `test`) are in the
 root `package.json`; run one workspace with `bun turbo run <task> --filter=<workspace>`.
-The non-obvious ones:
+
+**Formatting is not a turbo task** — Prettier runs once from the repo root (`bun run fmt`,
+`fmt:check`). No workspace declares `prettier`, an `fmt` script, or its own config: a nested
+config would shadow the root one for that subtree. New ignore patterns go in the root
+`.prettierignore`, root-relative, and only for paths the root `.gitignore` misses — Prettier
+already honors that, but not nested or global gitignores.
+
+Husky hooks (installed by `bun install` via `prepare`): `pre-commit` runs lint-staged,
+`commit-msg` enforces Conventional Commits. `lint-staged.config.js` explains why the lint
+step is not scoped to the staged files — read it before "fixing" that.
+
+The non-obvious commands:
 
 ```bash
 cd apps/api && bun run db:migrate              # run pending migrations
@@ -96,7 +107,8 @@ Every `tsconfig.json` is an `extends` plus, at most, its own `types`/`paths`/`in
 - `erasableSyntaxOnly` is on repo-wide, so `enum`, `namespace`, and constructor parameter
   properties are compile errors in api and notifications too — even though Bun runs all three
   natively. The point is that every file stays transform-only erasable.
-- `allowJs` is deliberately **off**. Nothing in the repo is JavaScript, and api/notifications
+- `allowJs` is deliberately **off**. No _source_ is JavaScript (only the root tooling
+  configs, which no tsconfig covers), and api/notifications
   declare no `include`, so enabling it pulled their own `dist/` and `coverage/` output into the
   program (a 2.5 MB bundle, and a typecheck that varied by what happened to be on disk).
 

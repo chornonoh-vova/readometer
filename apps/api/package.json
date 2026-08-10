@@ -9,7 +9,6 @@
     "db:generate": "kysely-codegen --out-file ./src/lib/db.d.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
-    "fmt": "prettier . --write",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -37,7 +36,6 @@
     "eslint-config": "workspace:*",
     "kysely-codegen": "^0.20.0",
     "kysely-ctl": "^0.21.0",
-    "prettier": "catalog:",
     "testcontainers": "^12.0.1",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",

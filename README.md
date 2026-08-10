@@ -49,6 +49,7 @@ bun install
 # Copy environment samples
 cp sample.env .env
 cp apps/api/sample.env apps/api/.env
+cp apps/notifications/sample.env apps/notifications/.env
 cp apps/web/sample.env apps/web/.env
 
 # Start Postgres (the dev compose file also includes it)
@@ -75,7 +76,14 @@ bun run build       # turbo run build   — build every package/app
 bun run typecheck   # turbo run typecheck
 bun run lint        # turbo run lint
 bun run test        # turbo run test
-bun run fmt         # turbo run fmt     — prettier --write
+```
+
+Formatting is not a turbo task — Prettier is configured once at the repo root and
+runs over every workspace in a single pass:
+
+```sh
+bun run fmt         # prettier . --write
+bun run fmt:check   # prettier . --check
 ```
 
 Filter to a single workspace with `--filter`:
@@ -86,20 +94,41 @@ bun run dev   --filter=web
 bun run test  --filter=isbn
 ```
 
+## Git hooks
+
+`bun install` installs husky via the `prepare` script — no extra setup step. On commit:
+
+- **pre-commit** — `lint-staged` formats staged files with Prettier and runs `bun run lint`
+  if any TypeScript is staged.
+- **commit-msg** — `commitlint` enforces
+  [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `chore:` …).
+
+Use `git commit --no-verify` to bypass both in a pinch.
+
 ## Environment variables
 
 Root `.env` (consumed by `dev.compose.yaml` / `compose.yaml`):
 
-| Variable               | Purpose                                     |
-| ---------------------- | ------------------------------------------- |
-| `BETTER_AUTH_SECRET`   | Better Auth session signing secret          |
-| `DATABASE_URL`         | Postgres connection string                  |
-| `TURNSTILE_SITE_KEY`   | Cloudflare Turnstile site key (web build)   |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret (API)           |
-| `GOOGLE_CLIENT_ID`     | Google OAuth client ID (API)                |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (API)            |
+| Variable               | Purpose                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `BETTER_AUTH_SECRET`   | Better Auth session signing secret (API)                                                         |
+| `DATABASE_URL`         | Postgres connection string (migration + API)                                                     |
+| `REDIS_URL`            | Dragonfly connection string — the shared notification queue, so API and notifications must agree |
+| `REDIS_PASSWORD`       | Dragonfly's own password (`DFLY_requirepass`) and healthcheck                                    |
+| `TURNSTILE_SITE_KEY`   | Cloudflare Turnstile site key (web build)                                                        |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret (API)                                                                |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID (API)                                                                     |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (API)                                                                 |
+| `SMTP_HOST`            | SMTP relay host (notifications)                                                                  |
+| `SMTP_PORT`            | SMTP relay port (notifications)                                                                  |
+| `SMTP_SECURE`          | Implicit TLS — `false` in both dev and production                                                |
+| `SMTP_USER`            | SMTP username — leave unset against local Mailpit                                                |
+| `SMTP_PASS`            | SMTP password — leave unset against local Mailpit                                                |
+| `MAIL_FROM`            | From address on outgoing mail (notifications)                                                    |
 
-See `apps/api/sample.env` and `apps/web/sample.env` for per-app variables.
+Locally the SMTP block points at Mailpit (`SMTP_HOST=mailpit`, `SMTP_PORT=1025`, no
+credentials); in production it's the Resend relay. See `apps/api/sample.env`,
+`apps/notifications/sample.env`, and `apps/web/sample.env` for per-app variables.
 
 ## Deployment
 

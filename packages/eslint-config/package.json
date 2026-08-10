@@ -9,7 +9,6 @@
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "fmt": "prettier . --write",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,7 +21,6 @@
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "prettier": "catalog:",
     "typescript": "catalog:",
     "typescript-config": "workspace:*"
   }

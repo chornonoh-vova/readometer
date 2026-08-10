@@ -56,9 +56,10 @@ bun run preview               # vite preview
 bun run typecheck             # tsc --noEmit
 bun run lint                  # eslint .
 bun run test                  # vitest
-bun run fmt                   # prettier --write .
 bun run generate-pwa-assets   # regenerate PWA icons from readometer.svg
 ```
+
+Formatting is repo-wide, not per-app — run `bun run fmt` from the repo root.
 
 During `dev`, Vite proxies `/api` to `http://localhost:3000` (see
 `vite.config.ts`), so you can run the web app without CORS configuration.

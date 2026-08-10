@@ -11,7 +11,6 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --max-warnings=0",
-    "fmt": "prettier . --write",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 ./public/readometer.svg"
   },
@@ -57,7 +56,6 @@
     "eslint": "catalog:",
     "eslint-config": "workspace:*",
     "jsdom": "^29.1.1",
-    "prettier": "catalog:",
     "shadcn": "^4.15.0",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",
