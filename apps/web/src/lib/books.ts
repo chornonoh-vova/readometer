@@ -32,11 +32,7 @@ export type BookDetails = Omit<
 >;
 
 export type BooksStatusFilter =
-  | "all"
-  | "to-read"
-  | "abandoned"
-  | "in-progress"
-  | "completed";
+  "all" | "to-read" | "abandoned" | "in-progress" | "completed";
 
 export function getBookStatus(
   completedPages: number,

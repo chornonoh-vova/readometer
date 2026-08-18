@@ -1,4 +1,4 @@
-import { useTheme } from "next-themes";
+import { type CSSProperties } from "react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
@@ -7,13 +7,15 @@ import {
   OctagonXIcon,
   Loader2Icon,
 } from "lucide-react";
+import { useThemeStore } from "@/store/theme";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const theme = useThemeStore((state) => state.theme);
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={theme}
+      richColors
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
@@ -28,8 +30,20 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
-        } as React.CSSProperties
+        } as CSSProperties
       }
+      offset={{
+        top: "max(env(safe-area-inset-top, 0), 32px)",
+        right: "max(env(safe-area-inset-right, 0), 32px)",
+        bottom: "max(env(safe-area-inset-bottom, 0), 32px)",
+        left: "max(env(safe-area-inset-left, 0), 32px)",
+      }}
+      mobileOffset={{
+        top: "max(env(safe-area-inset-top, 0), 16px)",
+        right: "max(env(safe-area-inset-right, 0), 16px)",
+        bottom: "max(env(safe-area-inset-bottom, 0), 16px)",
+        left: "max(env(safe-area-inset-left, 0), 16px)",
+      }}
       toastOptions={{
         classNames: {
           toast: "cn-toast",

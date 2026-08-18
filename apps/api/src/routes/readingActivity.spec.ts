@@ -13,44 +13,39 @@ type ActivityRow = {
   date: string;
 };
 
+const YEAR_2024 = "from=2024-01-01&to=2025-01-01";
+
+function activityUrl(tz: string, range = YEAR_2024) {
+  return `/api/reading-activity?${range}&tz=${tz}`;
+}
+
 describe("/api/reading-activity", () => {
   it("returns 401 without auth", async () => {
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=UTC",
-    );
+    const response = await call("GET", activityUrl("UTC"));
     expect(response.status).toBe(401);
   });
 
   it("returns 400 for an invalid timezone", async () => {
     const user = await makeUser();
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=Mars/Olympus",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("Mars/Olympus"), {
+      as: user,
+    });
     expect(response.status).toBe(400);
   });
 
   it("accepts legacy IANA aliases (Europe/Kiev) by mapping to the canonical name (Europe/Kyiv)", async () => {
     const user = await makeUser();
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=Europe/Kiev",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("Europe/Kiev"), {
+      as: user,
+    });
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([]);
   });
 
-  it("returns an empty array when the user has no sessions in the year", async () => {
+  it("returns an empty array when the user has no sessions in the range", async () => {
     const user = await makeUser();
 
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=UTC",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("UTC"), { as: user });
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([]);
@@ -82,11 +77,7 @@ describe("/api/reading-activity", () => {
       readTime: 900,
     });
 
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=UTC",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("UTC"), { as: user });
 
     expect(response.status).toBe(200);
     const rows = (await response.json()) as ActivityRow[];
@@ -115,18 +106,16 @@ describe("/api/reading-activity", () => {
       readTime: 1800,
     });
 
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=America/New_York",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("America/New_York"), {
+      as: user,
+    });
 
     const rows = (await response.json()) as ActivityRow[];
     expect(rows).toHaveLength(1);
     expect(rows[0]!.date).toBe("2024-06-15");
   });
 
-  it("excludes sessions outside [year, year+1) in the requested tz", async () => {
+  it("excludes sessions outside [from, to) in the requested tz", async () => {
     const user = await makeUser();
     const book = await makeBook({ userId: user.id });
     const run = await makeRun({
@@ -160,16 +149,97 @@ describe("/api/reading-activity", () => {
       readTime: 240,
     });
 
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=UTC",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("UTC"), { as: user });
 
     const rows = (await response.json()) as ActivityRow[];
     expect(rows).toHaveLength(1);
     expect(rows[0]!.date.startsWith("2024-01-01")).toBe(true);
     expect(Number(rows[0]!.totalReadPages)).toBe(2);
+  });
+
+  it("returns 400 when `to` is not after `from`", async () => {
+    const user = await makeUser();
+
+    for (const range of [
+      "from=2025-01-01&to=2024-01-01",
+      "from=2024-01-01&to=2024-01-01",
+    ]) {
+      const response = await call("GET", activityUrl("UTC", range), {
+        as: user,
+      });
+      expect(response.status).toBe(400);
+    }
+  });
+
+  it("returns 400 for a range wider than any real view", async () => {
+    const user = await makeUser();
+
+    const response = await call(
+      "GET",
+      activityUrl("UTC", "from=2020-01-01&to=2024-01-01"),
+      { as: user },
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("returns 400 for a malformed date", async () => {
+    const user = await makeUser();
+
+    const response = await call(
+      "GET",
+      activityUrl("UTC", "from=2024-1-1&to=2025-01-01"),
+      { as: user },
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("spans a range that crosses a year boundary", async () => {
+    const user = await makeUser();
+    const book = await makeBook({ userId: user.id, totalPages: 500 });
+    const run = await makeRun({
+      userId: user.id,
+      bookId: book.id,
+      completedPages: 1,
+    });
+
+    await makeSession({
+      userId: user.id,
+      runId: run.id,
+      startTime: new Date("2024-11-20T12:00:00Z"),
+      endTime: new Date("2024-11-20T13:00:00Z"),
+      readPages: 10,
+      readTime: 3600,
+    });
+    await makeSession({
+      userId: user.id,
+      runId: run.id,
+      startTime: new Date("2025-02-05T12:00:00Z"),
+      endTime: new Date("2025-02-05T13:00:00Z"),
+      readPages: 20,
+      readTime: 1800,
+    });
+    await makeSession({
+      userId: user.id,
+      runId: run.id,
+      startTime: new Date("2024-08-01T12:00:00Z"),
+      endTime: new Date("2024-08-01T13:00:00Z"),
+      readPages: 99,
+      readTime: 99,
+    });
+
+    const response = await call(
+      "GET",
+      activityUrl("UTC", "from=2024-09-01&to=2025-09-01"),
+      { as: user },
+    );
+
+    const rows = (await response.json()) as ActivityRow[];
+    expect(rows.map((r) => r.date).sort()).toEqual([
+      "2024-11-20",
+      "2025-02-05",
+    ]);
   });
 
   it("scopes results to the caller", async () => {
@@ -190,11 +260,7 @@ describe("/api/reading-activity", () => {
       readTime: 3600,
     });
 
-    const response = await call(
-      "GET",
-      "/api/reading-activity?year=2024&tz=UTC",
-      { as: user },
-    );
+    const response = await call("GET", activityUrl("UTC"), { as: user });
 
     expect(await response.json()).toEqual([]);
   });

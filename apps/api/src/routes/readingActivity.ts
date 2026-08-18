@@ -4,25 +4,40 @@ import { zValidator } from "../lib/validator";
 import z from "zod";
 import { db } from "../lib/database";
 import { sql } from "kysely";
-import { canonicalizeTz } from "../lib/tz";
+import { canonicalizeTz, dayStartInTz } from "../lib/tz";
 
 const readingActivity = new Hono<AppEnv>();
 
-const readingActivitySchema = z.object({
-  year: z.preprocess(Number, z.number().int().positive()),
-  tz: z.string(),
-});
+const MS_PER_DAY = 86_400_000;
+// No view exceeds 12 months; a leap year plus tz slack covers every caller.
+const MAX_RANGE_DAYS = 400;
+
+const readingActivitySchema = z
+  .object({
+    from: z.iso.date(),
+    to: z.iso.date(),
+    tz: z.string(),
+  })
+  .refine(({ from, to }) => from < to, {
+    message: "must be before `to`",
+    path: ["from"],
+  })
+  .refine(
+    ({ from, to }) =>
+      (Date.parse(to) - Date.parse(from)) / MS_PER_DAY <= MAX_RANGE_DAYS,
+    {
+      message: `range must not span more than ${MAX_RANGE_DAYS} days`,
+      path: ["to"],
+    },
+  );
 
 readingActivity.get(
   "/",
   zValidator("query", readingActivitySchema),
   async (c) => {
     const userId = c.get("user")!.id;
-    const { year, tz } = c.req.valid("query");
+    const { from, to, tz } = c.req.valid("query");
     const canonicTZ = canonicalizeTz(tz);
-
-    const yearStart = `${year}-01-01`;
-    const yearEnd = `${year + 1}-01-01`;
 
     const result = await db
       .selectFrom("readingSession")
@@ -34,16 +49,8 @@ readingActivity.get(
         ),
       ])
       .where("userId", "=", userId)
-      .where(
-        "startTime",
-        ">=",
-        sql<Date>`(${yearStart}::date)::timestamp AT TIME ZONE ${canonicTZ}`,
-      )
-      .where(
-        "startTime",
-        "<",
-        sql<Date>`(${yearEnd}::date)::timestamp AT TIME ZONE ${canonicTZ}`,
-      )
+      .where("startTime", ">=", dayStartInTz(from, canonicTZ))
+      .where("startTime", "<", dayStartInTz(to, canonicTZ))
       .groupBy("date")
       .execute();
 

@@ -9,17 +9,19 @@ export type ReadingActivity = {
 };
 
 async function fetchReadingActivity(
-  year: number,
+  from: string,
+  to: string,
   tz: string,
 ): Promise<ReadingActivity[]> {
-  const searchParams = new URLSearchParams({ year: year.toString(), tz });
+  const searchParams = new URLSearchParams({ from, to, tz });
   return await fetchApi(`/reading-activity?${searchParams}`);
 }
 
-export function readingActivityQueryOptions(year: number) {
+/** `from` is inclusive, `to` is exclusive; both are `yyyy-MM-dd`. */
+export function readingActivityQueryOptions(from: string, to: string) {
   const tz = new Intl.DateTimeFormat().resolvedOptions().timeZone;
   return queryOptions({
-    queryKey: readingActivity.byYear(year, tz),
-    queryFn: () => fetchReadingActivity(year, tz),
+    queryKey: readingActivity.byRange(from, to, tz),
+    queryFn: () => fetchReadingActivity(from, to, tz),
   });
 }

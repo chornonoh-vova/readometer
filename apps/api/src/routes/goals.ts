@@ -5,7 +5,7 @@ import { zValidator } from "../lib/validator";
 import { db } from "../lib/database";
 import { sql } from "kysely";
 import { HTTPException } from "hono/http-exception";
-import { canonicalizeTz } from "../lib/tz";
+import { canonicalizeTz, dayEndInTz, dayStartInTz } from "../lib/tz";
 
 const goals = new Hono<AppEnv>();
 
@@ -77,8 +77,8 @@ async function dailyActual(
   date: string,
   tz: string,
 ): Promise<number> {
-  const dayStart = sql<Date>`(${date}::date)::timestamp AT TIME ZONE ${tz}`;
-  const dayEnd = sql<Date>`((${date}::date) + INTERVAL '1 day')::timestamp AT TIME ZONE ${tz}`;
+  const dayStart = dayStartInTz(date, tz);
+  const dayEnd = dayEndInTz(date, tz);
 
   const column = metric === "minutes" ? "readTime" : "readPages";
 
@@ -100,8 +100,8 @@ async function yearlyBooksActual(
   tz: string,
 ): Promise<number> {
   const year = Number(date.slice(0, 4));
-  const yearStart = sql<Date>`(${`${year}-01-01`}::date)::timestamp AT TIME ZONE ${tz}`;
-  const yearEnd = sql<Date>`(${`${year + 1}-01-01`}::date)::timestamp AT TIME ZONE ${tz}`;
+  const yearStart = dayStartInTz(`${year}-01-01`, tz);
+  const yearEnd = dayStartInTz(`${year + 1}-01-01`, tz);
 
   const row = await db
     .selectFrom("readingRun")

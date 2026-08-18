@@ -1,5 +1,13 @@
 import { useNavigate } from "@tanstack/react-router";
-import { NativeSelect, NativeSelectOption } from "./ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +20,12 @@ import {
 import { Button } from "./ui/button";
 import { SettingsIcon } from "lucide-react";
 import { useReadingActivityStore } from "@/store/reading-activity";
+import { getActivityYears } from "@/lib/heatmap";
 
-const minYear = 2026;
+const RECENT = "recent";
 
-export function ReadingActivityToolbar({ year }: { year: number }) {
+export function ReadingActivityToolbar({ year }: { year: number | undefined }) {
   const navigate = useNavigate();
-
-  const maxYear = new Date().getFullYear() + 1;
 
   const displayBy = useReadingActivityStore((state) => state.displayBy);
   const setDisplayBy = useReadingActivityStore((state) => state.setDisplayBy);
@@ -27,23 +34,32 @@ export function ReadingActivityToolbar({ year }: { year: number }) {
 
   return (
     <div className="flex items-end justify-end-safe gap-2">
-      <NativeSelect
-        id="year"
-        aria-label="Year"
-        value={year}
-        onChange={(e) =>
+      <Select
+        value={year ? year.toString() : RECENT}
+        onValueChange={(value: string | null) =>
           navigate({
             to: "/activity",
-            search: { year: Number(e.target.value) },
+            search:
+              value === null || value === RECENT ? {} : { year: Number(value) },
+            replace: true,
           })
         }
       >
-        {Array.from({ length: maxYear - minYear }, (_, i) => (
-          <NativeSelectOption key={minYear + i} value={minYear + i}>
-            {minYear + i}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+        <SelectTrigger aria-label="Time period">
+          <SelectValue>{year ?? "Recent"}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Time period</SelectLabel>
+            <SelectItem value={RECENT}>Recent</SelectItem>
+            {getActivityYears().map((activityYear) => (
+              <SelectItem key={activityYear} value={String(activityYear)}>
+                {activityYear}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={

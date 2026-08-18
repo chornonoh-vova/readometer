@@ -1,7 +1,18 @@
 import { PageHeader, PageHeaderName } from "@/components/page-header";
-import { ReadingActivityHeatmap } from "@/components/reading-activity-heatmap";
+import {
+  monthColumnClass,
+  monthGridClass,
+  monthsSectionClass,
+  ReadingActivityHeatmap,
+} from "@/components/reading-activity-heatmap";
 import { ReadingActivityToolbar } from "@/components/reading-activity-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getActivityMonths,
+  getMonthsRange,
+  minYear,
+  monthsPerView,
+} from "@/lib/heatmap";
 import { readingActivityQueryOptions } from "@/lib/reading-activity";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -12,14 +23,21 @@ export const Route = createFileRoute("/_auth/_app/activity")({
   pendingComponent: ActivityLoading,
   loaderDeps: ({ search: { year } }) => ({ year }),
   loader: ({ context, deps: { year } }) => {
-    context.queryClient.ensureQueryData(readingActivityQueryOptions(year));
+    // Returned rather than re-derived in the component: the clock is read once,
+    // so a month rollover cannot make the render ask for a different range.
+    const months = getActivityMonths(year);
+    const { from, to } = getMonthsRange(months);
+    context.queryClient.ensureQueryData(readingActivityQueryOptions(from, to));
+    return { months, from, to };
   },
   validateSearch: z.object({
-    year: z.number().positive().optional().prefault(new Date().getFullYear()),
+    // Bounded because the loader does date arithmetic on this: `?year=999999`
+    // overflows `Date` and would throw before the route mounts.
+    year: z.number().int().min(minYear).max(9999).optional().catch(undefined),
   }),
 });
 
-function ActivityHeader({ year }: { year: number }) {
+function ActivityHeader({ year }: { year: number | undefined }) {
   return (
     <PageHeader>
       <PageHeaderName>
@@ -39,11 +57,15 @@ function ActivityLoading() {
         </PageHeaderName>
       </PageHeader>
       <div className="w-full grid grid-cols-1 gap-4 p-2">
-        <div className="flex flex-wrap items-center justify-center gap-2.5">
-          {Array.from({ length: 12 }, (_, i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
+        <div className={monthsSectionClass}>
+          {Array.from({ length: monthsPerView }, (_, month) => (
+            <div key={month} className={monthColumnClass}>
               <Skeleton className="h-3 w-12 rounded" />
-              <Skeleton className="w-[164px] h-[140px] rounded-sm" />
+              <div className={monthGridClass}>
+                {Array.from({ length: 42 }, (_, day) => (
+                  <Skeleton key={day} className="rounded-sm" />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -54,13 +76,17 @@ function ActivityLoading() {
 
 function Activity() {
   const { year } = Route.useSearch();
+  const { months, from, to } = Route.useLoaderData();
   const { data: readingActivity } = useSuspenseQuery(
-    readingActivityQueryOptions(year),
+    readingActivityQueryOptions(from, to),
   );
   return (
     <>
       <ActivityHeader year={year} />
-      <ReadingActivityHeatmap year={year} readingActivity={readingActivity} />
+      <ReadingActivityHeatmap
+        months={months}
+        readingActivity={readingActivity}
+      />
     </>
   );
 }

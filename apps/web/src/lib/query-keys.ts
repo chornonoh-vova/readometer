@@ -19,5 +19,10 @@ export const readingSessions = {
 };
 
 export const readingActivity = {
-  byYear: (year: number, tz: string) => ["reading-activity", year, tz],
+  byRange: (from: string, to: string, tz: string) => [
+    "reading-activity",
+    from,
+    to,
+    tz,
+  ],
 };

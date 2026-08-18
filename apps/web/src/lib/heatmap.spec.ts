@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { getActivityMap, getCalendarPosition } from "./heatmap";
+import {
+  getActivityMap,
+  getActivityMonths,
+  getActivityYears,
+  getCalendarPosition,
+  getMonthsRange,
+  getRollingMonths,
+  getYearMonths,
+} from "./heatmap";
 import type { ReadingActivity } from "./reading-activity";
 
 describe("getActivityMap", () => {
@@ -89,5 +97,98 @@ describe("getCalendarPosition", () => {
     const first = getCalendarPosition(new Date(2026, 3, 1), "monday");
     const mid = getCalendarPosition(new Date(2026, 3, 15), "monday");
     expect(mid.row).toBeGreaterThan(first.row);
+  });
+});
+
+describe("getActivityYears", () => {
+  it("lists years from the current one back to minYear", () => {
+    expect(getActivityYears(new Date(2030, 3, 30))).toEqual([
+      2030, 2029, 2028, 2027, 2026,
+    ]);
+  });
+
+  it("lists only minYear during minYear itself", () => {
+    expect(getActivityYears(new Date(2026, 7, 17))).toEqual([2026]);
+  });
+
+  it("returns an empty list before minYear rather than a negative range", () => {
+    expect(getActivityYears(new Date(2025, 0, 1))).toEqual([]);
+  });
+});
+
+describe("getRollingMonths", () => {
+  it("starts at the current month and walks backwards across the year boundary", () => {
+    const months = getRollingMonths(12, new Date(2026, 7, 17));
+    expect(months).toHaveLength(12);
+    expect(months.at(0)).toEqual({ year: 2026, month: 7 });
+    expect(months.at(-1)).toEqual({ year: 2025, month: 8 });
+  });
+
+  it("ignores the day of month", () => {
+    expect(getRollingMonths(2, new Date(2026, 0, 31))).toEqual(
+      getRollingMonths(2, new Date(2026, 0, 1)),
+    );
+  });
+
+  it("steps back one calendar month at a time", () => {
+    expect(getRollingMonths(3, new Date(2026, 1, 5))).toEqual([
+      { year: 2026, month: 1 },
+      { year: 2026, month: 0 },
+      { year: 2025, month: 11 },
+    ]);
+  });
+});
+
+describe("getYearMonths", () => {
+  it("lists all twelve months of the year, December first", () => {
+    const months = getYearMonths(2026);
+    expect(months).toHaveLength(12);
+    expect(months.at(0)).toEqual({ year: 2026, month: 11 });
+    expect(months.at(-1)).toEqual({ year: 2026, month: 0 });
+    expect(months.every(({ year }) => year === 2026)).toBe(true);
+  });
+});
+
+describe("getActivityMonths", () => {
+  it("rolls back from the current month when no year is selected", () => {
+    const now = new Date(2026, 7, 17);
+    expect(getActivityMonths(undefined, now)).toEqual(
+      getRollingMonths(12, now),
+    );
+  });
+
+  it("uses the selected year, ignoring the clock", () => {
+    expect(getActivityMonths(2026, new Date(2030, 3, 30))).toEqual(
+      getYearMonths(2026),
+    );
+  });
+});
+
+describe("getMonthsRange", () => {
+  it("covers a rolling window with a half-open range", () => {
+    expect(getMonthsRange(getRollingMonths(12, new Date(2026, 7, 17)))).toEqual(
+      {
+        from: "2025-09-01",
+        to: "2026-09-01",
+      },
+    );
+  });
+
+  it("covers a whole selected year", () => {
+    expect(getMonthsRange(getYearMonths(2026))).toEqual({
+      from: "2026-01-01",
+      to: "2027-01-01",
+    });
+  });
+
+  it("rolls a December window over into the next January", () => {
+    expect(getMonthsRange([{ year: 2026, month: 11 }])).toEqual({
+      from: "2026-12-01",
+      to: "2027-01-01",
+    });
+  });
+
+  it("throws on an empty month list", () => {
+    expect(() => getMonthsRange([])).toThrow();
   });
 });

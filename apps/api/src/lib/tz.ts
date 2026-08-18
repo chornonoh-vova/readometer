@@ -1,4 +1,5 @@
 import { HTTPException } from "hono/http-exception";
+import { sql } from "kysely";
 
 // IANA timezones that the JS Intl runtime (ICU/CLDR) still surfaces under their
 // legacy names — most notably from `Intl.DateTimeFormat().resolvedOptions().timeZone`
@@ -21,4 +22,18 @@ export function canonicalizeTz(tz: string): string {
     throw new HTTPException(400, { message: "Invalid timezone" });
   }
   return TZ_ALIASES[tz] ?? tz;
+}
+
+/**
+ * Start of a `yyyy-MM-dd` day in `canonicalTz`, shaped so the compared column
+ * stays bare and the bound remains usable for an index scan. Pass an
+ * already-canonical zone — Postgres rejects legacy IANA aliases.
+ */
+export function dayStartInTz(date: string, canonicalTz: string) {
+  return sql<Date>`(${date}::date)::timestamp AT TIME ZONE ${canonicalTz}`;
+}
+
+/** Exclusive upper bound: start of the day after `date`. */
+export function dayEndInTz(date: string, canonicalTz: string) {
+  return sql<Date>`((${date}::date) + INTERVAL '1 day')::timestamp AT TIME ZONE ${canonicalTz}`;
 }
