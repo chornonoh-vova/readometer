@@ -1,0 +1,104 @@
+name: Dokploy
+
+on:
+  workflow_run:
+    workflows:
+      - "Docker"
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://readometer.app
+    env:
+      DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+      DOKPLOY_COMPOSE_ID: ${{ vars.DOKPLOY_COMPOSE_ID }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+    steps:
+      - name: Deploy compose stack and wait for it to settle
+        run: |
+          set -euo pipefail
+
+          list_deployments() {
+            curl --fail-with-body -sS \
+              -H "x-api-key: ${DOKPLOY_API_KEY}" \
+              "${DOKPLOY_URL}/api/deployment.allByCompose?composeId=${DOKPLOY_COMPOSE_ID}"
+          }
+
+          # deployment.allByCompose has documented parameters but no documented
+          # response schema, so unwrap the shapes it plausibly returns and fail
+          # loudly (printing the body) rather than silently matching nothing.
+          normalize() {
+            jq -e 'if type == "array" then .
+                   elif has("data") then .data
+                   elif has("result") then (.result.data.json // .result.data)
+                   else error("unrecognized shape") end'
+          }
+
+          ids_of() { jq -r '[.[] | (.deploymentId // .id)] | @json'; }
+
+          raw=$(list_deployments)
+          if ! before=$(printf '%s' "$raw" | normalize 2>/dev/null | ids_of); then
+            echo "::error::Could not parse deployment.allByCompose. Raw response:"
+            printf '%s\n' "$raw"
+            exit 1
+          fi
+
+          echo "Triggering deploy of compose ${DOKPLOY_COMPOSE_ID}"
+          curl --fail-with-body -sS -X POST \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data "{\"composeId\":\"${DOKPLOY_COMPOSE_ID}\"}" \
+            "${DOKPLOY_URL}/api/compose.deploy"
+          echo
+
+          logged=0
+          for _ in $(seq 1 90); do
+            sleep 10
+
+            current=$(list_deployments | normalize)
+            deployment=$(printf '%s' "$current" | jq -c --argjson before "$before" \
+              '[.[] | select((.deploymentId // .id) as $id | ($before | index($id)) | not)] | first // empty')
+
+            if [ -z "$deployment" ]; then
+              echo "Waiting for Dokploy to register the deployment..."
+              continue
+            fi
+
+            if [ "$logged" -eq 0 ]; then
+              echo "Tracking deployment:"
+              printf '%s\n' "$deployment" | jq .
+              logged=1
+            fi
+
+            status=$(printf '%s' "$deployment" | jq -r '.status // "unknown"')
+            case "$status" in
+              done|success|completed)
+                echo "Deployment finished: ${status}"
+                exit 0
+                ;;
+              error|failed|cancelled|canceled)
+                echo "::error::Deployment finished: ${status}"
+                printf '%s\n' "$deployment" | jq .
+                exit 1
+                ;;
+              *)
+                echo "Deployment status: ${status}"
+                ;;
+            esac
+          done
+
+          echo "::error::Timed out after 15 minutes waiting for the deployment to settle."
+          exit 1

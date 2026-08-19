@@ -1,4 +1,4 @@
-name: Build and publish images
+name: Docker
 
 on:
   workflow_run:
@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   build-and-publish:
+    name: ${{ matrix.image }}
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:

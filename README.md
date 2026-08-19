@@ -190,3 +190,12 @@ To build locally with Traefik routing on `readometer.local`, use
 - `.github/workflows/docker.yaml` — on a successful CI run against `main`,
   builds `apps/api`, `apps/notifications`, and `apps/web` for `linux/amd64` and
   `linux/arm64`, and publishes to GHCR tagged with both the commit SHA and `latest`.
+- `.github/workflows/dokploy.yaml` — on a successful image publish, deploys the
+  compose stack to Dokploy and polls until the deployment settles, so a failed
+  rollout fails the job. Runs in the `production` GitHub environment, which
+  records each deploy under the repository's Deployments UI. Needs
+  `DOKPLOY_API_KEY` (secret) plus `DOKPLOY_URL` and `DOKPLOY_COMPOSE_ID`
+  (variables) on that environment. Also runnable via `workflow_dispatch`.
+
+The three workflows chain via `workflow_run`, which GitHub caps at three levels —
+a fourth chained workflow would silently never fire.
