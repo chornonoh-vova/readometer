@@ -18,9 +18,10 @@ session-based authentication.
 
 ## Entry points
 
-- `src/index.ts` — top-level entry. Running the built bundle with
-  `bun dist/index.js migrate` applies Kysely migrations and exits;
-  otherwise it boots the Hono server via `src/app.ts`.
+- `src/index.ts` — top-level entry. Boots the Hono server via `src/app.ts`
+  and registers the ordered shutdown hooks (HTTP → queue → Redis → pg pool).
+  There is no build step: dev, tests, and the production image all run this
+  file directly with `bun src/index.ts`.
 - `src/app.ts` — wires middlewares and mounts routes under `/api`.
 
 ## Route map
@@ -61,19 +62,23 @@ Domain tables (see `src/lib/db.d.ts` for the generated Kysely types):
 
 ```sh
 bun run dev          # bun --watch src/index.ts
-bun run build        # bun build → dist/ (sharp is external)
 bun run db:migrate   # kysely migrate (via kysely-ctl)
 bun run db:generate  # regenerate src/lib/db.d.ts from the live DB
 bun run typecheck    # tsc --noEmit
 bun run lint         # eslint .
+bun run test         # vitest run (needs Docker — testcontainers Postgres)
 ```
+
+There is deliberately no `build` script; `apps/web` is the only workspace with one.
 
 Formatting is repo-wide, not per-app — run `bun run fmt` from the repo root.
 
-Migrations live in `src/migrations/` and are registered in
-`src/migrations/index.ts`. They are embedded in the build and applied by
-the `migrate` CLI subcommand, so production deployments never need
-`kysely-ctl` at runtime.
+Migrations live in `src/migrations/` and need no registration — kysely-ctl
+discovers them by scanning the directory, so `bun run db:migrate make <name>`
+is all it takes to add one. Keep schema changes and backfills in separate
+files. In production the `migration` service in `compose.yaml` reuses the api
+image to run `bun run db:migrate latest` once and exit, which is why
+`kysely-ctl` ships in the image rather than being pruned as a dev dependency.
 
 ## Environment variables
 

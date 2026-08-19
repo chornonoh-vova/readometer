@@ -16,3 +16,10 @@ Hono REST API on Bun with PostgreSQL, Kysely, and Better Auth.
   param and compute calendar-day boundaries with Postgres `AT TIME ZONE`.
 - Tests spin up a real PostgreSQL container per run via testcontainers, so Docker must be
   running before `bun run test`.
+- **Migrations**: scaffold with `bun run db:migrate make <name>` — kysely-ctl discovers files
+  by scanning `src/migrations/`, so nothing needs registering. Keep DDL and data in separate
+  files: the `add-…-column` / `backfill-…-column` / `finalize-…-column` (or `drop-…`) triples
+  in `src/migrations/` are the pattern to follow, so a schema change and its backfill can fail
+  and be retried independently.
+- Prefer Kysely's typed query builders over raw SQL; reach for `` sql`…` `` only where no
+  builder exists for the construct (e.g. `AT TIME ZONE`, check constraints).

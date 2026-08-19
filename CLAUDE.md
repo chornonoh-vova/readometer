@@ -1,9 +1,29 @@
 # CLAUDE.md
 
 Readometer is a reading tracker and activity visualizer — a Turborepo monorepo of
-`apps/*` and `packages/*`. Per-app guidance lives in each app's own `CLAUDE.md`.
+`apps/*` and `packages/*`. Per-app guidance lives in each app's own `CLAUDE.md`; the
+four packages have none, so their conventions are the sections below.
 
 **Package manager**: Bun (required — do not use npm/yarn/pnpm)
+
+## Workspaces
+
+Seven workspaces, all `private`, all consumed as `workspace:*`. The workspace name is the
+bare directory name (`api`, not `@readometer/api`) — that is what `--filter` takes.
+
+| Workspace                      | What it is                                             |
+| ------------------------------ | ------------------------------------------------------ |
+| `apps/api`                     | Hono REST API on Bun; owns all DB access               |
+| `apps/notifications`           | BullMQ worker: React Email templates over SMTP         |
+| `apps/web`                     | React 19 + Vite SPA/PWA                                |
+| `packages/isbn`                | ISBN-10/13 validation and normalization                |
+| `packages/notification-events` | Zod schemas for the api → notifications queue payloads |
+| `packages/eslint-config`       | The only workspace that declares ESLint plugins        |
+| `packages/typescript-config`   | `base.json` and `react.json`; no `src`, no `exports`   |
+
+Only `apps/web` has a `build` script (`tsc -b && vite build`). api and notifications run
+from source under Bun in dev, in tests, and in their production images alike — there is no
+`dist/` to deploy, so a "build the api" step does not exist.
 
 ## Commands
 
@@ -122,3 +142,17 @@ samples don't tell you:
   port `587`, user `resend`, password = the Resend API key. `SMTP_SECURE=false` in both.
 - `REDIS_URL` must be the same value in `apps/api` and `apps/notifications` — they share
   the notification queue.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `chornonoh-vova/readometer`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical role strings, unchanged. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context — `CONTEXT-MAP.md` at the root points at per-workspace `CONTEXT.md` files. See `docs/agents/domain.md`.

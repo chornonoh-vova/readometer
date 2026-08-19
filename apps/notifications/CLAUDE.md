@@ -17,3 +17,6 @@ session cache).
   object plus a new sender module, without touching existing events.
 - Tests spin up a real Redis container per run (not to be confused with `apps/api`'s
   Postgres container); one test also spins up Mailpit to verify SMTP delivery end-to-end.
+- `bun run dev` starts two processes in parallel: the worker (`bun --watch src/index.ts`) and
+  React Email's template preview (`email dev`) on port 3002. Neither implies the other —
+  previewing a template does not require Redis or the API.
