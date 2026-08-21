@@ -4,6 +4,7 @@ import { zValidator } from "../lib/validator";
 import z from "zod";
 import { db } from "../lib/database";
 import { FIELD_LIMITS } from "../lib/limits.ts";
+import { assertRunQuota } from "../lib/quota.ts";
 import { HTTPException } from "hono/http-exception";
 import { sql } from "kysely";
 
@@ -40,6 +41,9 @@ const createReadingRunSchema = z.object({
 readingRuns.post("/", zValidator("json", createReadingRunSchema), async (c) => {
   const userId = c.get("user")!.id;
   const request = c.req.valid("json");
+
+  // request first: the quota is scoped per book, so it needs bookId from the body.
+  await assertRunQuota(userId, request.bookId);
 
   const createReadingRunQuery = db
     .insertInto("readingRun")
