@@ -10,9 +10,7 @@ export const requireAuth = () =>
       throw new HTTPException(401);
     }
 
-    // Unverified accounts reach nothing behind this gate. Mounted in app.ts
-    // with app.use("*") after healthz/readyz and the better-auth handler, so
-    // those stay reachable and a blocked user can still verify or sign out.
+    // Mounted after healthz/readyz and /auth/*, so those stay reachable.
     if (!user.emailVerified) {
       throw new HTTPException(403, { message: "Email not verified" });
     }

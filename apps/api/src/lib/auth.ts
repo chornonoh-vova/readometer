@@ -67,10 +67,8 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    // Sign-up never returns a session, and sign-in 403s until the address is
-    // verified. Note we deliberately do NOT set emailVerification.sendOnSignIn:
-    // that would re-send a verification email on every blocked login attempt,
-    // which is an email-bomb vector aimed at our sender reputation.
+    // Do not add emailVerification.sendOnSignIn: it re-sends on every blocked
+    // login attempt, which is an email-bomb vector at our sender reputation.
     autoSignIn: false,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
@@ -92,11 +90,8 @@ export const auth = betterAuth({
 
   emailVerification: {
     sendOnSignUp: true,
-    // With autoSignIn off, clicking the emailed link is how a credential user
-    // gets their first session. It also refreshes the session cookie: without
-    // this flag better-auth skips setSessionCookie, so the cookieCache below
-    // would keep serving emailVerified: false and lock a just-verified user
-    // out for up to its maxAge.
+    // Required, not cosmetic: better-auth only calls setSessionCookie when this
+    // is set, so cookieCache would keep serving a stale emailVerified: false.
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await publishNotification({

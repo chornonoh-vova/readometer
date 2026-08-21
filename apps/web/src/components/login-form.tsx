@@ -83,14 +83,12 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
           },
           onSuccess: () => router.navigate({ to: redirect }),
           onError: (ctx) => {
-            // Sign-in is refused until the address is verified. Send them to a
-            // page where they can resend the link instead of a dead-end alert.
-            // Match on the code, not the 403 status: CSRF and captcha failures
-            // also 403, and routing those here would swallow their message.
+            // Match the code, not the 403 status: CSRF and captcha also 403.
             if (ctx.error.code === "EMAIL_NOT_VERIFIED") {
+              setLoading(false);
               router.navigate({
                 to: "/verify-email",
-                search: { email: data.email },
+                search: { email: data.email, redirect },
               });
               return;
             }

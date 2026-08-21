@@ -78,6 +78,7 @@ describe("RegisterForm", () => {
 
     expect(mockSignUpEmail).toHaveBeenCalledWith(
       expect.objectContaining({
+        callbackURL: "/verify-email",
         name: "Alice Smith",
         email: "alice@example.com",
         password: "securepassword",

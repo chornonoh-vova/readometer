@@ -137,8 +137,24 @@ describe("LoginForm", () => {
 
     expect(mockNavigate).toHaveBeenCalledWith({
       to: "/verify-email",
-      search: { email: "user@example.com" },
+      search: { email: "user@example.com", redirect: "/" },
     });
+  });
+
+  it("clears the loading state before routing to /verify-email", async () => {
+    mockSignInEmail.mockImplementation(({ fetchOptions }) =>
+      fetchOptions.onError({
+        error: { code: "EMAIL_NOT_VERIFIED", message: "x", status: 403 },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/" />);
+    await fillAndSubmit(user);
+
+    expect(
+      screen.getByRole("button", { name: /sign in with email/i }),
+    ).toBeEnabled();
   });
 
   // CSRF and captcha failures are also 403. They must surface their own

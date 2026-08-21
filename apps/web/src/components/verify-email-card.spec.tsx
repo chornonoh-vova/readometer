@@ -62,10 +62,12 @@ describe("VerifyEmailCard", () => {
 
     expect(mockSendVerificationEmail).toHaveBeenCalledWith({
       email: "me@example.com",
-      callbackURL: "/",
+      callbackURL: "/verify-email",
     });
+    // Hedged copy: an already-verified address gets a success response with no
+    // email actually sent, so this must not promise delivery.
     expect(
-      await screen.findByText(/sent a new verification link/i),
+      await screen.findByText(/if that address still needs verifying/i),
     ).toBeInTheDocument();
   });
 
@@ -91,6 +93,56 @@ describe("VerifyEmailCard", () => {
     await clickResend(user);
 
     expect(await screen.findByText(/wait a minute/i)).toBeInTheDocument();
+  });
+
+  it("threads a deep link through the callbackURL", async () => {
+    const user = userEvent.setup();
+    render(<VerifyEmailCard email="me@example.com" redirect="/books/abc" />);
+
+    await clickResend(user);
+
+    expect(mockSendVerificationEmail).toHaveBeenCalledWith({
+      email: "me@example.com",
+      callbackURL: "/verify-email?redirect=%2Fbooks%2Fabc",
+    });
+  });
+
+  it("refuses an off-site redirect in the callbackURL", async () => {
+    const user = userEvent.setup();
+    render(
+      <VerifyEmailCard email="me@example.com" redirect="//evil.example/x" />,
+    );
+
+    await clickResend(user);
+
+    expect(mockSendVerificationEmail).toHaveBeenCalledWith({
+      email: "me@example.com",
+      callbackURL: "/verify-email",
+    });
+  });
+
+  it("explains an expired verification link", () => {
+    render(<VerifyEmailCard email="me@example.com" error="TOKEN_EXPIRED" />);
+
+    expect(screen.getByText(/link has expired/i)).toBeInTheDocument();
+  });
+
+  it("falls back to a generic message for an unknown link error", () => {
+    render(<VerifyEmailCard email="me@example.com" error="WAT" />);
+
+    expect(screen.getByText(/could not be used/i)).toBeInTheDocument();
+  });
+
+  it("still shows feedback when a thrown error carries a blank message", async () => {
+    const user = userEvent.setup();
+    mockSendVerificationEmail.mockRejectedValue(new Error(""));
+    render(<VerifyEmailCard email="me@example.com" />);
+
+    await clickResend(user);
+
+    expect(
+      await screen.findByText(/something went wrong/i),
+    ).toBeInTheDocument();
   });
 
   it("offers no resend when no address is known", () => {
