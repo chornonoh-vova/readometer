@@ -64,7 +64,12 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
           headers: {
             "x-captcha-response": token,
           },
-          onSuccess: () => router.navigate({ to: "/" }),
+          // Sign-up returns no session: the account has to be verified first.
+          onSuccess: () =>
+            router.navigate({
+              to: "/verify-email",
+              search: { email: data.email },
+            }),
           onError: (ctx) => {
             setErrorMessage(ctx.error.message);
             setLoading(false);
