@@ -8,6 +8,7 @@ import { zValidator } from "../lib/validator.ts";
 import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "isbn";
 import { FIELD_LIMITS } from "../lib/limits.ts";
+import { assertBookQuota } from "../lib/quota.ts";
 
 const books = new Hono<AppEnv>();
 
@@ -109,6 +110,8 @@ const createBookSchema = z.object({
 
 books.post("/", zValidator("json", createBookSchema), async (c) => {
   const userId = c.get("user")!.id;
+  await assertBookQuota(userId);
+
   const request = c.req.valid("json");
 
   const createBookQuery = db
