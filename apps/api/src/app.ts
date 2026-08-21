@@ -11,6 +11,7 @@ import { timing } from "hono/timing";
 import { secureHeaders } from "hono/secure-headers";
 
 import { session } from "./middlewares/session.ts";
+import { requestBodyLimit } from "./middlewares/bodyLimit.ts";
 import { requireAuth } from "./middlewares/requireAuth.ts";
 
 import healthz from "./routes/healthz.ts";
@@ -34,6 +35,9 @@ app.use(
   }),
 );
 app.use(csrf());
+// Before the /auth/* handler and before requireAuth: the signup endpoint is
+// the one that most needs a ceiling, and it is mounted above both.
+app.use(requestBodyLimit());
 app.use(compress());
 app.use(logger());
 app.use(timing());
