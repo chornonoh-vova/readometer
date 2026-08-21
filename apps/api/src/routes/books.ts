@@ -9,6 +9,7 @@ import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "isbn";
 import { FIELD_LIMITS } from "../lib/limits.ts";
 import { assertBookQuota } from "../lib/quota.ts";
+import { removeCoverFiles } from "../lib/covers.ts";
 
 const books = new Hono<AppEnv>();
 
@@ -184,15 +185,22 @@ books.delete("/:bookId", zValidator("param", bookSchema), async (c) => {
   const userId = c.get("user")!.id;
   const bookId = c.req.valid("param").bookId;
 
+  // `returning` instead of numDeletedRows: the cascade drops the child rows but
+  // nothing removed the cover files, so they leaked on STORAGE_PATH forever.
   const deleteBookQuery = db
     .deleteFrom("book")
     .where("id", "=", bookId)
-    .where("userId", "=", userId);
+    .where("userId", "=", userId)
+    .returning("coverId");
 
   const result = await deleteBookQuery.executeTakeFirst();
 
-  if (!result.numDeletedRows) {
+  if (!result) {
     throw new HTTPException(404, { message: "Book not found" });
+  }
+
+  if (result.coverId) {
+    await removeCoverFiles(result.coverId);
   }
 
   return c.body(null, 204);

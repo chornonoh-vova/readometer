@@ -7,6 +7,9 @@ import {
   makeSession,
   makeUser,
 } from "../../test/helpers/factories";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { makeSolidPng } from "../../test/helpers/png";
 import { db } from "../lib/database";
 
 describe("/api/books", () => {
@@ -411,5 +414,35 @@ describe("/api/books", () => {
 
       expect(response.status).toBe(400);
     });
+  });
+
+  it("removes the cover files when the book is deleted", async () => {
+    const user = await makeUser();
+    const book = await makeBook({ userId: user.id });
+
+    const form = new FormData();
+    form.append(
+      "cover",
+      new File([makeSolidPng(64, 64, 10, 20, 30)], "cover.png", {
+        type: "image/png",
+      }),
+    );
+    const upload = await call("POST", `/api/books/${book.id}/cover`, {
+      as: user,
+      formData: form,
+    });
+    expect(upload.status).toBe(201);
+    const { coverId } = (await upload.json()) as { coverId: string };
+
+    const dir = join(process.env.STORAGE_PATH!, "covers");
+    expect(existsSync(join(dir, `${coverId}-sm.webp`))).toBe(true);
+
+    const response = await call("DELETE", `/api/books/${book.id}`, {
+      as: user,
+    });
+    expect(response.status).toBe(204);
+
+    expect(existsSync(join(dir, `${coverId}-sm.webp`))).toBe(false);
+    expect(existsSync(join(dir, `${coverId}-md.webp`))).toBe(false);
   });
 });

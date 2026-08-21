@@ -177,4 +177,46 @@ describe("/api/books/:bookId/cover", () => {
       expect(response.status).toBe(400);
     });
   });
+
+  describe("upload validation", () => {
+    it("rejects a non-image upload with 400", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+
+      const form = new FormData();
+      form.append(
+        "cover",
+        new File(["#!/bin/sh\necho hi"], "payload.sh", {
+          type: "text/x-shellscript",
+        }),
+      );
+
+      const response = await call("POST", `/api/books/${book.id}/cover`, {
+        as: user,
+        formData: form,
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("replaces a cover whose files are already missing", async () => {
+      const user = await makeUser();
+      // A syntactically valid coverId with no files on disk: the unlink must
+      // tolerate ENOENT rather than 500.
+      const book = await makeBook({
+        userId: user.id,
+        coverId: "01999999-9999-7999-8999-999999999999",
+      });
+
+      const form = new FormData();
+      form.append("cover", makeImage());
+
+      const response = await call("POST", `/api/books/${book.id}/cover`, {
+        as: user,
+        formData: form,
+      });
+
+      expect(response.status).toBe(201);
+    });
+  });
 });
