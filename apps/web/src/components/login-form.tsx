@@ -83,6 +83,16 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
           },
           onSuccess: () => router.navigate({ to: redirect }),
           onError: (ctx) => {
+            // Match the code, not the 403 status: CSRF and captcha also 403.
+            if (ctx.error.code === "EMAIL_NOT_VERIFIED") {
+              setLoading(false);
+              router.navigate({
+                to: "/verify-email",
+                search: { email: data.email, redirect },
+              });
+              return;
+            }
+
             setErrorMessage(ctx.error.message);
             setLoading(false);
           },

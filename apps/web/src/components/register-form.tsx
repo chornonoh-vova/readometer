@@ -60,11 +60,18 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
 
       authClient.signUp.email({
         ...data,
+        // Link failures redirect to `${callbackURL}?error=<code>`.
+        callbackURL: "/verify-email",
         fetchOptions: {
           headers: {
             "x-captcha-response": token,
           },
-          onSuccess: () => router.navigate({ to: "/" }),
+          // Sign-up returns no session: verification comes first.
+          onSuccess: () =>
+            router.navigate({
+              to: "/verify-email",
+              search: { email: data.email },
+            }),
           onError: (ctx) => {
             setErrorMessage(ctx.error.message);
             setLoading(false);

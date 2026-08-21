@@ -10,5 +10,10 @@ export const requireAuth = () =>
       throw new HTTPException(401);
     }
 
+    // Mounted after healthz/readyz and /auth/*, so those stay reachable.
+    if (!user.emailVerified) {
+      throw new HTTPException(403, { message: "Email not verified" });
+    }
+
     await next();
   });

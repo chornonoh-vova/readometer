@@ -118,6 +118,62 @@ describe("LoginForm", () => {
     expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
   });
 
+  // requireEmailVerification makes sign-in 403 with this code until the address
+  // is verified. Route them somewhere they can act instead of showing a dead end.
+  it("routes to /verify-email when the address is unverified", async () => {
+    mockSignInEmail.mockImplementation(({ fetchOptions }) =>
+      fetchOptions.onError({
+        error: {
+          code: "EMAIL_NOT_VERIFIED",
+          message: "Email not verified",
+          status: 403,
+        },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/" />);
+    await fillAndSubmit(user);
+
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: "/verify-email",
+      search: { email: "user@example.com", redirect: "/" },
+    });
+  });
+
+  it("clears the loading state before routing to /verify-email", async () => {
+    mockSignInEmail.mockImplementation(({ fetchOptions }) =>
+      fetchOptions.onError({
+        error: { code: "EMAIL_NOT_VERIFIED", message: "x", status: 403 },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/" />);
+    await fillAndSubmit(user);
+
+    expect(
+      screen.getByRole("button", { name: /sign in with email/i }),
+    ).toBeEnabled();
+  });
+
+  // CSRF and captcha failures are also 403. They must surface their own
+  // message, not get mistaken for an unverified address.
+  it("shows the message for an unrelated 403 instead of routing away", async () => {
+    mockSignInEmail.mockImplementation(({ fetchOptions }) =>
+      fetchOptions.onError({
+        error: { message: "Captcha verification failed", status: 403 },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/" />);
+    await fillAndSubmit(user);
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByText("Captcha verification failed")).toBeInTheDocument();
+  });
+
   it("does not submit with invalid email", async () => {
     const user = userEvent.setup();
     render(<LoginForm redirect="/" />);

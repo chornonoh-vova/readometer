@@ -12,5 +12,16 @@ export const Route = createFileRoute("/_auth")({
         },
       });
     }
+
+    // UX only — the API's requireAuth middleware is the actual boundary.
+    if (!session.user.emailVerified) {
+      throw redirect({
+        to: "/verify-email",
+        search: {
+          email: session.user.email,
+          redirect: location.href,
+        },
+      });
+    }
   },
 });

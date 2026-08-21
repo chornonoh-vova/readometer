@@ -78,6 +78,7 @@ describe("RegisterForm", () => {
 
     expect(mockSignUpEmail).toHaveBeenCalledWith(
       expect.objectContaining({
+        callbackURL: "/verify-email",
         name: "Alice Smith",
         email: "alice@example.com",
         password: "securepassword",
@@ -85,7 +86,10 @@ describe("RegisterForm", () => {
     );
   });
 
-  it("navigates to / on successful sign up", async () => {
+  // Sign-up no longer returns a session (autoSignIn is off and email
+  // verification is required), so navigating to / would land on the _auth
+  // guard and bounce to /login.
+  it("navigates to /verify-email with the address on successful sign up", async () => {
     mockSignUpEmail.mockImplementation(({ fetchOptions }) =>
       fetchOptions.onSuccess(),
     );
@@ -94,7 +98,10 @@ describe("RegisterForm", () => {
     render(<RegisterForm />);
     await fillAndSubmit(user);
 
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: "/verify-email",
+      search: { email: "alice@example.com" },
+    });
   });
 
   it("shows error message when registration fails", async () => {

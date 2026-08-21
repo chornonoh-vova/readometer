@@ -67,6 +67,10 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    // Do not add emailVerification.sendOnSignIn: it re-sends on every blocked
+    // login attempt, which is an email-bomb vector at our sender reputation.
+    autoSignIn: false,
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await publishNotification({
         type: "password-reset-requested",
@@ -86,6 +90,9 @@ export const auth = betterAuth({
 
   emailVerification: {
     sendOnSignUp: true,
+    // Required, not cosmetic: better-auth only calls setSessionCookie when this
+    // is set, so cookieCache would keep serving a stale emailVerified: false.
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await publishNotification({
         type: "verification-email-requested",
