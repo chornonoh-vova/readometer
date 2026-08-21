@@ -63,7 +63,7 @@ Client-side Zod is irrelevant — the bot posts directly to the API.
 
 ## Design
 
-Four layers. Layers 1–3 bound bytes per request; layer 4 bounds rows per account.
+Five layers. Layers 1-3 bound bytes per request; layer 4 bounds rows per account; layer 5 bounds writes per hour.
 
 ### Layer 1 — Tiered request body limits
 
@@ -178,6 +178,33 @@ Note that at the observed ~20 sessions/book ratio, 5_000 sessions is ~250 books 
 so for a realistic usage pattern the session cap binds well before the 1_000-book
 cap.
 
+### Layer 5 — Per-user write rate limiting
+
+Quotas bound how much an account can ever store; this bounds how fast.
+**100 writes per hour per user**, counted in Dragonfly, applied to `POST`, `PUT`,
+`PATCH`, and `DELETE`. A fixed window whose index is part of the Redis key, so
+the counter expires on its own and the check stays one round trip without
+depending on `EXPIRE NX` (Redis 7+, not guaranteed on Dragonfly).
+
+Applied after `requireAuth()`, so it is keyed on `userId` and leaves `/auth/*`
+to better-auth's own `rateLimit`.
+
+**Sizing.** Adding one book with a cover and logging three sessions is 6 writes
+(`POST /books`, `POST /books/:id/cover`, `POST /reading-runs`, 3x
+`POST /reading-sessions`), so 100/hour accommodates a real evening of use,
+including logging a weekend backlog. **10/hour was considered and rejected**: it
+would block a user partway through adding a second book, and session logging is
+bursty by nature.
+
+Because a bot held to this rate still cannot exceed its QUOTAS, the limiter's job
+is CPU and connection burn, not data volume — which is exactly why it can afford
+to be generous. At 100/hour a bot manages 2,400 writes/day, so maxing the
+5_000-session quota on one account takes roughly two days of sustained hammering.
+
+**Fails open.** If Dragonfly is unreachable the write proceeds, with the error
+logged. The quotas still bound total damage, so a cache outage should not take
+writes down with it.
+
 ### Cover upload hardening
 
 `apps/api/src/routes/bookCovers.ts`:
@@ -238,6 +265,9 @@ outside the helpers — `globalSetup` must set module-level env first.
 - Cover upload: disallowed MIME → 400; oversized → 413; replacing a cover whose
   files are already missing → succeeds, not 500.
 - Auth: over-long `name` → rejected; blocklisted domain → rejected.
+- Rate limit: reads never consume budget; the write past the ceiling returns 429
+  with `Retry-After`; budget is keyed per user. Requires resetting the Redis mock
+  between tests, or counters leak across the suite.
 
 ## Out of scope
 
@@ -246,9 +276,6 @@ outside the helpers — `globalSetup` must set module-level env first.
   currently-polluted tables — so it must follow cleanup. Per CLAUDE.md, DDL and
   backfill must be separate migration files scaffolded with
   `bun run db:migrate make <name>`.
-- **Per-user write rate limiting.** Quotas cap totals, not velocity; a bot can still
-  burn CPU and connections hammering up to its quota. `rateLimit` in `auth.ts`
-  covers only `/auth/*`. Dragonfly is already deployed for this.
 - **Monitoring.** Nothing alerts on database growth today, which is why 30GB was
   discovered by its effects. An alert would have caught this in minutes.
 - **Expired `verification` row cleanup**, not configured in `auth.ts`; every signup
