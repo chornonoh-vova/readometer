@@ -4,6 +4,7 @@ import z from "zod";
 import { zValidator } from "../lib/validator";
 import { db } from "../lib/database";
 import { FIELD_LIMITS } from "../lib/limits.ts";
+import { assertSessionQuota } from "../lib/quota.ts";
 import { sql } from "kysely";
 import { HTTPException } from "hono/http-exception";
 
@@ -64,6 +65,10 @@ readingSessions.post(
     if (request.endPage > totalPages) {
       throw new HTTPException(400, { message: "Incorrect end page" });
     }
+
+    // Before the try: its catch turns every error into a 404, which would mask
+    // this 403.
+    await assertSessionQuota(userId, request.runId);
 
     try {
       const result = await db.transaction().execute(async (trx) => {
