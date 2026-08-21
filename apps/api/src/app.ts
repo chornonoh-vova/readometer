@@ -12,6 +12,7 @@ import { secureHeaders } from "hono/secure-headers";
 
 import { session } from "./middlewares/session.ts";
 import { requestBodyLimit } from "./middlewares/bodyLimit.ts";
+import { writeRateLimit } from "./middlewares/writeRateLimit.ts";
 import { requireAuth } from "./middlewares/requireAuth.ts";
 
 import healthz from "./routes/healthz.ts";
@@ -51,6 +52,9 @@ app.route("/readyz", readyz);
 app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
 
 app.use("*", requireAuth());
+// After requireAuth so c.get("user") is populated; /auth/* keeps better-auth's
+// own rateLimit.
+app.use("*", writeRateLimit());
 
 app.route("/me", me);
 app.route("/books", books);

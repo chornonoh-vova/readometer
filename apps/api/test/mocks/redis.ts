@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 
 const store = new Map<string, string>();
+const ttls = new Map<string, number>();
 
 export const redisMock = {
   async ping() {
@@ -23,6 +24,40 @@ export const redisMock = {
       if (store.delete(key)) count++;
     }
     return count;
+  },
+  async incr(key: string) {
+    const next = Number(store.get(key) ?? "0") + 1;
+    store.set(key, String(next));
+    return next;
+  },
+  async expire(key: string, seconds: number) {
+    if (!store.has(key)) return 0;
+    ttls.set(key, seconds);
+    return 1;
+  },
+  async ttl(key: string) {
+    if (!store.has(key)) return -2;
+    return ttls.get(key) ?? -1;
+  },
+  /** Supports the chained `.incr(k).expire(k, s).exec()` shape only. */
+  multi() {
+    const ops: Array<() => Promise<unknown>> = [];
+    const chain = {
+      incr(key: string) {
+        ops.push(() => redisMock.incr(key));
+        return chain;
+      },
+      expire(key: string, seconds: number) {
+        ops.push(() => redisMock.expire(key, seconds));
+        return chain;
+      },
+      async exec() {
+        const out: Array<[Error | null, unknown]> = [];
+        for (const op of ops) out.push([null, await op()]);
+        return out;
+      },
+    };
+    return chain;
   },
   async keys(pattern: string) {
     const prefix = pattern.replace(/\*$/, "");
@@ -53,6 +88,7 @@ export const redisMock = {
  */
 export function resetRedisMock(): void {
   store.clear();
+  ttls.clear();
 }
 
 vi.mock("../../src/lib/redis", () => ({
