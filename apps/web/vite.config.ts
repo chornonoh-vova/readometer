@@ -4,26 +4,11 @@ import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig, type Plugin } from "vite";
-
-// The CSP in index.html is production-only — the dev server injects an inline
-// react-refresh preamble and an HMR websocket that it would block.
-function stripCspInDev(): Plugin {
-  return {
-    name: "strip-csp-in-dev",
-    apply: "serve",
-    transformIndexHtml: (html) =>
-      html.replace(
-        /\s*<meta[^>]*http-equiv="Content-Security-Policy"[^>]*>/,
-        "",
-      ),
-  };
-}
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    stripCspInDev(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
