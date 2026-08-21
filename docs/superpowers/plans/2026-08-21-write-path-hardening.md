@@ -41,7 +41,7 @@
 | `readTimeSeconds`                                     | 86_400         |
 | body limit: auth                                      | 16 KB          |
 | body limit: json                                      | 64 KB          |
-| body limit: upload                                    | 8 MB           |
+| body limit: upload                                    | 1 MB           |
 | `writesPerWindow`                                     | 100            |
 | `windowSeconds`                                       | 3_600 (1 hour) |
 
@@ -142,7 +142,7 @@ export const QUOTAS = {
 export const BODY_LIMITS = {
   auth: 16 * 1024,
   json: 64 * 1024,
-  upload: 8 * 1024 * 1024,
+  upload: 1024 * 1024,
 } as const;
 ```
 
@@ -225,7 +225,7 @@ const tiers: Record<keyof typeof BODY_LIMITS, MiddlewareHandler> = {
 /**
  * One middleware that picks the tier, rather than three overlapping
  * `app.use()` registrations. Hono runs *every* matching middleware in
- * registration order, so a wildcard 64KB limit registered alongside an 8MB
+ * registration order, so a wildcard 64KB limit registered alongside a 1MB
  * cover limit would reject cover uploads. One decision, one place.
  */
 export const requestBodyLimit = (): MiddlewareHandler =>
@@ -1367,8 +1367,10 @@ The layer that closes the actual 30GB vector. `user.name` is written by `POST /a
 - Produces: from `./accountPolicy.ts` —
   - `emailDomain(email: string): string`
   - `isDisposableEmailDomain(email: string): boolean`
+  - `isAllowedSignupDomain(email: string): boolean`
   - `isNameWithinLimit(name: string): boolean`
   - `truncateUserAgent(ua: string | null | undefined): string | null`
+  - `ALLOWED_SIGNUP_DOMAINS: ReadonlySet<string>`
 
 - [ ] **Step 1: Create the blocklist data**
 
@@ -1420,6 +1422,7 @@ export const DISPOSABLE_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
 import { describe, it, expect } from "vitest";
 import {
   emailDomain,
+  isAllowedSignupDomain,
   isDisposableEmailDomain,
   isNameWithinLimit,
   truncateUserAgent,
@@ -1457,6 +1460,33 @@ describe("isDisposableEmailDomain", () => {
 
   it("does not block a subdomain lookalike it has no entry for", () => {
     expect(isDisposableEmailDomain("bot@mail.kolsea.com")).toBe(false);
+  });
+});
+
+describe("isAllowedSignupDomain", () => {
+  it.each([
+    "a@gmail.com",
+    "a@googlemail.com",
+    "a@icloud.com",
+    "a@me.com",
+    "a@mac.com",
+  ])("allows %s", (email) => {
+    expect(isAllowedSignupDomain(email)).toBe(true);
+  });
+
+  it.each(["a@proton.me", "a@outlook.com", "a@fastmail.com", "a@kolsea.com"])(
+    "rejects %s",
+    (email) => {
+      expect(isAllowedSignupDomain(email)).toBe(false);
+    },
+  );
+
+  it("is case insensitive", () => {
+    expect(isAllowedSignupDomain("A@GMAIL.COM")).toBe(true);
+  });
+
+  it("does not allow a subdomain of an allowed domain", () => {
+    expect(isAllowedSignupDomain("a@mail.gmail.com")).toBe(false);
   });
 });
 
@@ -1519,6 +1549,28 @@ export function isDisposableEmailDomain(email: string): boolean {
   return DISPOSABLE_EMAIL_DOMAINS.has(emailDomain(email));
 }
 
+/**
+ * Providers allowed to register with email and password.
+ *
+ * `me.com` and `mac.com` are here because iCloud issues addresses on all three
+ * Apple domains and older accounts often have only a legacy one; allowing
+ * `icloud.com` alone would silently reject real iCloud users.
+ *
+ * Everyone else signs in with Google. Enforced ONLY on `/sign-up/email` — see
+ * the note in auth.ts about why this cannot live in a `user.create` hook.
+ */
+export const ALLOWED_SIGNUP_DOMAINS: ReadonlySet<string> = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+]);
+
+export function isAllowedSignupDomain(email: string): boolean {
+  return ALLOWED_SIGNUP_DOMAINS.has(emailDomain(email));
+}
+
 export function isNameWithinLimit(name: string): boolean {
   return name.length <= FIELD_LIMITS.userName;
 }
@@ -1547,13 +1599,40 @@ Expected: PASS (16 assertions).
 Add the imports at the top of `apps/api/src/lib/auth.ts`:
 
 ```ts
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import {
+  isAllowedSignupDomain,
   isDisposableEmailDomain,
   isNameWithinLimit,
   truncateUserAgent,
 } from "./accountPolicy.ts";
 ```
+
+Add a `hooks.before` block for the signup allowlist, beside `databaseHooks`:
+
+```ts
+  hooks: {
+    // Scoped to /sign-up/email on purpose. A `databaseHooks.user.create.before`
+    // check would also fire for Google OAuth, where a Workspace user's email is
+    // a custom domain — that would break "Sign up with Google" for exactly the
+    // users the OAuth path exists to serve.
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+
+      const email = ctx.body?.email;
+      if (typeof email !== "string" || !isAllowedSignupDomain(email)) {
+        throw new APIError("BAD_REQUEST", {
+          message:
+            "Email sign-up is limited to Gmail and iCloud addresses. Use \"Sign up with Google\" for other providers.",
+        });
+      }
+    }),
+  },
+```
+
+Verify `ctx.path` is the un-prefixed better-auth path (`/sign-up/email`, not
+`/api/auth/sign-up/email`) against the installed version — log it once if unsure.
+An allowlist that never matches would silently reject every signup.
 
 Add a `databaseHooks` block to the `betterAuth({...})` options — put it next to `emailAndPassword`, before `socialProviders`:
 

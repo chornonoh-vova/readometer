@@ -74,13 +74,13 @@ routes (including the `/auth/*` handler, which is currently mounted ahead of
 | Path                            | Limit | Rationale                                             |
 | ------------------------------- | ----- | ----------------------------------------------------- |
 | `/api/auth/*`                   | 16 KB | better-auth owns the handler; we cannot add Zod there |
-| `POST /api/books/:bookId/cover` | 8 MB  | phone photos of covers are large                      |
+| `POST /api/books/:bookId/cover` | 1 MB  | resized to 200px/400px WebP anyway                    |
 | everything else                 | 64 KB | JSON payloads are small                               |
 
 A single path-aware middleware selects the tier, rather than three overlapping
 `app.use()` registrations. Overlapping registrations are the trap here: Hono runs
 _all_ matching middleware in order, so a wildcard 64KB limit registered alongside
-an 8MB cover limit would reject cover uploads. One middleware, one decision, one
+a 1MB cover limit would reject cover uploads. One middleware, one decision, one
 place to test.
 
 Exceeding a limit returns **413**.
@@ -136,11 +136,25 @@ Bots rotate domains, and an adversary already paying for Turnstile solves will
 rotate around a list. It is worth having because it is cheap and it stops the
 current wave; it is not worth trusting.
 
-**Rejected: allowlisting `gmail.com`/`icloud.com`.** It permanently turns away
-every Proton, Outlook, Fastmail, and custom-domain user while a single throwaway
-Gmail defeats it. **Rejected: disabling email signup.** One throwaway Google
-account defeats Google-only signup. Both operate on _who gets an account_; the
-damage needs exactly one account.
+**Signup domain allowlist (decided by the user).** Email/password signup is
+restricted to `gmail.com`, `icloud.com`, `me.com`, and `mac.com`. The two legacy
+Apple domains are included because iCloud issues addresses on all three and older
+accounts often have only `me.com` or `mac.com`; allowing `icloud.com` alone would
+silently reject them.
+
+The tradeoff was raised and accepted: this turns away Proton, Outlook, Fastmail,
+and custom-domain users, and a single throwaway Gmail still defeats it. It trades
+reach for a smaller attack surface while the campaign is active, and it is one
+constant to widen later. Google OAuth remains the path for everyone else.
+
+**It must not be enforced in `databaseHooks.user.create.before`**, which fires for
+Google OAuth signups too — a Google Workspace user's email is a custom domain, so
+an allowlist there would break "Sign up with Google" for exactly the users the
+OAuth path exists to serve. It goes in a `hooks.before` middleware scoped to
+`ctx.path === "/sign-up/email"`, leaving every OAuth path untouched.
+
+**Rejected: disabling email signup entirely.** One throwaway Google account
+defeats Google-only signup, and it strands users who have no Google account.
 
 Exact `databaseHooks` signatures must be verified against the installed
 better-auth (`^1.6.9`) during implementation.
@@ -264,7 +278,9 @@ outside the helpers — `globalSetup` must set module-level env first.
   independently of per-run.
 - Cover upload: disallowed MIME → 400; oversized → 413; replacing a cover whose
   files are already missing → succeeds, not 500.
-- Auth: over-long `name` → rejected; blocklisted domain → rejected.
+- Auth: over-long `name` → rejected; blocklisted domain → rejected; a
+  non-allowlisted domain on `/sign-up/email` → rejected, while an OAuth-shaped
+  custom domain is unaffected.
 - Rate limit: reads never consume budget; the write past the ceiling returns 429
   with `Retry-After`; budget is keyed per user. Requires resetting the Redis mock
   between tests, or counters leak across the suite.
