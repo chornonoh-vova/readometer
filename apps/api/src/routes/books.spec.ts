@@ -306,4 +306,110 @@ describe("/api/books", () => {
       expect(second.status).toBe(404);
     });
   });
+  describe("field limits", () => {
+    it("rejects a title over the limit", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id: uuidv7(), title: "x".repeat(257), totalPages: 300 },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects a description over the limit", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          title: "Fine",
+          description: "x".repeat(1_001),
+          totalPages: 300,
+        },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects an author over the limit", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          title: "Fine",
+          author: "x".repeat(129),
+          totalPages: 300,
+        },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("accepts fields exactly at the limit", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          title: "x".repeat(256),
+          description: "y".repeat(1_000),
+          author: "z".repeat(128),
+          totalPages: 300,
+        },
+      });
+
+      expect(response.status).toBe(201);
+    });
+
+    it("rejects a non-integer totalPages with 400, not 500", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id: uuidv7(), title: "Fine", totalPages: 1.5 },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects a totalPages beyond int4 with 400, not 500", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id: uuidv7(), title: "Fine", totalPages: 1e12 },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects a language longer than two characters with 400, not 500", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/books", {
+        as: user,
+        body: { id: uuidv7(), title: "Fine", totalPages: 300, language: "eng" },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects an over-long description on update", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+
+      const response = await call("PUT", `/api/books/${book.id}`, {
+        as: user,
+        body: { description: "x".repeat(1_001) },
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
 });

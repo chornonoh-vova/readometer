@@ -7,6 +7,7 @@ import { db } from "../lib/database.ts";
 import { zValidator } from "../lib/validator.ts";
 import z from "zod";
 import { isbnSchema, normalizeIsbnToIsbn13 } from "isbn";
+import { FIELD_LIMITS } from "../lib/limits.ts";
 
 const books = new Hono<AppEnv>();
 
@@ -96,13 +97,14 @@ books.get("/:bookId", zValidator("param", bookSchema), async (c) => {
 
 const createBookSchema = z.object({
   id: z.uuidv7(),
-  title: z.string().trim().nonempty(),
-  description: z.string().trim().optional(),
-  author: z.string().trim().optional(),
-  totalPages: z.number().positive(),
+  title: z.string().trim().nonempty().max(FIELD_LIMITS.bookTitle),
+  description: z.string().trim().max(FIELD_LIMITS.bookDescription).optional(),
+  author: z.string().trim().max(FIELD_LIMITS.bookAuthor).optional(),
+  totalPages: z.number().int().positive().max(FIELD_LIMITS.pages),
   publishDate: partialDateSchema.optional(),
   isbn: isbnSchema.optional(),
-  language: z.string().trim().optional(),
+  // `book.language` is char(2); without this the DB raises a 500, not a 400.
+  language: z.string().trim().length(2).optional(),
 });
 
 books.post("/", zValidator("json", createBookSchema), async (c) => {
@@ -130,13 +132,13 @@ books.post("/", zValidator("json", createBookSchema), async (c) => {
 });
 
 const updateBookSchema = z.object({
-  title: z.string().trim().nonempty().optional(),
-  description: z.string().trim().optional(),
-  author: z.string().trim().optional(),
-  totalPages: z.number().positive().optional(),
+  title: z.string().trim().nonempty().max(FIELD_LIMITS.bookTitle).optional(),
+  description: z.string().trim().max(FIELD_LIMITS.bookDescription).optional(),
+  author: z.string().trim().max(FIELD_LIMITS.bookAuthor).optional(),
+  totalPages: z.number().int().positive().max(FIELD_LIMITS.pages).optional(),
   publishDate: partialDateSchema.optional(),
   isbn: isbnSchema.optional(),
-  language: z.string().trim().optional(),
+  language: z.string().trim().length(2).optional(),
 });
 
 books.put(
