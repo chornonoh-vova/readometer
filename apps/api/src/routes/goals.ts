@@ -3,24 +3,33 @@ import type { AppEnv } from "../types";
 import z from "zod";
 import { zValidator } from "../lib/validator";
 import { db } from "../lib/database";
+import { FIELD_LIMITS } from "../lib/limits.ts";
 import { sql } from "kysely";
 import { HTTPException } from "hono/http-exception";
 import { canonicalizeTz, dayEndInTz, dayStartInTz } from "../lib/tz";
 
 const goals = new Hono<AppEnv>();
 
-const upsertGoalSchema = z.discriminatedUnion("type", [
+// Split by metric, not just by type: a daily minutes ceiling (a day has 1440)
+// is not the same shape of number as a daily pages ceiling.
+const upsertGoalSchema = z.union([
   z.object({
     id: z.uuidv7(),
     type: z.literal("daily"),
-    metric: z.enum(["minutes", "pages"]),
-    target: z.number().int().positive(),
+    metric: z.literal("minutes"),
+    target: z.number().int().positive().max(FIELD_LIMITS.goalDailyMinutes),
+  }),
+  z.object({
+    id: z.uuidv7(),
+    type: z.literal("daily"),
+    metric: z.literal("pages"),
+    target: z.number().int().positive().max(FIELD_LIMITS.goalDailyPages),
   }),
   z.object({
     id: z.uuidv7(),
     type: z.literal("yearly"),
     metric: z.literal("books"),
-    target: z.number().int().positive(),
+    target: z.number().int().positive().max(FIELD_LIMITS.goalYearlyBooks),
   }),
 ]);
 
@@ -68,7 +77,7 @@ goals.get("/", async (c) => {
 
 const progressSchema = z.object({
   date: z.iso.date(),
-  tz: z.string(),
+  tz: z.string().max(FIELD_LIMITS.tz),
 });
 
 async function dailyActual(

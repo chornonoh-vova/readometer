@@ -583,4 +583,47 @@ describe("/api/reading-sessions", () => {
       expect(second.status).toBe(404);
     });
   });
+  describe("field limits", () => {
+    it("rejects a readTime beyond one day", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+      const run = await makeRun({ userId: user.id, bookId: book.id });
+
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          runId: run.id,
+          startPage: 1,
+          endPage: 10,
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          readTime: 86_401,
+        },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects a non-integer readTime with 400, not 500", async () => {
+      const user = await makeUser();
+      const book = await makeBook({ userId: user.id });
+      const run = await makeRun({ userId: user.id, bookId: book.id });
+
+      const response = await call("POST", "/api/reading-sessions", {
+        as: user,
+        body: {
+          id: uuidv7(),
+          runId: run.id,
+          startPage: 1,
+          endPage: 10,
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          readTime: 12.5,
+        },
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
 });

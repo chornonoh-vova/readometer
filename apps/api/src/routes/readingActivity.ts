@@ -5,6 +5,7 @@ import z from "zod";
 import { db } from "../lib/database";
 import { sql } from "kysely";
 import { canonicalizeTz, dayStartInTz } from "../lib/tz";
+import { FIELD_LIMITS } from "../lib/limits.ts";
 
 const readingActivity = new Hono<AppEnv>();
 
@@ -16,7 +17,7 @@ const readingActivitySchema = z
   .object({
     from: z.iso.date(),
     to: z.iso.date(),
-    tz: z.string(),
+    tz: z.string().max(FIELD_LIMITS.tz),
   })
   .refine(({ from, to }) => from < to, {
     message: "must be before `to`",

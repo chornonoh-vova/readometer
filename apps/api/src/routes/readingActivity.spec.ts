@@ -264,4 +264,15 @@ describe("/api/reading-activity", () => {
 
     expect(await response.json()).toEqual([]);
   });
+  it("rejects an over-long tz query parameter", async () => {
+    const user = await makeUser();
+
+    const response = await call(
+      "GET",
+      `/api/reading-activity?from=2026-01-01&to=2026-02-01&tz=${"x".repeat(65)}`,
+      { as: user },
+    );
+
+    expect(response.status).toBe(400);
+  });
 });

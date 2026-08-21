@@ -3,6 +3,7 @@ import type { AppEnv } from "../types";
 import { zValidator } from "../lib/validator";
 import z from "zod";
 import { db } from "../lib/database";
+import { FIELD_LIMITS } from "../lib/limits.ts";
 import { HTTPException } from "hono/http-exception";
 import { sql } from "kysely";
 
@@ -31,7 +32,7 @@ readingRuns.get("/", zValidator("query", readingRunsSchema), async (c) => {
 const createReadingRunSchema = z.object({
   id: z.uuidv7(),
   bookId: z.uuidv7(),
-  completedPages: z.number().nonnegative(),
+  completedPages: z.number().int().nonnegative().max(FIELD_LIMITS.pages),
   startedAt: z.iso.datetime(),
   finishedAt: z.iso.datetime().optional(),
 });
@@ -67,7 +68,12 @@ const runIdSchema = z.object({
 });
 
 const updateReadingRunSchema = z.object({
-  completedPages: z.number().positive().optional(),
+  completedPages: z
+    .number()
+    .int()
+    .positive()
+    .max(FIELD_LIMITS.pages)
+    .optional(),
   finishedAt: z.iso.datetime().optional(),
   abandoned: z.boolean().optional(),
 });

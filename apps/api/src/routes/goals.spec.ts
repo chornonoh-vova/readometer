@@ -412,4 +412,39 @@ describe("/api/goals", () => {
       expect(response.status).toBe(404);
     });
   });
+  describe("field limits", () => {
+    it("rejects a daily minutes target above a day's worth", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/goals", {
+        as: user,
+        body: { id: uuidv7(), type: "daily", metric: "minutes", target: 1_441 },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects a target beyond int4 with 400, not 500", async () => {
+      const user = await makeUser();
+
+      const response = await call("POST", "/api/goals", {
+        as: user,
+        body: { id: uuidv7(), type: "yearly", metric: "books", target: 1e12 },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("rejects an over-long tz query parameter", async () => {
+      const user = await makeUser();
+
+      const response = await call(
+        "GET",
+        `/api/goals/progress?date=2026-05-07&tz=${"x".repeat(65)}`,
+        { as: user },
+      );
+
+      expect(response.status).toBe(400);
+    });
+  });
 });

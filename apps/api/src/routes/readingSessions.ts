@@ -3,6 +3,7 @@ import type { AppEnv } from "../types";
 import z from "zod";
 import { zValidator } from "../lib/validator";
 import { db } from "../lib/database";
+import { FIELD_LIMITS } from "../lib/limits.ts";
 import { sql } from "kysely";
 import { HTTPException } from "hono/http-exception";
 
@@ -34,11 +35,11 @@ readingSessions.get(
 const createReadingSessionSchema = z.object({
   id: z.uuidv7(),
   runId: z.uuidv7(),
-  startPage: z.number().nonnegative(),
-  endPage: z.number().positive(),
+  startPage: z.number().int().nonnegative().max(FIELD_LIMITS.pages),
+  endPage: z.number().int().positive().max(FIELD_LIMITS.pages),
   startTime: z.iso.datetime(),
   endTime: z.iso.datetime(),
-  readTime: z.number().positive(),
+  readTime: z.number().int().positive().max(FIELD_LIMITS.readTimeSeconds),
 });
 
 readingSessions.post(
@@ -110,11 +111,16 @@ const sessionIdSchema = z.object({
 });
 
 const updateReadingSessionSchema = z.object({
-  startPage: z.number().nonnegative().optional(),
-  endPage: z.number().positive().optional(),
+  startPage: z.number().int().nonnegative().max(FIELD_LIMITS.pages).optional(),
+  endPage: z.number().int().positive().max(FIELD_LIMITS.pages).optional(),
   startTime: z.iso.datetime().optional(),
   endTime: z.iso.datetime().optional(),
-  readTime: z.number().positive().optional(),
+  readTime: z
+    .number()
+    .int()
+    .positive()
+    .max(FIELD_LIMITS.readTimeSeconds)
+    .optional(),
   updateRun: z.boolean(),
 });
 

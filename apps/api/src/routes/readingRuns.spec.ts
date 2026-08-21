@@ -294,4 +294,20 @@ describe("/api/reading-runs", () => {
       expect(second.status).toBe(404);
     });
   });
+  it("rejects a completedPages beyond the page limit", async () => {
+    const user = await makeUser();
+    const book = await makeBook({ userId: user.id });
+
+    const response = await call("POST", "/api/reading-runs", {
+      as: user,
+      body: {
+        id: uuidv7(),
+        bookId: book.id,
+        completedPages: 50_001,
+        startedAt: new Date().toISOString(),
+      },
+    });
+
+    expect(response.status).toBe(400);
+  });
 });
