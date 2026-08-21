@@ -11,7 +11,9 @@
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "purge:bots": "bun run scripts/purge-bot-accounts.ts",
+    "sweep:covers": "bun run scripts/sweep-orphan-covers.ts"
   },
   "dependencies": {
     "@better-auth/redis-storage": "catalog:",

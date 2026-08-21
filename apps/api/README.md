@@ -67,6 +67,8 @@ bun run db:generate  # regenerate src/lib/db.d.ts from the live DB
 bun run typecheck    # tsc --noEmit
 bun run lint         # eslint .
 bun run test         # vitest run (needs Docker — testcontainers Postgres)
+bun run purge:bots   # dry run; --apply to delete matched bot accounts
+bun run sweep:covers # dry run; --apply to delete orphaned cover files
 ```
 
 There is deliberately no `build` script; `apps/web` is the only workspace with one.
@@ -79,6 +81,35 @@ is all it takes to add one. Keep schema changes and backfills in separate
 files. In production the `migration` service in `compose.yaml` reuses the api
 image to run `bun run db:migrate latest` once and exit, which is why
 `kysely-ctl` ships in the image rather than being pruned as a dev dependency.
+
+## Reclaiming disk after an abuse incident
+
+1. `bun run purge:bots` — dry run; review the matched accounts. It matches on a
+   blocklisted email domain or a name past `FIELD_LIMITS.userName`, and
+   deliberately _not_ on `emailVerified = false` alone, which would catch real
+   people who have not clicked their link yet.
+2. `bun run purge:bots -- --apply` — delete them. Every FK to `user.id` is
+   `ON DELETE CASCADE`, so books, runs, sessions, goals, sessions and accounts
+   follow.
+3. `bun run sweep:covers -- --apply` — remove cover files with no owning book.
+4. **`DELETE` does not return disk to the OS.** It only marks tuples dead. Run
+   `VACUUM (FULL, ANALYZE) "user"` (and `book`, `"readingSession"`,
+   `"readingRun"`, `session`, `verification`) — an exclusive lock, so it needs a
+   maintenance window and free disk equal to the live data size. `pg_repack`
+   does the same online if the extension is available.
+
+Step 4 is the one that gets missed: without it the space stays allocated and the
+incident looks unresolved.
+
+## Rate limits and quotas
+
+All `POST`/`PUT`/`PATCH`/`DELETE` routes share a per-user ceiling of 100
+requests per hour, returning `429` with `Retry-After`. Separately, each account
+is capped at 1,000 books, 5 reading runs per book, 5,000 reading sessions, and
+100 sessions per run, returning `403`. Constants live in `src/lib/limits.ts`.
+
+Email/password sign-up is restricted to Gmail and iCloud domains
+(`src/lib/accountPolicy.ts`); every other provider goes through Google OAuth.
 
 ## Environment variables
 
