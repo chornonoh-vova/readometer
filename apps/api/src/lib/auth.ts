@@ -4,6 +4,13 @@ import { captcha, lastLoginMethod } from "better-auth/plugins";
 import { redisStorage } from "@better-auth/redis-storage";
 import { redisClient } from "./redis.ts";
 import { publishNotification } from "./notifications.ts";
+import { APIError, createAuthMiddleware } from "better-auth/api";
+import {
+  isAllowedSignupDomain,
+  isDisposableEmailDomain,
+  isNameWithinLimit,
+  truncateUserAgent,
+} from "./accountPolicy.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -107,6 +114,59 @@ export const auth = betterAuth({
           },
         },
       });
+    },
+  },
+
+  // Scoped to /sign-up/email on purpose. A databaseHooks.user.create.before
+  // check would also fire for Google OAuth, where a Workspace user's email is a
+  // custom domain - that would break "Sign up with Google" for exactly the
+  // users the OAuth path exists to serve.
+  //
+  // `ctx.path` is the un-prefixed better-auth path (verified empirically:
+  // /sign-out, /get-session), not /api/auth/....
+  //
+  // The captcha plugin's before-hook runs ahead of this one, so an unsolved
+  // captcha is rejected first (the cheaper rejection). Tests reach this by
+  // sending an x-captcha-response header.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+
+      const email = (ctx.body as { email?: unknown } | undefined)?.email;
+
+      if (typeof email !== "string" || !isAllowedSignupDomain(email)) {
+        throw new APIError("BAD_REQUEST", {
+          message:
+            'Email sign-up is limited to Gmail and iCloud addresses. Use "Sign up with Google" for other providers.',
+        });
+      }
+    }),
+  },
+
+  // The signup path writes `user` before verification, so no route-level quota
+  // can see it. This is the only place these fields can be bounded.
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          if (!isNameWithinLimit(user.name)) {
+            throw new APIError("BAD_REQUEST", { message: "Name is too long" });
+          }
+          if (isDisposableEmailDomain(user.email)) {
+            throw new APIError("BAD_REQUEST", {
+              message: "This email provider is not supported",
+            });
+          }
+          return { data: user };
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => ({
+          data: { ...session, userAgent: truncateUserAgent(session.userAgent) },
+        }),
+      },
     },
   },
 

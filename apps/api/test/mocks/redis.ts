@@ -46,6 +46,15 @@ export const redisMock = {
   },
 };
 
+/**
+ * The store is module-level and shared. Without this reset, better-auth's
+ * rateLimit counters and any other cached state leak between tests, so a spec
+ * inherits budget already spent by whatever ran before it.
+ */
+export function resetRedisMock(): void {
+  store.clear();
+}
+
 vi.mock("../../src/lib/redis", () => ({
   redisClient: redisMock,
 }));

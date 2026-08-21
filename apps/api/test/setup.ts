@@ -8,6 +8,7 @@ import { installBunImagePolyfill } from "./shims/bun-image";
 import { db } from "../src/lib/database";
 import { truncateAll } from "./helpers/truncate";
 import { installAuthMock, setAuthenticatedUser } from "./mocks/auth";
+import { resetRedisMock } from "./mocks/redis";
 import { queueAddMock } from "./mocks/bullmq";
 
 installBunImagePolyfill();
@@ -16,6 +17,7 @@ installAuthMock();
 beforeEach(async () => {
   setAuthenticatedUser(null);
   queueAddMock.mockClear();
+  resetRedisMock();
   await truncateAll(db);
 });
 

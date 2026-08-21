@@ -29,8 +29,10 @@ import { Spinner } from "./ui/spinner";
 import GoogleIcon from "@/assets/icons/google.svg?react";
 import { signInWithGoogle } from "@/lib/google-sign-in";
 
+// `name` mirrors FIELD_LIMITS.userName in the api. This is UX only - the api
+// rejects an over-long name regardless, since a bot never loads this bundle.
 const registerFormSchema = z.object({
-  name: z.string().nonempty(),
+  name: z.string().trim().nonempty().max(128),
   email: z.email(),
   password: z.string().trim().nonempty().min(8).max(128),
 });
@@ -167,9 +169,13 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
                       type="email"
                       aria-invalid={isInvalid}
                       required
-                      placeholder="me@example.com"
+                      placeholder="me@gmail.com"
                       autoComplete="email"
                     />
+                    <FieldDescription>
+                      Gmail and iCloud addresses only. For any other provider,
+                      use Sign up with Google above.
+                    </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}

@@ -104,6 +104,32 @@ describe("RegisterForm", () => {
     });
   });
 
+  it("does not submit a name past the api's length limit", async () => {
+    mockSignUpEmail.mockImplementation(() => {});
+    const user = userEvent.setup();
+    render(<RegisterForm />);
+
+    await user.type(
+      screen.getByRole("textbox", { name: "Name" }),
+      "x".repeat(129),
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Email" }),
+      "alice@gmail.com",
+    );
+    await user.type(screen.getByLabelText("Password"), "securepassword");
+    await user.click(screen.getByRole("button", { name: "Sign up" }));
+
+    expect(mockSignUpEmail).not.toHaveBeenCalled();
+  });
+
+  it("tells the user which email providers are accepted", () => {
+    render(<RegisterForm />);
+    expect(
+      screen.getByText(/Gmail and iCloud addresses only/i),
+    ).toBeInTheDocument();
+  });
+
   it("shows error message when registration fails", async () => {
     mockSignUpEmail.mockImplementation(({ fetchOptions }) =>
       fetchOptions.onError({ error: { message: "Email already in use" } }),
