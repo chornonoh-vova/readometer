@@ -158,3 +158,87 @@ describe("ban gate on session creation", () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe("bot score gate on sign-up", () => {
+  it("rejects a Gmail alias whose local part is dot-fragmented", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "I will destroy YOU",
+        email: "roredmcdonal.d.2335@gmail.com",
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(400);
+    expect(queueAddMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a keyboard-mash name", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "dsjkdsa",
+        email: `mash-${crypto.randomUUID()}@gmail.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(400);
+    expect(queueAddMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a name carrying markup", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: '<a href="https://evil.example">CLICK</a>',
+        email: `markup-${crypto.randomUUID()}@gmail.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(400);
+    expect(queueAddMock).not.toHaveBeenCalled();
+  });
+
+  it("does not tell the caller which signal fired", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "dsjkdsa",
+        email: "rangsimanphu.n.a.s.r.i@gmail.com",
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    const body = (await res.json()) as { message: string };
+    expect(body.message).not.toMatch(/dot|score|mash|keyboard|signal/i);
+  });
+
+  it("accepts a Cyrillic name on an undotted Gmail address", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "Оксана Шевченко",
+        email: `${crypto.randomUUID()}@gmail.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("accepts a dotted iCloud address, where dots are significant", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "Yaroslav Mudryi",
+        email: `mudryi.${crypto.randomUUID()}@icloud.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
+  });
+});

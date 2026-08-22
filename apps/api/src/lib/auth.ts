@@ -12,6 +12,7 @@ import {
   truncateUserAgent,
 } from "./accountPolicy.ts";
 import { isBanned } from "./moderation.ts";
+import { BOT_SCORE_THRESHOLD, scoreSignup } from "./botScore.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -35,6 +36,12 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 if (!googleClientId || !googleClientSecret) {
   throw new Error("Google auth credentials are missing");
 }
+
+/**
+ * Deliberately says nothing about which signal fired. A specific message is a
+ * free oracle for tuning the next batch of names against.
+ */
+const SIGNUP_REJECTED = "This name or email address cannot be used.";
 
 export const auth = betterAuth({
   baseURL,
@@ -138,6 +145,18 @@ export const auth = betterAuth({
             'Email sign-up is limited to Gmail and iCloud addresses. Use "Sign up with Google" for other providers.',
         });
       }
+
+      // Full bot score, threshold and all, applies here and nowhere else. A
+      // real person caught by a fuzzy signal can still get in through "Sign up
+      // with Google", which is the only reason a hard block is affordable.
+      const name = (ctx.body as { name?: unknown } | undefined)?.name;
+
+      if (
+        typeof name === "string" &&
+        scoreSignup(name, email).score >= BOT_SCORE_THRESHOLD
+      ) {
+        throw new APIError("BAD_REQUEST", { message: SIGNUP_REJECTED });
+      }
     }),
   },
 
@@ -154,6 +173,12 @@ export const auth = betterAuth({
             throw new APIError("BAD_REQUEST", {
               message: "This email provider is not supported",
             });
+          }
+          // Only the signals no real name can trip, because this hook also
+          // fires for Google OAuth, where the name comes from a Google profile
+          // and a fuzzy rejection would lock the user out of every route.
+          if (scoreSignup(user.name, user.email).certain) {
+            throw new APIError("BAD_REQUEST", { message: SIGNUP_REJECTED });
           }
           return { data: user };
         },

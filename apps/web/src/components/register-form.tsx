@@ -29,10 +29,25 @@ import { Spinner } from "./ui/spinner";
 import GoogleIcon from "@/assets/icons/google.svg?react";
 import { signInWithGoogle } from "@/lib/google-sign-in";
 
-// `name` mirrors FIELD_LIMITS.userName in the api. This is UX only - the api
-// rejects an over-long name regardless, since a bot never loads this bundle.
+// Letters of any script, plus the punctuation names actually use. Kept in step
+// with NAME_CHARS in the api's botScore.ts.
+const NAME_CHARS = /^[\p{L}\p{M} '.-]+$/u;
+
+// `name` mirrors FIELD_LIMITS.userName and the api's bot-score gate. This is UX
+// only - the api rejects all of it regardless, since a bot never loads this
+// bundle - so the messages here can be specific where the server's cannot.
 const registerFormSchema = z.object({
-  name: z.string().trim().nonempty().max(128),
+  name: z
+    .string()
+    .trim()
+    .nonempty()
+    .max(128)
+    .refine((name) => NAME_CHARS.test(name), {
+      message: "Use letters only - no symbols, digits, or email addresses.",
+    })
+    .refine((name) => name.split(/\s+/).length <= 4, {
+      message: "Use at most four words.",
+    }),
   email: z.email(),
   password: z.string().trim().nonempty().min(8).max(128),
 });

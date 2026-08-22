@@ -171,6 +171,49 @@ describe("RegisterForm", () => {
     expect(mockSignUpEmail).not.toHaveBeenCalled();
   });
 
+  // Mirrors the api's bot-score gate. UX only: a bot never loads this bundle,
+  // so the server rejects these regardless.
+  describe("name shape", () => {
+    async function submitName(name: string) {
+      mockSignUpEmail.mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(<RegisterForm />);
+
+      await user.type(screen.getByRole("textbox", { name: "Name" }), name);
+      await user.type(
+        screen.getByRole("textbox", { name: "Email" }),
+        "alice@gmail.com",
+      );
+      await user.type(screen.getByLabelText("Password"), "securepassword");
+      await user.click(screen.getByRole("button", { name: "Sign up" }));
+    }
+
+    it("does not submit a name carrying markup", async () => {
+      await submitName('<a href="https://evil.example">CLICK</a>');
+      expect(mockSignUpEmail).not.toHaveBeenCalled();
+    });
+
+    it("does not submit a name containing an email address", async () => {
+      await submitName("wewewewewehongta.m.mit12.4.5@gmail.com");
+      expect(mockSignUpEmail).not.toHaveBeenCalled();
+    });
+
+    it("does not submit a name of more than four words", async () => {
+      await submitName("one two three four five");
+      expect(mockSignUpEmail).not.toHaveBeenCalled();
+    });
+
+    it("submits a Cyrillic name", async () => {
+      await submitName("Оксана Шевченко");
+      expect(mockSignUpEmail).toHaveBeenCalled();
+    });
+
+    it("submits a name with a hyphen and an apostrophe", async () => {
+      await submitName("Anne-Marie O'Brien");
+      expect(mockSignUpEmail).toHaveBeenCalled();
+    });
+  });
+
   it("renders a Sign up with Google button", () => {
     render(<RegisterForm />);
     expect(
