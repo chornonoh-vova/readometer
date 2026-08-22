@@ -15,7 +15,24 @@ describe("requireAuth", () => {
     const response = await call("GET", "/api/me", { as: user });
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ message: "Email not verified" });
+    expect(await response.json()).toEqual({ message: "Forbidden" });
+  });
+
+  it("returns a generic 403 when the caller is banned", async () => {
+    const user = await makeUser({ banned: true });
+
+    const response = await call("GET", "/api/me", { as: user });
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ message: "Forbidden" });
+  });
+
+  it("is indistinguishable from an unverified rejection", async () => {
+    const user = await makeUser({ banned: true, emailVerified: false });
+
+    const response = await call("GET", "/api/me", { as: user });
+
+    expect(await response.json()).toEqual({ message: "Forbidden" });
   });
 
   it("lets a verified caller through", async () => {

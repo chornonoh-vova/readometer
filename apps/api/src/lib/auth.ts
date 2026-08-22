@@ -11,6 +11,7 @@ import {
   isNameWithinLimit,
   truncateUserAgent,
 } from "./accountPolicy.ts";
+import { isBanned } from "./moderation.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -55,14 +56,11 @@ export const auth = betterAuth({
 
   trustedOrigins,
 
+  // No cookieCache: it put a 10-minute floor under how fast a ban takes effect.
   session: {
     expiresIn: 60 * 60 * 24 * 14, // 14 days
     updateAge: 60 * 60 * 24 * 2, // 2 days
     deferSessionRefresh: true,
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 10, // 10 minutes
-    },
   },
 
   rateLimit: {
@@ -98,7 +96,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     // Required, not cosmetic: better-auth only calls setSessionCookie when this
-    // is set, so cookieCache would keep serving a stale emailVerified: false.
+    // is set, so without it a just-verified user keeps the session they had.
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await publishNotification({
@@ -161,11 +159,21 @@ export const auth = betterAuth({
         },
       },
     },
+    // Every sign-in path funnels through here. Fires even though sessions never
+    // reach Postgres: create.before runs ahead of the secondary-storage write.
     session: {
       create: {
-        before: async (session) => ({
-          data: { ...session, userAgent: truncateUserAgent(session.userAgent) },
-        }),
+        before: async (session) => {
+          if (await isBanned(session.userId)) {
+            throw new APIError("FORBIDDEN", { message: "Forbidden" });
+          }
+          return {
+            data: {
+              ...session,
+              userAgent: truncateUserAgent(session.userAgent),
+            },
+          };
+        },
       },
     },
   },

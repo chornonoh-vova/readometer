@@ -1,4 +1,5 @@
-import { DISPOSABLE_EMAIL_DOMAINS } from "./disposableDomains.ts";
+import { isDisposableEmail } from "disposable-email-domains-js";
+import { EXTRA_DISPOSABLE_EMAIL_DOMAINS } from "./disposableDomains.ts";
 import { FIELD_LIMITS } from "./limits.ts";
 
 /** The part after the final `@`, normalised for comparison. */
@@ -10,7 +11,10 @@ export function emailDomain(email: string): string {
 }
 
 export function isDisposableEmailDomain(email: string): boolean {
-  return DISPOSABLE_EMAIL_DOMAINS.has(emailDomain(email));
+  return (
+    isDisposableEmail(email) ||
+    EXTRA_DISPOSABLE_EMAIL_DOMAINS.has(emailDomain(email))
+  );
 }
 
 /**

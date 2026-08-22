@@ -78,18 +78,8 @@ export interface ReadingSession {
   userId: string;
 }
 
-export interface Session {
-  createdAt: Generated<Timestamp>;
-  expiresAt: Timestamp;
-  id: string;
-  ipAddress: string | null;
-  token: string;
-  updatedAt: Generated<Timestamp>;
-  userAgent: string | null;
-  userId: string;
-}
-
 export interface User {
+  banned: Generated<boolean>;
   createdAt: Generated<Timestamp>;
   email: string;
   emailVerified: boolean;
@@ -99,22 +89,11 @@ export interface User {
   updatedAt: Generated<Timestamp>;
 }
 
-export interface Verification {
-  createdAt: Generated<Timestamp>;
-  expiresAt: Timestamp;
-  id: string;
-  identifier: string;
-  updatedAt: Generated<Timestamp>;
-  value: string;
-}
-
 export interface DB {
   account: Account;
   book: Book;
   goal: Goal;
   readingRun: ReadingRun;
   readingSession: ReadingSession;
-  session: Session;
   user: User;
-  verification: Verification;
 }

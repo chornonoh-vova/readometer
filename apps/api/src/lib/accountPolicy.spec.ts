@@ -31,6 +31,13 @@ describe("isDisposableEmailDomain", () => {
     expect(isDisposableEmailDomain("bot@KOLSEA.COM")).toBe(true);
   });
 
+  it.each(["bot@mailcatch.com", "bot@grr.la", "bot@tempmailo.com"])(
+    "blocks %s from the packaged blocklist",
+    (email) => {
+      expect(isDisposableEmailDomain(email)).toBe(true);
+    },
+  );
+
   it("allows ordinary providers", () => {
     expect(isDisposableEmailDomain("real.person@gmail.com")).toBe(false);
     expect(isDisposableEmailDomain("real.person@proton.me")).toBe(false);

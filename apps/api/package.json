@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "ban:user": "bun run scripts/ban-user.ts",
     "purge:bots": "bun run scripts/purge-bot-accounts.ts",
+    "purge:banned": "bun run scripts/purge-banned-data.ts",
     "sweep:covers": "bun run scripts/sweep-orphan-covers.ts"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "@hono/zod-validator": "^0.9.0",
     "better-auth": "catalog:",
     "bullmq": "catalog:",
+    "disposable-email-domains-js": "^1.25.0",
     "hono": "^4.13.1",
     "ioredis": "catalog:",
     "isbn": "workspace:*",

@@ -6,9 +6,8 @@ export async function truncateAll(db: Kysely<DB>) {
     "readingSession",
     "readingRun",
     "book",
-    "session",
+    "goal",
     "account",
-    "verification",
     "user"
     RESTART IDENTITY CASCADE`.execute(db);
 }

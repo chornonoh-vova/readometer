@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { call } from "../../test/helpers/request";
 import { makeUser } from "../../test/helpers/factories";
 import { queueAddMock } from "../../test/mocks/bullmq";
+import { db } from "./database";
 
 const CAPTCHA_HEADERS = { "x-captcha-response": "test-response" };
 
@@ -110,5 +111,50 @@ describe("auth hooks -> notifications", () => {
 
     expect(res.status).toBe(200);
     expect(queueAddMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("ban gate on session creation", () => {
+  async function signUpVerified(overrides: { banned?: boolean } = {}) {
+    const email = `banned-${crypto.randomUUID()}@gmail.com`;
+    const password = "correct-horse-battery-staple";
+
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: { name: "Reader", email, password },
+      headers: CAPTCHA_HEADERS,
+    });
+    expect(res.status).toBe(200);
+
+    await db
+      .updateTable("user")
+      .set({ emailVerified: true, banned: overrides.banned ?? false })
+      .where("email", "=", email)
+      .execute();
+
+    return { email, password };
+  }
+
+  it("refuses to create a session for a banned user", async () => {
+    const { email, password } = await signUpVerified({ banned: true });
+
+    const res = await call("POST", "/api/auth/sign-in/email", {
+      body: { email, password },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(403);
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toBe("Forbidden");
+  });
+
+  it("still lets an unbanned verified user sign in", async () => {
+    const { email, password } = await signUpVerified({ banned: false });
+
+    const res = await call("POST", "/api/auth/sign-in/email", {
+      body: { email, password },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
   });
 });

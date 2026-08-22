@@ -7,6 +7,7 @@ export type TestUser = {
   email: string;
   name: string;
   emailVerified: boolean;
+  banned: boolean;
   image: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -21,6 +22,7 @@ export async function makeUser(
     email: overrides.email ?? `u-${randomUUID()}@example.com`,
     name: overrides.name ?? "Test User",
     emailVerified: overrides.emailVerified ?? true,
+    banned: overrides.banned ?? false,
     image: overrides.image ?? null,
     createdAt: overrides.createdAt ?? now,
     updatedAt: overrides.updatedAt ?? now,

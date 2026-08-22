@@ -1,8 +1,6 @@
 import { start } from "./app";
-import { db } from "./lib/database";
-import { redisClient } from "./lib/redis";
-import { connection, notificationsQueue } from "./lib/notifications";
-import { closeRedisClient, onShutdown } from "./lib/shutdown";
+import { resourceClosers } from "./lib/resources";
+import { onShutdown } from "./lib/shutdown";
 
 const server = start();
 
@@ -12,11 +10,5 @@ onShutdown([
   // `stop()` without arguments leaves in-flight requests alone and resolves once
   // they have drained
   { name: "http", close: () => server.stop() },
-  // the queue must go before its connection: BullMQ treats an injected
-  // connection as shared and never closes it itself
-  { name: "notifications-queue", close: () => notificationsQueue.close() },
-  { name: "notifications-redis", close: () => closeRedisClient(connection) },
-  { name: "auth-redis", close: () => closeRedisClient(redisClient) },
-  // ends the pg pool that Better Auth shares
-  { name: "database", close: () => db.destroy() },
+  ...resourceClosers,
 ]);
