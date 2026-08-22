@@ -1,6 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   emailDomain,
+  isEmailSignupEnabled,
+  parseEmailSignupEnabled,
   isAllowedSignupDomain,
   isDisposableEmailDomain,
   isNameWithinLimit,
@@ -109,5 +111,45 @@ describe("truncateUserAgent", () => {
   it("maps null and undefined to null", () => {
     expect(truncateUserAgent(null)).toBeNull();
     expect(truncateUserAgent(undefined)).toBeNull();
+  });
+});
+
+describe("parseEmailSignupEnabled", () => {
+  it.each([undefined, "", "   "])("defaults to enabled for %p", (raw) => {
+    expect(parseEmailSignupEnabled(raw)).toBe(true);
+  });
+
+  it.each(["true", "TRUE", " True ", "1"])("reads %p as enabled", (raw) => {
+    expect(parseEmailSignupEnabled(raw)).toBe(true);
+  });
+
+  it.each(["false", "FALSE", " False ", "0"])("reads %p as disabled", (raw) => {
+    expect(parseEmailSignupEnabled(raw)).toBe(false);
+  });
+
+  // A kill switch that silently stays open because someone wrote "no" is worse
+  // than one that refuses to start.
+  it.each(["no", "yes", "off", "on", "disabled", "maybe"])(
+    "throws rather than guessing at %p",
+    (raw) => {
+      expect(() => parseEmailSignupEnabled(raw)).toThrow(
+        /EMAIL_SIGNUP_ENABLED/,
+      );
+    },
+  );
+});
+
+describe("isEmailSignupEnabled", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("is enabled when the variable is unset", () => {
+    expect(isEmailSignupEnabled()).toBe(true);
+  });
+
+  it("follows the variable", () => {
+    vi.stubEnv("EMAIL_SIGNUP_ENABLED", "false");
+    expect(isEmailSignupEnabled()).toBe(false);
   });
 });

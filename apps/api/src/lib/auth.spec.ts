@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { call } from "../../test/helpers/request";
 import { makeUser } from "../../test/helpers/factories";
 import { queueAddMock } from "../../test/mocks/bullmq";
@@ -234,6 +234,86 @@ describe("bot score gate on sign-up", () => {
       body: {
         name: "Yaroslav Mudryi",
         email: `mudryi.${crypto.randomUUID()}@icloud.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
+  });
+});
+
+describe("email sign-up kill switch", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("refuses email sign-up when disabled", async () => {
+    vi.stubEnv("EMAIL_SIGNUP_ENABLED", "false");
+
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "Jane Reader",
+        email: `jane-${crypto.randomUUID()}@gmail.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(403);
+    expect(queueAddMock).not.toHaveBeenCalled();
+  });
+
+  it("points the caller at Google, which is still open", async () => {
+    vi.stubEnv("EMAIL_SIGNUP_ENABLED", "false");
+
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "Jane Reader",
+        email: `jane-${crypto.randomUUID()}@gmail.com`,
+        password: "correct-horse-battery-staple",
+      },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    const body = (await res.json()) as { message: string };
+    expect(body.message).toMatch(/Google/);
+  });
+
+  // The switch closes the door to new accounts, not to the people who already
+  // have one. Sign-in and password reset run on different paths and must not
+  // notice it at all.
+  it("still lets an existing verified user sign in", async () => {
+    const email = `existing-${crypto.randomUUID()}@gmail.com`;
+    const password = "correct-horse-battery-staple";
+
+    const signUp = await call("POST", "/api/auth/sign-up/email", {
+      body: { name: "Reader", email, password },
+      headers: CAPTCHA_HEADERS,
+    });
+    expect(signUp.status).toBe(200);
+
+    await db
+      .updateTable("user")
+      .set({ emailVerified: true })
+      .where("email", "=", email)
+      .execute();
+
+    vi.stubEnv("EMAIL_SIGNUP_ENABLED", "false");
+
+    const res = await call("POST", "/api/auth/sign-in/email", {
+      body: { email, password },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("allows email sign-up when the variable is unset", async () => {
+    const res = await call("POST", "/api/auth/sign-up/email", {
+      body: {
+        name: "Jane Reader",
+        email: `jane-${crypto.randomUUID()}@gmail.com`,
         password: "correct-horse-battery-staple",
       },
       headers: CAPTCHA_HEADERS,

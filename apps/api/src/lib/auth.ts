@@ -8,6 +8,7 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import {
   isAllowedSignupDomain,
   isDisposableEmailDomain,
+  isEmailSignupEnabled,
   isNameWithinLimit,
   truncateUserAgent,
 } from "./accountPolicy.ts";
@@ -136,6 +137,15 @@ export const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path !== "/sign-up/email") return;
+
+      // The kill switch. Checked before anything else on this path, and only on
+      // this path: /sign-in/email and the password-reset routes stay open.
+      if (!isEmailSignupEnabled()) {
+        throw new APIError("FORBIDDEN", {
+          message:
+            'Email sign-up is temporarily unavailable. Use "Sign up with Google" instead.',
+        });
+      }
 
       const email = (ctx.body as { email?: unknown } | undefined)?.email;
 
