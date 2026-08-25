@@ -3,6 +3,17 @@ import { mkdtempSync, rmSync, promises as fsPromises } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileMigrationProvider, Migrator } from "kysely/migration";
+import { exportPKCS8, generateKeyPair } from "jose";
+
+/**
+ * `auth.ts` signs a real client secret at import time, so a placeholder string
+ * fails `importPKCS8` and takes every spec in the suite down with it. Escaped
+ * newlines because that is the spelling a real deployment provides.
+ */
+async function appleTestPrivateKey(): Promise<string> {
+  const { privateKey } = await generateKeyPair("ES256", { extractable: true });
+  return (await exportPKCS8(privateKey)).replaceAll("\n", "\\n");
+}
 
 export default async function globalSetup() {
   const container = await new PostgreSqlContainer("postgres:18.1").start();
@@ -16,6 +27,11 @@ export default async function globalSetup() {
   process.env.TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA";
   process.env.GOOGLE_CLIENT_ID = "test-google-client-id";
   process.env.GOOGLE_CLIENT_SECRET = "test-google-client-secret";
+  process.env.APPLE_CLIENT_ID = "app.readometer.test";
+  process.env.APPLE_TEAM_ID = "TESTTEAMID";
+  process.env.APPLE_KEY_ID = "TESTKEYID0";
+  process.env.APPLE_PRIVATE_KEY = await appleTestPrivateKey();
+  process.env.APPLE_APP_BUNDLE_IDENTIFIER = "app.readometer.test.ios";
   process.env.NODE_ENV = "test";
   process.env.TZ = "UTC";
 

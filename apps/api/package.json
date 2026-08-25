@@ -26,6 +26,7 @@
     "hono": "^4.13.3",
     "ioredis": "catalog:",
     "isbn": "workspace:*",
+    "jose": "^6.2.10",
     "kysely": "^0.29.5",
     "notification-events": "workspace:*",
     "pg": "^8.23.0",

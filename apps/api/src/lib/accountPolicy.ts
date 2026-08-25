@@ -24,7 +24,8 @@ export function isDisposableEmailDomain(email: string): boolean {
  * Apple domains and older accounts often have only a legacy one; allowing
  * `icloud.com` alone would silently reject real iCloud users.
  *
- * Everyone else signs in with Google. Enforced ONLY on `/sign-up/email` - see
+ * Everyone else signs in with Google or Apple. Enforced ONLY on
+ * `/sign-up/email` - see
  * the note in auth.ts about why this cannot live in a `user.create` hook.
  */
 export const ALLOWED_SIGNUP_DOMAINS: ReadonlySet<string> = new Set([
@@ -60,7 +61,7 @@ export function parseEmailSignupEnabled(raw: string | undefined): boolean {
 
 /**
  * Last resort for an ongoing campaign: shuts the email sign-up route entirely,
- * leaving Google as the only way to make an account.
+ * leaving the OAuth providers as the only way to make an account.
  *
  * Read per request rather than at startup so tests can flip it, and so the
  * blast radius of a bad value is one 500 on the sign-up route rather than a

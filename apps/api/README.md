@@ -11,8 +11,9 @@ session-based authentication.
 - **HTTP**: Hono (`cors`, `compress`, `logger`, `request-id`)
 - **Validation**: Zod via `@hono/zod-validator`
 - **Database**: PostgreSQL + Kysely + `kysely-ctl` for migrations
-- **Auth**: Better Auth (email + password) with Cloudflare Turnstile
-  captcha plugin; cookies are prefixed `readometer`
+- **Auth**: Better Auth (email + password, plus Google and Apple OAuth)
+  with Cloudflare Turnstile captcha plugin; cookies are prefixed
+  `readometer`
 - **Images**: Sharp — cover uploads are stored as `sm` (200 px) and `md`
   (400 px) WebP variants, plus a dominant-colour hex for placeholders
 
@@ -109,24 +110,53 @@ is capped at 1,000 books, 5 reading runs per book, 5,000 reading sessions, and
 100 sessions per run, returning `403`. Constants live in `src/lib/limits.ts`.
 
 Email/password sign-up is restricted to Gmail and iCloud domains
-(`src/lib/accountPolicy.ts`); every other provider goes through Google OAuth.
+(`src/lib/accountPolicy.ts`); every other provider goes through Google or
+Apple OAuth.
 
 ## Environment variables
 
 See `sample.env` for a working development configuration.
 
-| Variable               | Required | Description                                          |
-| ---------------------- | -------- | ---------------------------------------------------- |
-| `PORT`                 | no       | Defaults to `3000`                                   |
-| `NODE_ENV`             | no       | `development` enables verbose route logging          |
-| `DATABASE_URL`         | yes      | Postgres connection string                           |
-| `BETTER_AUTH_SECRET`   | yes      | Session signing secret                               |
-| `BETTER_AUTH_URL`      | yes      | Public URL of the deployment                         |
-| `TRUSTED_ORIGINS`      | no       | Comma-separated CORS allowlist (defaults to above)   |
-| `TURNSTILE_SECRET_KEY` | yes      | Cloudflare Turnstile secret                          |
-| `GOOGLE_CLIENT_ID`     | yes      | Google OAuth client ID                               |
-| `GOOGLE_CLIENT_SECRET` | yes      | Google OAuth client secret                           |
-| `STORAGE_PATH`         | yes      | Directory for cover images (`sm`/`md` WebP variants) |
+### Sign in with Apple
+
+Apple is the one provider with no static client secret. `src/lib/appleAuth.ts`
+signs an ES256 JWT from `APPLE_PRIVATE_KEY` and hands it to Better Auth as the
+`apple` provider's `clientSecret`. Three things about that are easy to trip on:
+
+- **It is signed once.** Better Auth resolves a function-valued social provider
+  when the auth context is built, then caches it for the life of the process, so
+  the secret is minted at startup and never refreshed. That is why its TTL is
+  180 days (Apple's ceiling is six months) rather than a few minutes.
+- **The private key cannot contain literal newlines.** Bun's `.env` reader keeps
+  `\n` escaped even inside double quotes, so `importPKCS8` would reject a
+  "properly" multi-line value. Keep it on one line with `\n` escapes;
+  `normalizeApplePrivateKey` accepts either spelling.
+- **Apple will not call back to localhost.** The registered return URL must be
+  `<BETTER_AUTH_URL>/api/auth/callback/apple` over https, and Apple rejects
+  `http://` and `localhost`. `bun run dev` therefore cannot exercise the Apple
+  button; use an https tunnel or a deployed environment.
+
+Apple posts the callback as a `form_post` from its own host, which is why
+`https://appleid.apple.com` is appended to `trustedOrigins` in `src/lib/auth.ts` —
+without it Better Auth's origin check rejects the callback as CSRF.
+
+| Variable                      | Required | Description                                          |
+| ----------------------------- | -------- | ---------------------------------------------------- |
+| `PORT`                        | no       | Defaults to `3000`                                   |
+| `NODE_ENV`                    | no       | `development` enables verbose route logging          |
+| `DATABASE_URL`                | yes      | Postgres connection string                           |
+| `BETTER_AUTH_SECRET`          | yes      | Session signing secret                               |
+| `BETTER_AUTH_URL`             | yes      | Public URL of the deployment                         |
+| `TRUSTED_ORIGINS`             | no       | Comma-separated CORS allowlist (defaults to above)   |
+| `TURNSTILE_SECRET_KEY`        | yes      | Cloudflare Turnstile secret                          |
+| `GOOGLE_CLIENT_ID`            | yes      | Google OAuth client ID                               |
+| `GOOGLE_CLIENT_SECRET`        | yes      | Google OAuth client secret                           |
+| `APPLE_CLIENT_ID`             | yes      | Apple **Services ID** — not the App ID               |
+| `APPLE_TEAM_ID`               | yes      | Apple team ID (10 chars)                             |
+| `APPLE_KEY_ID`                | yes      | Key ID of the "Sign in with Apple" `.p8`             |
+| `APPLE_PRIVATE_KEY`           | yes      | The `.p8` PKCS#8 PEM, newlines escaped as `\n`       |
+| `APPLE_APP_BUNDLE_IDENTIFIER` | yes      | Native iOS bundle ID — unused by the web flow        |
+| `STORAGE_PATH`                | yes      | Directory for cover images (`sm`/`md` WebP variants) |
 
 ## Docker
 

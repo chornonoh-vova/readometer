@@ -20,6 +20,10 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 
+vi.mock("@/assets/icons/apple.svg?react", () => ({
+  default: () => null,
+}));
+
 vi.mock("@/assets/icons/google.svg?react", () => ({
   default: () => null,
 }));
@@ -233,5 +237,34 @@ describe("RegisterForm", () => {
     expect(mockSignInSocial).toHaveBeenCalledWith({
       provider: "google",
     });
+  });
+
+  it("renders a Sign up with Apple button", () => {
+    render(<RegisterForm />);
+    expect(
+      screen.getByRole("button", { name: /sign up with apple/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls authClient.signIn.social with apple provider", async () => {
+    mockSignInSocial.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<RegisterForm />);
+
+    await user.click(
+      screen.getByRole("button", { name: /sign up with apple/i }),
+    );
+
+    expect(mockSignInSocial).toHaveBeenCalledWith({
+      provider: "apple",
+    });
+  });
+
+  it("points users on other providers at both OAuth buttons", () => {
+    render(<RegisterForm />);
+    const hint = screen.getByText(/Gmail and iCloud addresses only/i);
+
+    expect(hint).toHaveTextContent(/Sign up with Google/i);
+    expect(hint).toHaveTextContent(/Sign up with Apple/i);
   });
 });

@@ -150,22 +150,31 @@ Use `git commit --no-verify` to bypass both in a pinch.
 
 Root `.env` (consumed by `dev.compose.yaml` / `compose.yaml`):
 
-| Variable               | Purpose                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------ |
-| `BETTER_AUTH_SECRET`   | Better Auth session signing secret (API)                                                         |
-| `DATABASE_URL`         | Postgres connection string (migration + API)                                                     |
-| `REDIS_URL`            | Dragonfly connection string — the shared notification queue, so API and notifications must agree |
-| `REDIS_PASSWORD`       | Dragonfly's own password (`DFLY_requirepass`) and healthcheck                                    |
-| `TURNSTILE_SITE_KEY`   | Cloudflare Turnstile site key (web build)                                                        |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret (API)                                                                |
-| `GOOGLE_CLIENT_ID`     | Google OAuth client ID (API)                                                                     |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (API)                                                                 |
-| `SMTP_HOST`            | SMTP relay host (notifications)                                                                  |
-| `SMTP_PORT`            | SMTP relay port (notifications)                                                                  |
-| `SMTP_SECURE`          | Implicit TLS — `false` in both dev and production                                                |
-| `SMTP_USER`            | SMTP username — leave unset against local Mailpit                                                |
-| `SMTP_PASS`            | SMTP password — leave unset against local Mailpit                                                |
-| `MAIL_FROM`            | From address on outgoing mail (notifications)                                                    |
+| Variable                      | Purpose                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| `BETTER_AUTH_SECRET`          | Better Auth session signing secret (API)                                                         |
+| `DATABASE_URL`                | Postgres connection string (migration + API)                                                     |
+| `REDIS_URL`                   | Dragonfly connection string — the shared notification queue, so API and notifications must agree |
+| `REDIS_PASSWORD`              | Dragonfly's own password (`DFLY_requirepass`) and healthcheck                                    |
+| `TURNSTILE_SITE_KEY`          | Cloudflare Turnstile site key (web build)                                                        |
+| `TURNSTILE_SECRET_KEY`        | Cloudflare Turnstile secret (API)                                                                |
+| `GOOGLE_CLIENT_ID`            | Google OAuth client ID (API)                                                                     |
+| `GOOGLE_CLIENT_SECRET`        | Google OAuth client secret (API)                                                                 |
+| `APPLE_CLIENT_ID`             | Apple Services ID — not the App ID (API)                                                         |
+| `APPLE_TEAM_ID`               | Apple team ID (API)                                                                              |
+| `APPLE_KEY_ID`                | Key ID of the "Sign in with Apple" `.p8` (API)                                                   |
+| `APPLE_PRIVATE_KEY`           | The `.p8` PKCS#8 PEM, on one line with newlines escaped as `\n` (API)                            |
+| `APPLE_APP_BUNDLE_IDENTIFIER` | Native iOS bundle ID; required to boot but unused by the web flow (API)                          |
+| `SMTP_HOST`                   | SMTP relay host (notifications)                                                                  |
+| `SMTP_PORT`                   | SMTP relay port (notifications)                                                                  |
+| `SMTP_SECURE`                 | Implicit TLS — `false` in both dev and production                                                |
+| `SMTP_USER`                   | SMTP username — leave unset against local Mailpit                                                |
+| `SMTP_PASS`                   | SMTP password — leave unset against local Mailpit                                                |
+| `MAIL_FROM`                   | From address on outgoing mail (notifications)                                                    |
+
+Sign in with Apple needs an https return URL — Apple rejects `localhost` — so
+that button only works against a tunnel or a deployed environment. See
+`apps/api/README.md` for the details.
 
 Locally the SMTP block points at Mailpit (`SMTP_HOST=mailpit`, `SMTP_PORT=1025`, no
 credentials); in production it's the Resend relay. See `apps/api/sample.env`,

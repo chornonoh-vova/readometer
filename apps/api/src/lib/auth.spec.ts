@@ -3,6 +3,9 @@ import { call } from "../../test/helpers/request";
 import { makeUser } from "../../test/helpers/factories";
 import { queueAddMock } from "../../test/mocks/bullmq";
 import { db } from "./database";
+import { decodeJwt, decodeProtectedHeader } from "jose";
+import { auth, trustedOrigins } from "./auth";
+import { APPLE_ORIGIN } from "./appleAuth";
 
 const CAPTCHA_HEADERS = { "x-captcha-response": "test-response" };
 
@@ -320,5 +323,61 @@ describe("email sign-up kill switch", () => {
     });
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("Sign in with Apple", () => {
+  async function appleProvider() {
+    const ctx = await auth.$context;
+    return ctx.socialProviders.find((provider) => provider.id === "apple");
+  }
+
+  // A bad key rejects the context promise rather than failing at import, which
+  // 500s every auth route at once.
+  it("resolves the provider when the auth context is built", async () => {
+    await expect(appleProvider()).resolves.toBeDefined();
+  });
+
+  it("trusts the Apple origin the form_post callback arrives from", async () => {
+    expect(trustedOrigins).toContain(APPLE_ORIGIN);
+  });
+
+  it("keeps the configured origins alongside it", async () => {
+    expect(trustedOrigins).toContain("http://localhost:3000");
+  });
+
+  it("registers a signed ES256 client secret rather than a literal", async () => {
+    const provider = await appleProvider();
+    const clientSecret = (provider?.options as { clientSecret?: unknown })
+      .clientSecret;
+
+    expect(typeof clientSecret).toBe("string");
+
+    const jwt = clientSecret as string;
+    expect(decodeProtectedHeader(jwt).alg).toBe("ES256");
+
+    const payload = decodeJwt(jwt);
+    expect(payload.iss).toBe(process.env.APPLE_TEAM_ID);
+    expect(payload.sub).toBe(process.env.APPLE_CLIENT_ID);
+    expect(payload.aud).toBe(APPLE_ORIGIN);
+  });
+
+  it("sends the browser to Apple with form_post and the name/email scopes", async () => {
+    const res = await call("POST", "/api/auth/sign-in/social", {
+      body: { provider: "apple", callbackURL: "/" },
+      headers: CAPTCHA_HEADERS,
+    });
+
+    expect(res.status).toBe(200);
+
+    const body = (await res.json()) as { url?: string };
+    const url = new URL(body.url!);
+
+    expect(url.origin).toBe(APPLE_ORIGIN);
+    expect(url.searchParams.get("client_id")).toBe(process.env.APPLE_CLIENT_ID);
+    // Apple drops name and email silently under the default query response_mode.
+    expect(url.searchParams.get("response_mode")).toBe("form_post");
+    expect(url.searchParams.get("scope")).toContain("email");
+    expect(url.searchParams.get("scope")).toContain("name");
   });
 });

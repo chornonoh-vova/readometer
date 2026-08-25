@@ -27,8 +27,9 @@ import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Spinner } from "./ui/spinner";
 
+import AppleIcon from "@/assets/icons/apple.svg?react";
 import GoogleIcon from "@/assets/icons/google.svg?react";
-import { signInWithGoogle } from "@/lib/google-sign-in";
+import { signInWithSocial } from "@/lib/social-sign-in";
 import { Badge } from "./ui/badge";
 
 const loginFormSchema = z.object({
@@ -102,7 +103,10 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
   });
 
   const handleGoogleSignIn = () =>
-    signInWithGoogle(setErrorMessage, setLoading);
+    signInWithSocial("google", setErrorMessage, setLoading);
+
+  const handleAppleSignIn = () =>
+    signInWithSocial("apple", setErrorMessage, setLoading);
 
   return (
     <form
@@ -137,6 +141,18 @@ export function LoginForm({ redirect, className, ...props }: LoginFormProps) {
               <GoogleIcon />
               Sign in with Google
               <LastUsedBadge show={lastMethod === "google"} />
+            </Button>
+
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full relative"
+              disabled={loading}
+              onClick={handleAppleSignIn}
+            >
+              <AppleIcon />
+              Sign in with Apple
+              <LastUsedBadge show={lastMethod === "apple"} />
             </Button>
 
             <FieldSeparator>Or continue with</FieldSeparator>

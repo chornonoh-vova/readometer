@@ -26,8 +26,9 @@ import { useForm } from "@tanstack/react-form";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Spinner } from "./ui/spinner";
 
+import AppleIcon from "@/assets/icons/apple.svg?react";
 import GoogleIcon from "@/assets/icons/google.svg?react";
-import { signInWithGoogle } from "@/lib/google-sign-in";
+import { signInWithSocial } from "@/lib/social-sign-in";
 
 // Letters of any script, plus the punctuation names actually use. Kept in step
 // with NAME_CHARS in the api's botScore.ts.
@@ -99,7 +100,10 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
   });
 
   const handleGoogleSignUp = () =>
-    signInWithGoogle(setErrorMessage, setLoading);
+    signInWithSocial("google", setErrorMessage, setLoading);
+
+  const handleAppleSignUp = () =>
+    signInWithSocial("apple", setErrorMessage, setLoading);
 
   return (
     <form
@@ -133,6 +137,17 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
             >
               <GoogleIcon />
               Sign up with Google
+            </Button>
+
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full"
+              disabled={loading}
+              onClick={handleAppleSignUp}
+            >
+              <AppleIcon />
+              Sign up with Apple
             </Button>
 
             <FieldSeparator>Or continue with</FieldSeparator>
@@ -189,7 +204,7 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
                     />
                     <FieldDescription>
                       Gmail and iCloud addresses only. For any other provider,
-                      use Sign up with Google above.
+                      use Sign up with Google or Sign up with Apple above.
                     </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

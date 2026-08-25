@@ -25,6 +25,10 @@ vi.mock("@/assets/icons/google.svg?react", () => ({
   default: () => null,
 }));
 
+vi.mock("@/assets/icons/apple.svg?react", () => ({
+  default: () => null,
+}));
+
 vi.mock("@marsidev/react-turnstile", () => ({
   Turnstile: ({ onSuccess }: { onSuccess: (token: string) => void }) => (
     <button type="button" onClick={() => onSuccess("test-token")}>
@@ -213,6 +217,44 @@ describe("LoginForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders a Sign in with Apple button", () => {
+    render(<LoginForm redirect="/" />);
+    expect(
+      screen.getByRole("button", { name: /sign in with apple/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls authClient.signIn.social with apple provider", async () => {
+    mockSignInSocial.mockResolvedValue({ error: null });
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/dashboard" />);
+
+    await user.click(
+      screen.getByRole("button", { name: /sign in with apple/i }),
+    );
+
+    expect(mockSignInSocial).toHaveBeenCalledWith({
+      provider: "apple",
+    });
+  });
+
+  it("disables both social buttons while a sign-in is in flight", async () => {
+    mockSignInSocial.mockReturnValue(new Promise(() => {}));
+    const user = userEvent.setup();
+    render(<LoginForm redirect="/" />);
+
+    await user.click(
+      screen.getByRole("button", { name: /sign in with apple/i }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: /sign in with apple/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /sign in with google/i }),
+    ).toBeDisabled();
+  });
+
   it("calls authClient.signIn.social with google provider", async () => {
     mockSignInSocial.mockResolvedValue({ error: null });
     const user = userEvent.setup();
@@ -238,16 +280,21 @@ describe("LoginForm", () => {
     {
       method: "google",
       lastUsedName: /sign in with google/i,
-      otherName: "Sign in with email",
+      otherNames: [/sign in with apple/i, "Sign in with email"],
+    },
+    {
+      method: "apple",
+      lastUsedName: /sign in with apple/i,
+      otherNames: [/sign in with google/i, "Sign in with email"],
     },
     {
       method: "email",
       lastUsedName: /sign in with email/i,
-      otherName: /sign in with google/i,
+      otherNames: [/sign in with google/i, /sign in with apple/i],
     },
   ])(
     "renders a Last used badge on the $method button when $method was the last method",
-    ({ method, lastUsedName, otherName }) => {
+    ({ method, lastUsedName, otherNames }) => {
       mockGetLastUsedLoginMethod.mockReturnValue(method);
       render(<LoginForm redirect="/" />);
 
@@ -255,9 +302,14 @@ describe("LoginForm", () => {
         name: lastUsedName,
       });
       expect(within(lastUsedButton).getByText("Last used")).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: otherName }),
-      ).not.toHaveTextContent("Last used");
+
+      expect(screen.getAllByText("Last used")).toHaveLength(1);
+
+      for (const otherName of otherNames) {
+        expect(
+          screen.getByRole("button", { name: otherName }),
+        ).not.toHaveTextContent("Last used");
+      }
     },
   );
 });

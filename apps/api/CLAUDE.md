@@ -21,5 +21,17 @@ Hono REST API on Bun with PostgreSQL, Kysely, and Better Auth.
   files: the `add-…-column` / `backfill-…-column` / `finalize-…-column` (or `drop-…`) triples
   in `src/migrations/` are the pattern to follow, so a schema change and its backfill can fail
   and be retried independently.
+- **Sign in with Apple** (`src/lib/appleAuth.ts`): Apple has no static client secret, so
+  the `apple` entry in `socialProviders` is a function that signs an ES256 JWT. Better Auth
+  resolves that function **once**, when the auth context is built, and caches it for the
+  life of the process — it is not a per-request refresh hook, which is why the TTL is 180
+  days. `APPLE_PRIVATE_KEY` arrives with `\n`-escaped newlines because nothing in the
+  deploy path carries a literal one (Bun's `.env` reader included), hence
+  `normalizeApplePrivateKey`. `https://appleid.apple.com` is in `trustedOrigins` because
+  Apple `form_post`s the callback from its own host. Apple refuses `localhost` return URLs,
+  so this flow cannot be exercised under `bun run dev`.
+- `test/globalSetup.ts` generates a throwaway ES256 key per run: `auth.ts` signs a real
+  client secret at import time, so a placeholder string fails `importPKCS8` and takes the
+  entire suite down with it, not just the auth specs.
 - Prefer Kysely's typed query builders over raw SQL; reach for `` sql`…` `` only where no
   builder exists for the construct (e.g. `AT TIME ZONE`, check constraints).

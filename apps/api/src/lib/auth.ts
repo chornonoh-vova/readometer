@@ -14,6 +14,7 @@ import {
 } from "./accountPolicy.ts";
 import { isBanned } from "./moderation.ts";
 import { BOT_SCORE_THRESHOLD, scoreSignup } from "./botScore.ts";
+import { APPLE_ORIGIN, generateAppleClientSecret } from "./appleAuth.ts";
 
 const baseURL = process.env.BETTER_AUTH_URL;
 
@@ -21,8 +22,11 @@ if (!baseURL) {
   throw new Error("Base URL is missing");
 }
 
-export const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") ?? [
-  baseURL,
+// Apple form_posts the callback from its own host, so the origin check sees
+// `Origin: https://appleid.apple.com` and rejects it unless that host is trusted.
+export const trustedOrigins = [
+  ...(process.env.TRUSTED_ORIGINS?.split(",") ?? [baseURL]),
+  APPLE_ORIGIN,
 ];
 
 const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
@@ -36,6 +40,23 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 if (!googleClientId || !googleClientSecret) {
   throw new Error("Google auth credentials are missing");
+}
+
+const appleClientId = process.env.APPLE_CLIENT_ID;
+const appleTeamId = process.env.APPLE_TEAM_ID;
+const appleKeyId = process.env.APPLE_KEY_ID;
+const applePrivateKey = process.env.APPLE_PRIVATE_KEY;
+
+const appleAppBundleIdentifier = process.env.APPLE_APP_BUNDLE_IDENTIFIER;
+
+if (
+  !appleClientId ||
+  !appleTeamId ||
+  !appleKeyId ||
+  !applePrivateKey ||
+  !appleAppBundleIdentifier
+) {
+  throw new Error("Apple auth credentials are missing");
 }
 
 /**
@@ -143,7 +164,7 @@ export const auth = betterAuth({
       if (!isEmailSignupEnabled()) {
         throw new APIError("FORBIDDEN", {
           message:
-            'Email sign-up is temporarily unavailable. Use "Sign up with Google" instead.',
+            'Email sign-up is temporarily unavailable. Use "Sign up with Google" or "Sign up with Apple" instead.',
         });
       }
 
@@ -152,7 +173,7 @@ export const auth = betterAuth({
       if (typeof email !== "string" || !isAllowedSignupDomain(email)) {
         throw new APIError("BAD_REQUEST", {
           message:
-            'Email sign-up is limited to Gmail and iCloud addresses. Use "Sign up with Google" for other providers.',
+            'Email sign-up is limited to Gmail and iCloud addresses. Use "Sign up with Google" or "Sign up with Apple" for other providers.',
         });
       }
 
@@ -218,6 +239,18 @@ export const auth = betterAuth({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
     },
+    // A function because the client secret has to be signed, not read. Resolved
+    // once at context creation - see APPLE_CLIENT_SECRET_TTL_SECONDS.
+    apple: async () => ({
+      clientId: appleClientId,
+      clientSecret: await generateAppleClientSecret({
+        clientId: appleClientId,
+        teamId: appleTeamId,
+        keyId: appleKeyId,
+        privateKey: applePrivateKey,
+      }),
+      appBundleIdentifier: appleAppBundleIdentifier,
+    }),
   },
 
   advanced: {
