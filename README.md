@@ -190,16 +190,15 @@ To build locally with Traefik routing on `readometer.local`, use
 - `.github/workflows/cd.yaml` — on a successful CI run against `main`, builds
   `apps/api`, `apps/notifications`, and `apps/web` for `linux/amd64` and
   `linux/arm64` and publishes them to GHCR tagged with both the commit SHA and
-  `latest`, then deploys the compose stack to Dokploy and polls until the
-  deployment settles, so a failed rollout fails the job. The `deploy` job runs in
-  the `production` GitHub environment, which records each deploy under the
-  repository's Deployments UI. Needs `DOKPLOY_API_KEY` (secret) plus
-  `DOKPLOY_URL` and `DOKPLOY_COMPOSE_ID` (variables) on that environment. Also
-  runnable via `workflow_dispatch`.
+  `latest`. Also runnable via `workflow_dispatch`.
 
-CD's two jobs are wired with `needs:`, not a second `workflow_run` hop — a typo in
-a `needs:` target fails at parse time, whereas an unmatched `workflow_run` name
-silently never fires. The one remaining name coupling is CD's `workflows: ["CI"]`.
+CD publishes images but does not deploy them — rolling the new `:latest` out to
+the server is a manual step in Dokploy for now. The automated `deploy` job called
+the Dokploy API over the public internet, which stopped working once
+`dok.readometer.app` moved behind Cloudflare: the edge blocks GitHub-hosted
+runners as datacenter bot traffic before the request reaches Dokploy. Rather than
+poke a hole in the WAF, Dokploy is moving onto Tailscale, and CD will reach it
+over the tailnet instead.
 
 Because `workflow_run` runs in the context of the default branch, `github.sha`
 there is main's tip at start time rather than the commit whose CI passed. CD
