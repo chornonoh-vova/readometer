@@ -55,7 +55,7 @@
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "eslint-config": "workspace:*",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.1",
     "shadcn": "^4.16.2",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",
