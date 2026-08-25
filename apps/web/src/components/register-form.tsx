@@ -128,123 +128,127 @@ export function RegisterForm({ className, ...props }: ComponentProps<"div">) {
               </Alert>
             )}
 
-            <Button
-              variant="outline"
-              type="button"
-              className="w-full"
-              disabled={loading}
-              onClick={handleGoogleSignUp}
-            >
-              <GoogleIcon />
-              Sign up with Google
-            </Button>
+            <FieldGroup>
+              <Button
+                variant="outline"
+                type="button"
+                className="w-full"
+                disabled={loading}
+                onClick={handleGoogleSignUp}
+              >
+                <GoogleIcon />
+                Sign up with Google
+              </Button>
 
-            <Button
-              variant="outline"
-              type="button"
-              className="w-full"
-              disabled={loading}
-              onClick={handleAppleSignUp}
-            >
-              <AppleIcon />
-              Sign up with Apple
-            </Button>
+              <Button
+                variant="outline"
+                type="button"
+                className="w-full"
+                disabled={loading}
+                onClick={handleAppleSignUp}
+              >
+                <AppleIcon />
+                Sign up with Apple
+              </Button>
+            </FieldGroup>
 
             <FieldSeparator>Or continue with</FieldSeparator>
 
-            <form.Field
-              name="name"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+            <FieldGroup>
+              <form.Field
+                name="name"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
 
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      type="text"
-                      aria-invalid={isInvalid}
-                      required
-                      placeholder="My name"
-                      autoComplete="name"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        type="text"
+                        aria-invalid={isInvalid}
+                        required
+                        placeholder="My name"
+                        autoComplete="name"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
 
-            <form.Field
-              name="email"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+              <form.Field
+                name="email"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
 
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      type="email"
-                      aria-invalid={isInvalid}
-                      required
-                      placeholder="me@gmail.com"
-                      autoComplete="email"
-                    />
-                    <FieldDescription>
-                      Gmail and iCloud addresses only. For any other provider,
-                      use Sign up with Google or Sign up with Apple above.
-                    </FieldDescription>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        type="email"
+                        aria-invalid={isInvalid}
+                        required
+                        placeholder="me@gmail.com"
+                        autoComplete="email"
+                      />
+                      <FieldDescription>
+                        Gmail and iCloud addresses only. For any other provider,
+                        use Sign up with Google or Sign up with Apple above.
+                      </FieldDescription>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
 
-            <form.Field
-              name="password"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+              <form.Field
+                name="password"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
 
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      aria-invalid={isInvalid}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      required
-                      autoComplete="new-password"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="password"
+                        aria-invalid={isInvalid}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
 
-            <Turnstile
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-              onSuccess={setToken}
-            />
+              <Turnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onSuccess={setToken}
+              />
+            </FieldGroup>
 
             <Field>
               <Button type="submit" disabled={loading}>
