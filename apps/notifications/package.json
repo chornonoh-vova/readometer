@@ -26,10 +26,10 @@
   "devDependencies": {
     "@react-email/ui": "catalog:",
     "@testcontainers/redis": "^12.1.0",
-    "@types/bun": "^1.3.14",
+    "@types/bun": "^1.4.0",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "eslint-config": "workspace:*",
