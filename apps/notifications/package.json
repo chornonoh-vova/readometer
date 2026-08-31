@@ -16,7 +16,7 @@
   "dependencies": {
     "bullmq": "catalog:",
     "ioredis": "catalog:",
-    "nodemailer": "^9.0.5",
+    "nodemailer": "^9.0.6",
     "notification-events": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",

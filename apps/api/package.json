@@ -23,7 +23,7 @@
     "better-auth": "catalog:",
     "bullmq": "catalog:",
     "disposable-email-domains-js": "^1.25.0",
-    "hono": "^4.13.3",
+    "hono": "^4.13.5",
     "ioredis": "catalog:",
     "isbn": "workspace:*",
     "jose": "^6.2.10",
