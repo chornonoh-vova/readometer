@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.7.10
+    image: traefik:v3.7.12
     networks:
       - proxy
     command:
@@ -132,7 +132,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
   mailpit:
-    image: axllent/mailpit:v1.30.7
+    image: axllent/mailpit:v1.31.0
     networks:
       - database
     ports:
