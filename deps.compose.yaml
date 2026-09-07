@@ -1,6 +1,6 @@
 services:
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.40.1
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.40.2
     ulimits:
       memlock: -1
     healthcheck:
@@ -38,7 +38,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
   mailpit:
-    image: axllent/mailpit:v1.31.0
+    image: axllent/mailpit:v1.31.1
     networks:
       - database
     ports:
