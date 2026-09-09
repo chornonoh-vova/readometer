@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@better-auth/redis-storage": "catalog:",
-    "@hono/zod-validator": "^0.9.0",
+    "@hono/zod-validator": "^0.9.1",
     "better-auth": "catalog:",
     "bullmq": "catalog:",
     "disposable-email-domains-js": "^1.25.0",
