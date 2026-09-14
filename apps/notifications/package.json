@@ -26,7 +26,7 @@
   "devDependencies": {
     "@react-email/ui": "catalog:",
     "@testcontainers/redis": "^12.1.0",
-    "@types/bun": "^1.4.0",
+    "@types/bun": "^1.4.2",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
