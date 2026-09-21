@@ -94,7 +94,7 @@ services:
       - "traefik.http.routers.app.rule=Host(`readometer.local`)"
       - "traefik.http.routers.app.entrypoints=web"
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.40.2
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v2.0.0
     ulimits:
       memlock: -1
     healthcheck:
