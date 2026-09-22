@@ -54,7 +54,7 @@ services:
     image: ghcr.io/chornonoh-vova/readometer-web:latest
     restart: unless-stopped
   dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.40.2
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v2.0.0
     ulimits:
       memlock: -1
     healthcheck:
