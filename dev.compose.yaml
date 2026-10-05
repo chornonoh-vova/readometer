@@ -132,7 +132,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
   mailpit:
-    image: axllent/mailpit:v1.31.2
+    image: axllent/mailpit:v1.31.3
     networks:
       - database
     ports:
