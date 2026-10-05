@@ -46,9 +46,9 @@
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
+    "lint-staged": "^17.6.0",
     "prettier": "3.9.9",
-    "turbo": "^2.11.3",
+    "turbo": "^2.11.6",
     "typescript": "catalog:"
   },
   "engines": {
