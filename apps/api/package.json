@@ -34,7 +34,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@testcontainers/postgresql": "^12.1.0",
+    "@testcontainers/postgresql": "^12.2.0",
     "@types/bun": "^1.4.2",
     "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "catalog:",
