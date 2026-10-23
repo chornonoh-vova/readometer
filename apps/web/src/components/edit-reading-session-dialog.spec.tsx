@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReadingSession } from "@/lib/reading-sessions";
 
@@ -58,6 +58,16 @@ function renderDialog(
   );
 }
 
+// Base UI moves focus to the first field asynchronously after the dialog
+// opens; typing before that lets it steal focus mid-sequence and drop keys
+async function waitForInitialFocus() {
+  await waitFor(() =>
+    expect(
+      screen.getByRole("spinbutton", { name: "Start page" }),
+    ).toHaveFocus(),
+  );
+}
+
 describe("EditReadingSessionDialog", () => {
   it("pre-populates startPage and endPage from the session", () => {
     renderDialog();
@@ -74,6 +84,7 @@ describe("EditReadingSessionDialog", () => {
   it("calls mutate with updated endPage and updateRun=true when latest", async () => {
     const user = userEvent.setup();
     renderDialog();
+    await waitForInitialFocus();
 
     const endPageInput = screen.getByRole("spinbutton", { name: "End page" });
     await user.clear(endPageInput);
@@ -128,6 +139,7 @@ describe("EditReadingSessionDialog", () => {
   it("does not call mutate when endPage exceeds totalPages", async () => {
     const user = userEvent.setup();
     renderDialog({ totalPages: 100 });
+    await waitForInitialFocus();
 
     const endPageInput = screen.getByRole("spinbutton", { name: "End page" });
     await user.clear(endPageInput);

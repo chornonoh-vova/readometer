@@ -12,11 +12,10 @@ export const queueAddMock = vi.fn(
   }),
 );
 
-export const queueConstructorMock = vi.fn();
-
+// the constructor runs once at import, and vitest clears mock call history
+// before every test, so the fake keeps its arguments on the instance instead
 vi.mock("bullmq", () => ({
   Queue: vi.fn(function (name: string, opts: unknown) {
-    queueConstructorMock(name, opts);
-    return { add: queueAddMock };
+    return { name, opts, add: queueAddMock };
   }),
 }));
