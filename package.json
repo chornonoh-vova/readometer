@@ -35,7 +35,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "@tanstack/eslint-plugin-query": "^5.101.4",
     "bullmq": "^6.3.11",
-    "ioredis": "5.10.1",
+    "ioredis": "6.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-email": "6.7.0",
