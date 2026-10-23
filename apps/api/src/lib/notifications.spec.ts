@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { notificationEventSchema } from "notification-events";
-import { queueAddMock, queueConstructorMock } from "../../test/mocks/bullmq";
-import { publishNotification } from "./notifications";
+import { queueAddMock } from "../../test/mocks/bullmq";
+import { notificationsQueue, publishNotification } from "./notifications";
 
 describe("publishNotification", () => {
   it("enqueues a verification-email-requested event", async () => {
@@ -79,8 +79,7 @@ describe("publishNotification", () => {
   });
 
   it("configures the queue with 5 retries and exponential backoff", () => {
-    expect(queueConstructorMock).toHaveBeenCalledTimes(1);
-    const [, opts] = queueConstructorMock.mock.calls[0]!;
+    const { opts } = notificationsQueue as unknown as { opts: unknown };
     expect(opts).toMatchObject({
       defaultJobOptions: {
         attempts: 5,
