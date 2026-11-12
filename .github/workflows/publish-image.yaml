@@ -40,9 +40,12 @@ jobs:
           persist-credentials: false
       # Exports TURBO_TOKEN and TURBO_TEAM, which reach `turbo run build` in
       # apps/web/Dockerfile as BuildKit secrets below. Revoked when the job
-      # ends. Only web runs turbo, and only in the push build.
+      # ends. Only web runs turbo, and only in the push build. Only on main:
+      # only main writes the cache (see .github/actions/setup), and Docker
+      # cannot be made read-only safely, so a run dispatched from a branch
+      # builds web without the remote cache at all.
       - name: Set up Turborepo remote cache
-        if: inputs.push && inputs.app == 'web'
+        if: inputs.push && inputs.app == 'web' && github.ref == 'refs/heads/main'
         uses: vercel/setup-turborepo-remote-cache-action@49d7b1b46ba4c9251e1977986bfe18336feabc8f # v1.1.0
         with:
           team: ${{ vars.TURBO_TEAM }}
@@ -68,12 +71,10 @@ jobs:
           {
             echo "list<<EOF"
             echo "site-key=$SITE_KEY"
-            echo "turbo_token=$TURBO_TOKEN"
-            echo "turbo_team=$TURBO_TEAM"
-            # Same rule as .github/actions/setup: only main writes the cache.
-            # A dispatched run from a branch builds read-only.
-            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
-              echo "turbo_cache=local:rw,remote:r"
+            # Unset off main, where the remote cache step is skipped.
+            if [ -n "$TURBO_TOKEN" ]; then
+              echo "turbo_token=$TURBO_TOKEN"
+              echo "turbo_team=$TURBO_TEAM"
             fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"

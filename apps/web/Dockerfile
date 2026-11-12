@@ -33,15 +33,15 @@ RUN bun install --frozen-lockfile
 #
 # Turborepo credentials are BuildKit secrets, mounted for this step only and
 # never written to a layer or to the exported build cache. Without them (a
-# local `docker build`) turbo runs on its local cache. turbo_cache is not a
-# credential, but as a secret it stays out of the layer cache key; CI sets it
-# to local:rw,remote:r for any ref but main, so only main uploads.
+# local `docker build`, or a run dispatched from a branch) turbo runs on its
+# local cache. Do not mount TURBO_CACHE the same way: an unpassed secret mount
+# still exports its variable as an empty string, which turbo reads as "no
+# cache sources" and bypasses the cache entirely.
 FROM deps AS builder
 COPY --from=prepare /app/out/full/ .
 RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
     --mount=type=secret,id=turbo_token,env=TURBO_TOKEN \
     --mount=type=secret,id=turbo_team,env=TURBO_TEAM \
-    --mount=type=secret,id=turbo_cache,env=TURBO_CACHE \
     bun turbo run build --filter=web --ui=stream
 
 # The runtime carries static files only. The stock image runs its master as

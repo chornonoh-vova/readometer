@@ -79,9 +79,11 @@ what follows is what breaks it.
   three Dockerfiles. Images install with `--frozen-lockfile`, so a mismatched bun fails the
   build instead of silently rewriting the lockfile. Dependabot bumps the Dockerfiles, not
   `packageManager`.
-- Only `main` writes the remote cache; pull requests and runs dispatched from a branch read it
-  (`TURBO_CACHE=local:rw,remote:r`, in the setup action and passed into the web image build):
-  the published web bundle comes out of that cache, and an unmerged branch must not supply it.
+- Only `main` writes the remote cache: pull requests and runs dispatched from a branch read it
+  (`TURBO_CACHE=local:rw,remote:r`, set by the setup action), and the web image build gets no
+  turbo credentials off `main`. The published web bundle comes out of that cache, and an
+  unmerged branch must not supply it. Never mount `TURBO_CACHE` as a BuildKit secret: an
+  unpassed mount exports it empty, and an empty value makes turbo bypass the cache.
 - Turbo credentials reach Docker as BuildKit secrets, never build args: the layer cache is
   exported with `mode=max`, which includes the builder stage, and a build arg would be
   recorded in it.
