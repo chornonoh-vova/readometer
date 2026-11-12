@@ -1,3 +1,7 @@
+# Builds the app images exactly as CI publishes them. Images ship for
+# linux/amd64 only, so the built services pin that platform too: on an
+# Apple-silicon Mac they run under Docker Desktop's emulation, so what runs
+# locally is the same architecture as what runs in production.
 services:
   traefik:
     image: traefik:v3.7.16
@@ -13,6 +17,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
   migration:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
@@ -27,6 +32,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
     command: ["bun", "run", "db:migrate", "latest"]
   api:
+    platform: linux/amd64
     image: readometer-api:dev
     depends_on:
       postgres:
@@ -62,6 +68,7 @@ services:
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
   notifications:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ./apps/notifications/Dockerfile
@@ -81,6 +88,7 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - MAIL_FROM=${MAIL_FROM}
   web:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
