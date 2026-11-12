@@ -101,6 +101,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`readometer.local`)"
       - "traefik.http.routers.app.entrypoints=web"
+      - "traefik.http.services.app.loadbalancer.server.port=8080"
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:v2.0.0
     ulimits:

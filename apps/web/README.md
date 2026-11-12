@@ -79,6 +79,8 @@ The sample value is Cloudflare's always-passing testing key.
 `Dockerfile` is a multi-stage build: `turbo prune web --docker` produces a
 pruned context, the `builder` stage runs `bun turbo build --filter=web`
 with `VITE_TURNSTILE_SITE_KEY` mounted as a build secret, and the final
-image serves `dist/` through Nginx. `nginx.conf` long-caches assets under
-`/assets/` and `/workbox-*`, and falls back to `index.html` for SPA
-routing.
+image serves `dist/` through Nginx, running as the unprivileged `nginx` user
+on port 8080. `nginx/nginx.conf` replaces the stock main config so that works
+(pid and temp files in `/tmp`); `nginx/default.conf` long-caches assets under
+`/assets/` and `/workbox-*`, and falls back to `index.html` for SPA routing;
+`nginx/snippets/security-headers.conf` holds the CSP and the other headers.

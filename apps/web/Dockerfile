@@ -41,9 +41,18 @@ RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
     --mount=type=secret,id=turbo_team,env=TURBO_TEAM \
     bun turbo run build --filter=web --ui=stream
 
+# The runtime carries static files only. The stock image runs its master as
+# root; this one runs unprivileged, so nginx.conf is replaced with one that
+# runs as the `nginx` user (see the header of that file) and the server
+# listens on 8080.
 FROM nginx:1.31.7@sha256:8632b3314d74c61f0e27f59055bab13f7793b988c94c090154d867bc29e0f39b AS runner
-COPY --from=builder /app/apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/apps/web/security-headers.conf /etc/nginx/security-headers.conf
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
-EXPOSE 80/tcp
+USER nginx
+# From the build context, not from `builder`: this is checked-in configuration
+# rather than build output. turbo.json keeps nginx/** (and this Dockerfile) out
+# of web#build's inputs, so an edit here replays the cached build.
+COPY apps/web/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY apps/web/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY apps/web/nginx/snippets/ /etc/nginx/snippets/
+COPY --from=builder /app/apps/web/dist/ /usr/share/nginx/html/
+EXPOSE 8080/tcp
 CMD ["nginx", "-g", "daemon off;"]
