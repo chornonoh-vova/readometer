@@ -2,21 +2,35 @@
   "$schema": "https://v2-10-10.turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
+    },
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "dependsOn": ["^build", "transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!sample.env",
+        "!Dockerfile",
+        "!nginx/**",
+        ".env*"
+      ],
       "outputs": ["dist/**", "*.tsbuildinfo"],
       "env": ["VITE_TURNSTILE_SITE_KEY"]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"],
       "outputs": ["*.tsbuildinfo"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
     },
     "dev": {
       "cache": false,
