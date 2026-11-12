@@ -1,0 +1,66 @@
+name: Verify
+
+# The checks every change must pass: on each pull request, and as the gate in
+# front of images.yaml's publish jobs on main. One definition, so a PR that goes
+# green here cannot fail the same checks after it merges.
+on:
+  pull_request:
+  workflow_call:
+
+# A new push to a PR supersedes its running check. On main this workflow runs
+# inside images.yaml, whose own group already keeps publishes in order.
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Read-only: checks clone and test, nothing more. id-token mints the GitHub
+# OIDC token the Turborepo remote cache step trades for a short-lived Vercel
+# token; it grants nothing on this repository.
+permissions:
+  contents: read
+  id-token: write
+
+# Two jobs side by side: the test suites (Postgres and Redis through
+# Testcontainers) are the long pole, so they get their own runner instead of
+# queueing behind lint, typecheck and build.
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    env:
+      # A public key, baked into the bundle. Set here so web#build hashes the
+      # same as in apps/web/Dockerfile, and the image build replays this run's
+      # dist/ from the remote cache. Fork PRs have no secrets and build
+      # without it; they do not write the cache.
+      VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+        with:
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      # Separate steps, so the UI says which check failed.
+      - name: Lint
+        run: bun run lint
+      - name: Type-check
+        run: bun run typecheck
+      - name: Build
+        run: bun run build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+        with:
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - name: Test
+        run: bun run test

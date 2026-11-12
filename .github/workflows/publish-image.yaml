@@ -1,0 +1,108 @@
+name: Publish image
+
+# Builds one app's image. Called by images.yaml twice per app: once to prime
+# the layer cache while the checks run (push: false), and once, after they
+# pass, to push to GHCR. images.yaml owns the order; this file owns how any one
+# image is built.
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: App under apps/ — api, web or notifications.
+        type: string
+        required: true
+      target:
+        description: Dockerfile stage to build.
+        type: string
+        default: runner
+      push:
+        description: Push to GHCR. False builds the target only, to fill the cache.
+        type: boolean
+        default: false
+      cache-write:
+        description: Whether to export this build's layers to the cache scope.
+        type: boolean
+        default: false
+
+# No permissions block: a called workflow that asks for more than its caller
+# grants fails to start, and the prime jobs grant only `contents: read`. Each
+# call runs with what images.yaml gives it — publish adds `packages: write` and
+# `id-token: write` (the Turborepo remote cache's OIDC exchange).
+
+jobs:
+  build:
+    name: ${{ inputs.push && 'Build and push' || 'Prime cache' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Exports TURBO_TOKEN and TURBO_TEAM, which reach `turbo run build` in
+      # apps/web/Dockerfile as BuildKit secrets below. Revoked when the job
+      # ends. Only web runs turbo, and only in the push build.
+      - name: Set up Turborepo remote cache
+        if: inputs.push && inputs.app == 'web'
+        uses: vercel/setup-turborepo-remote-cache-action@49d7b1b46ba4c9251e1977986bfe18336feabc8f # v1.1.0
+        with:
+          team: ${{ vars.TURBO_TEAM }}
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Log in to GHCR
+        if: inputs.push
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Only web's push build runs turbo, and only it gets the secrets: an
+      # empty entry in build-push-action's `secrets` is skipped with a warning,
+      # which every other build would print.
+      - name: Collect build secrets
+        id: secrets
+        if: inputs.push && inputs.app == 'web'
+        env:
+          SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+        run: |
+          {
+            echo "list<<EOF"
+            echo "site-key=$SITE_KEY"
+            echo "turbo_token=$TURBO_TOKEN"
+            echo "turbo_team=$TURBO_TEAM"
+            # Same rule as .github/actions/setup: only main writes the cache.
+            # A dispatched run from a branch builds read-only.
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "turbo_cache=local:rw,remote:r"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # :<full sha> and :latest, as before. compose.yaml and Dokploy pull
+      # :latest; the sha tag is for rollbacks.
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/readometer-${{ inputs.app }}
+          tags: |
+            type=sha,format=long,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build ${{ inputs.app }} (${{ inputs.target }})
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: apps/${{ inputs.app }}/Dockerfile
+          target: ${{ inputs.target }}
+          platforms: linux/amd64
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=readometer-${{ inputs.app }}
+          cache-to: ${{ inputs.cache-write && format('type=gha,scope=readometer-{0},mode=max', inputs.app) || '' }}
+          # Secrets, not build args: mode=max exports the builder stage, and a
+          # build arg would be recorded in its metadata and build history.
+          secrets: ${{ steps.secrets.outputs.list }}
+          # Single-platform build: an attestation would add the unknown/unknown
+          # manifest entry that clutters GHCR's package UI.
+          provenance: false

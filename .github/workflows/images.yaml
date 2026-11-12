@@ -1,0 +1,78 @@
+name: Images
+
+# Verifies main and publishes the api, web and notifications images to GHCR,
+# tagged :<sha> and :latest, for linux/amd64. Dokploy is not notified: rolling
+# :latest out stays a manual step in its UI (see README, "CI/CD").
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Publishing three images is not atomic; a run cancelled partway through leaves
+# the :latest tags at different commits. Let superseded runs finish rather than
+# kill them. GitHub keeps at most one pending run per group, so the queue
+# cannot grow: a third push replaces the second while the first finishes.
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+
+# Nothing by default; each job asks for exactly what it uses.
+permissions: {}
+
+jobs:
+  # The same checks a pull request runs, so main cannot publish what a PR would
+  # have failed. id-token is for the Turborepo remote cache's OIDC exchange.
+  verify:
+    name: Verify
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/verify.yaml
+    secrets: inherit
+
+  # Runs beside verify, not after it: builds each image without pushing and
+  # writes its layers to the app's cache scope. api and notifications have no
+  # build step, so this is their whole image. web stops at `deps`, the
+  # install: its build waits for verify, whose upload it replays. Nothing here
+  # is published, so nothing needs the checks to have passed yet, and the
+  # publish jobs below are left with cache hits and a push.
+  prime:
+    name: Prime ${{ matrix.app }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - app: api
+            target: runner
+          - app: notifications
+            target: runner
+          - app: web
+            target: deps
+    uses: ./.github/workflows/publish-image.yaml
+    with:
+      app: ${{ matrix.app }}
+      target: ${{ matrix.target }}
+      cache-write: true
+
+  # Once verify passes and the cache is primed, all three publish side by side:
+  # they come from separate Dockerfiles and share no stages, and api runs the
+  # migrations itself, so there is no order to keep. They read the cache but
+  # do not write it; the only layers they would add change on every commit.
+  # fail-fast is off so one image failing still lets the others publish.
+  publish:
+    name: Publish ${{ matrix.app }}
+    needs: [verify, prime]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, notifications]
+    uses: ./.github/workflows/publish-image.yaml
+    with:
+      app: ${{ matrix.app }}
+      push: true
+    secrets: inherit

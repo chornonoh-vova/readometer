@@ -1,0 +1,56 @@
+name: Set up workspace
+description: >-
+  Bun, the dependency cache, the Turborepo remote cache, and `bun install`.
+  Run after actions/checkout.
+
+inputs:
+  turbo-team:
+    description: Vercel team slug for the Turborepo remote cache (vars.TURBO_TEAM).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # The version comes from "packageManager" in the root package.json, the
+    # same one the Dockerfiles pin, so CI and the images run one bun.
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      with:
+        bun-version-file: package.json
+
+    # setup-bun caches the binary, not the packages. A stale entry is only
+    # topped up by the install.
+    - name: Restore Bun package cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.bun/install/cache
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: bun-${{ runner.os }}-
+
+    # Trades the job's GitHub OIDC token (the job needs `id-token: write`) for
+    # a short-lived Vercel token, exported as TURBO_TOKEN/TURBO_TEAM and revoked
+    # when the job ends. Fork pull requests get no OIDC token and skip it. On a
+    # pull request a refused exchange (a Dependabot run, say) degrades to
+    # turbo's local cache instead of failing the check.
+    - name: Set up Turborepo remote cache
+      if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+      continue-on-error: ${{ github.event_name == 'pull_request' }}
+      uses: vercel/setup-turborepo-remote-cache-action@49d7b1b46ba4c9251e1977986bfe18336feabc8f # v1.1.0
+      with:
+        team: ${{ inputs.turbo-team }}
+
+    # Only main writes the cache; every other ref reads it. That covers pull
+    # requests (refs/pull/N/merge) and an images.yaml run dispatched from a
+    # branch. The web image build on main replays cached dist/ output, which
+    # an unmerged branch must not supply. `local:rw` must stay listed: turbo
+    # disables any source left out.
+    - name: Make the remote cache read-only off main
+      if: github.ref != 'refs/heads/main'
+      shell: bash
+      run: echo "TURBO_CACHE=local:rw,remote:r" >> "$GITHUB_ENV"
+
+    # Dependabot's lockfile updates can lag its manifest bumps, so its runs
+    # may rewrite bun.lock; everyone else installs exactly what is committed.
+    - name: Install dependencies
+      shell: bash
+      run: bun install ${{ github.actor != 'dependabot[bot]' && '--frozen-lockfile' || '' }}

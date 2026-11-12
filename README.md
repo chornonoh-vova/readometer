@@ -61,7 +61,7 @@ through Redis, its schema is `.parse()`d on both enqueue and dequeue.
 
 ## Prerequisites
 
-- [Bun](https://bun.com) 1.3.14 (pinned via `packageManager`)
+- [Bun](https://bun.com) 1.4.4 (pinned via `packageManager`)
 - Node.js ≥ 24 (declared in `engines`, for tools that need it)
 - Docker — required for the dependency stack, and for the api/notifications
   tests, which spin up real Postgres/Redis containers via testcontainers
@@ -194,23 +194,30 @@ To build locally with Traefik routing on `readometer.local`, use
 
 ## CI/CD
 
-- `.github/workflows/ci.yaml` — lint, typecheck, test, and build on every PR and
-  `main` push, with remote turbo caching.
-- `.github/workflows/cd.yaml` — on a successful CI run against `main`, builds
-  `apps/api`, `apps/notifications`, and `apps/web` for `linux/amd64` and
-  `linux/arm64` and publishes them to GHCR tagged with both the commit SHA and
-  `latest`. Also runnable via `workflow_dispatch`.
+- `.github/workflows/verify.yaml` — the checks, on every PR and as the first
+  stage of `images.yaml`: lint, typecheck and build in one job, the test suites in
+  a second job beside it.
+- `.github/workflows/images.yaml` — on every push to `main` (and via
+  `workflow_dispatch`): runs `verify.yaml`, and while it runs, builds each image
+  without pushing to fill its Docker layer cache. Once the checks pass, publishes
+  `apps/api`, `apps/notifications` and `apps/web` to GHCR for `linux/amd64`,
+  tagged with the commit SHA and `latest`.
+- `.github/workflows/publish-image.yaml` — how one image is built; called by
+  `images.yaml` for both the cache-priming and the publishing builds.
 
-CD publishes images but does not deploy them — rolling the new `:latest` out to
-the server is a manual step in Dokploy for now. The automated `deploy` job called
-the Dokploy API over the public internet, which stopped working once
-`dok.readometer.app` moved behind Cloudflare: the edge blocks GitHub-hosted
-runners as datacenter bot traffic before the request reaches Dokploy. Rather than
-poke a hole in the WAF, Dokploy is moving onto Tailscale, and CD will reach it
-over the tailnet instead.
+Turbo's remote cache is Vercel's, reached through
+`vercel/setup-turborepo-remote-cache-action`: each job trades its GitHub OIDC token
+for a short-lived Vercel token, so no cache credential is stored in the repository
+(only the `TURBO_TEAM` variable). Runs on `main` read and write the cache; pull
+requests and runs dispatched from other branches only read it, and fork PRs skip
+it. The web image's `turbo run build`
+hashes the same as `verify`'s, so publishing it replays the `dist/` that `verify`
+just built instead of running Vite again.
 
-Because `workflow_run` runs in the context of the default branch, `github.sha`
-there is main's tip at start time rather than the commit whose CI passed. CD
-resolves `DEPLOY_SHA` from `workflow_run.head_sha` and uses it for both the
-checkout ref and the image tags, so back-to-back merges can't tag one commit's
-build with another's SHA.
+`images.yaml` publishes images but does not deploy them — rolling the new
+`:latest` out to the server is a manual step in Dokploy for now. The automated
+`deploy` job called the Dokploy API over the public internet, which stopped
+working once `dok.readometer.app` moved behind Cloudflare: the edge blocks
+GitHub-hosted runners as datacenter bot traffic before the request reaches
+Dokploy. Rather than poke a hole in the WAF, Dokploy is moving onto Tailscale, and
+the pipeline will reach it over the tailnet instead.
