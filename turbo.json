@@ -4,7 +4,13 @@
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!sample.env",
+        "!Dockerfile",
+        "!nginx/**"
+      ]
     },
     "build": {
       "dependsOn": ["^build", "transit"],
@@ -21,16 +27,34 @@
     },
     "test": {
       "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!sample.env",
+        "!Dockerfile",
+        "!nginx/**"
+      ]
     },
     "typecheck": {
       "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!sample.env",
+        "!Dockerfile",
+        "!nginx/**"
+      ],
       "outputs": ["*.tsbuildinfo"]
     },
     "lint": {
       "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!sample.env"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!sample.env",
+        "!Dockerfile",
+        "!nginx/**"
+      ]
     },
     "dev": {
       "cache": false,
