@@ -70,6 +70,11 @@ jobs:
             echo "site-key=$SITE_KEY"
             echo "turbo_token=$TURBO_TOKEN"
             echo "turbo_team=$TURBO_TEAM"
+            # Same rule as .github/actions/setup: only main writes the cache.
+            # A dispatched run from a branch builds read-only.
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "turbo_cache=local:rw,remote:r"
+            fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 

@@ -39,11 +39,13 @@ runs:
       with:
         team: ${{ inputs.turbo-team }}
 
-    # Pull requests read the cache but never write it: the web image build on
-    # main replays cached dist/ output, which an unmerged branch must not
-    # supply. `local:rw` must stay listed: turbo disables any source left out.
-    - name: Make the remote cache read-only on pull requests
-      if: github.event_name == 'pull_request'
+    # Only main writes the cache; every other ref reads it. That covers pull
+    # requests (refs/pull/N/merge) and an images.yaml run dispatched from a
+    # branch. The web image build on main replays cached dist/ output, which
+    # an unmerged branch must not supply. `local:rw` must stay listed: turbo
+    # disables any source left out.
+    - name: Make the remote cache read-only off main
+      if: github.ref != 'refs/heads/main'
       shell: bash
       run: echo "TURBO_CACHE=local:rw,remote:r" >> "$GITHUB_ENV"
 

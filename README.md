@@ -209,7 +209,8 @@ Turbo's remote cache is Vercel's, reached through
 `vercel/setup-turborepo-remote-cache-action`: each job trades its GitHub OIDC token
 for a short-lived Vercel token, so no cache credential is stored in the repository
 (only the `TURBO_TEAM` variable). Runs on `main` read and write the cache; pull
-requests only read it, and fork PRs skip it. The web image's `turbo run build`
+requests and runs dispatched from other branches only read it, and fork PRs skip
+it. The web image's `turbo run build`
 hashes the same as `verify`'s, so publishing it replays the `dist/` that `verify`
 just built instead of running Vite again.
 
