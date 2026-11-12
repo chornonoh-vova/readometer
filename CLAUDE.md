@@ -51,6 +51,40 @@ cd apps/api && bun run db:migrate make <name>  # scaffold a migration file — k
 cd apps/api && bun run db:generate             # regenerate src/lib/db.d.ts from the schema
 ```
 
+## CI and the Turborepo remote cache
+
+`.github/workflows/`: `verify.yaml` (PRs, and the gate inside `images.yaml`),
+`images.yaml` (main: verify, prime each image's layer cache in parallel, then publish),
+`publish-image.yaml` (one image build). The README's "CI/CD" section has the overview;
+what follows is what breaks it.
+
+- **`lint`, `typecheck` and `test` depend on `transit`, not on `^lint`/`^typecheck`/`^test`.**
+  Packages are consumed from source, so nothing has to run first; `transit` is a task no
+  package defines, which never runs but carries every upstream package's file hash into its
+  dependents. Removing it without a replacement makes api's tests cache-hit after an `isbn`
+  change.
+- **The web image replays `verify`'s `web#build` from the remote cache only while the two
+  hash the same.** Three things hold that up — keep them when touching either side:
+  - every file `.dockerignore` drops must also be outside the task's `inputs` (hence
+    `!**/*.md` and `!sample.env` in `turbo.json`);
+  - `verify` builds with the same `VITE_TURNSTILE_SITE_KEY` the image gets;
+  - `apps/web/Dockerfile` prunes `web api notifications`, not `web` alone — turbo's bun
+    pruner re-hoists `bun.lock` when it drops packages, which changes the dependency hash.
+
+  To check parity, compare `bun turbo run build --filter=web --dry=json` on a clean checkout
+  (no `apps/web/.env`, which `.env*` hashes) with the same command run inside the image's
+  `builder` stage.
+
+- **One bun version, in four places:** `packageManager` (CI reads it) and the `FROM` in all
+  three Dockerfiles. Images install with `--frozen-lockfile`, so a mismatched bun fails the
+  build instead of silently rewriting the lockfile. Dependabot bumps the Dockerfiles, not
+  `packageManager`.
+- Pull requests read the remote cache but never write it (`TURBO_CACHE=local:rw,remote:r`):
+  the published web bundle comes out of that cache, and an unmerged branch must not supply it.
+- Turbo credentials reach Docker as BuildKit secrets, never build args: the layer cache is
+  exported with `mode=max`, which includes the builder stage, and a build arg would be
+  recorded in it.
+
 ## Local Development
 
 Two supported flows:
