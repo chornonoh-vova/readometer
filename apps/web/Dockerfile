@@ -48,7 +48,7 @@ RUN --mount=type=secret,id=site-key,env=VITE_TURNSTILE_SITE_KEY \
 # root; this one runs unprivileged, so nginx.conf is replaced with one that
 # runs as the `nginx` user (see the header of that file) and the server
 # listens on 8080.
-FROM nginx:1.31.7@sha256:8632b3314d74c61f0e27f59055bab13f7793b988c94c090154d867bc29e0f39b AS runner
+FROM nginx:1.31.8@sha256:165ddde8751e75a1c907d24ef10d9f6deb08b57e0fe56caf67512486aff76d82 AS runner
 USER nginx
 # From the build context, not from `builder`: this is checked-in configuration
 # rather than build output. turbo.json keeps nginx/** (and this Dockerfile) out
