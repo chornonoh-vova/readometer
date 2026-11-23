@@ -4,7 +4,7 @@
 # locally is the same architecture as what runs in production.
 services:
   traefik:
-    image: traefik:v3.7.17
+    image: traefik:v3.7.18
     networks:
       - proxy
     command:
