@@ -43,15 +43,15 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
-    "@tanstack/router-plugin": "^1.168.48",
+    "@tanstack/router-plugin": "^1.169.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.8",
+    "@testing-library/user-event": "^14.6.13",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vite-pwa/assets-generator": "^2.0.0",
-    "@vitejs/plugin-react": "^6.1.2",
+    "@vitejs/plugin-react": "^6.3.0",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "eslint-config": "workspace:*",
@@ -59,7 +59,7 @@
     "shadcn": "^4.23.0",
     "typescript": "catalog:",
     "typescript-config": "workspace:*",
-    "vite": "^8.3.6",
+    "vite": "^8.3.8",
     "vite-plugin-pwa": "^2.0.0",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "catalog:"
